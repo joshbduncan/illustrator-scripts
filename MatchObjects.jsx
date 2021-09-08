@@ -14,13 +14,13 @@ Versions:
 1.0.4 updated settings dialog box
 1.0.5 added fancy source object previewing
 1.0.6 changed position anchor selection from drop-down to radio buttons
+1.0.7 added ability to move targets to source object layer
 */
 
-// TODO: match position in layer stack
 // TODO: source dropdown to select more than just top/bottom object
 
 var _title = "Match Objects";
-var _version = "1.0.6";
+var _version = "1.0.7";
 var _copyright = "Copyright 2021 Josh Duncan";
 var _website = "www.joshbduncan.com";
 
@@ -33,7 +33,7 @@ if (app.documents.length > 0) {
             // prompt for settings user input
             var settings = settingsWin();
             if (settings) {
-                if (!settings.position && !settings.size) {
+                if (!settings.position && !settings.size && !settings.layer) {
                     alert("No changes were made!");
                 } else {
                     matchObjects();
@@ -65,13 +65,15 @@ function previewSourceObject(object) {
 
 function matchObjects() {
     // set user selected object as source
-    var source;
+    var source, sourceLayer, sourceBounds;
     if (settings.source == "top") {
         source = sel.shift();
     } else {
         source = sel.pop();
     }
-    var sourceBounds = getVisibleBounds(source);
+    sourceLayer = source.layer;
+    sourceBounds = getVisibleBounds(source);
+
     // iterate over the target objects
     var target, targetBounds;
     for (var i = 0; i < sel.length; i++) {
@@ -116,6 +118,10 @@ function matchObjects() {
             );
             // move the target object
             target.transform(moveMatrix, true, true, true);
+        }
+        // if target should be moved to same layer
+        if (settings.layer) {
+            target.move(source, ElementPlacement.PLACEBEFORE);
         }
     }
 }
@@ -295,6 +301,7 @@ function settingsWin() {
     pSource.margins = 18;
     var cbPosition = pSource.add("checkbox", undefined, "Position");
     var cbSize = pSource.add("checkbox", undefined, "Size");
+    var cbLayer = pSource.add("checkbox", undefined, "Layer");
 
     // group - 2
     var group2 = win.add("group", undefined);
@@ -465,6 +472,7 @@ function settingsWin() {
             source: rbTop.value ? "top" : "bottom",
             size: cbSize.value,
             scale: scale,
+            layer: cbLayer.value,
             patterns: cbPatterns.value,
             gradients: cbGradients.value,
             strokePatterns: cbStrokePatterns.value,

@@ -11,7 +11,7 @@ Changelog:
 */
 
 // TODO: add option for PDF export
-// TOTO: add option to convert all text to outlines
+// TODO: add option to convert all text to outlines
 
 var _title = "Illustrator Artboard Exporter";
 var _version = "1.0.0";
