@@ -15,12 +15,11 @@ Versions:
 1.0.5 added fancy source object previewing
 1.0.6 changed position anchor selection from drop-down to radio buttons
 1.0.7 added ability to move targets to source object layer
+1.0.8 added align to source edge option (similar to align panel in Illustrator)
 */
 
-// TODO: source dropdown to select more than just top/bottom object
-
 var _title = "Match Objects";
-var _version = "1.0.7";
+var _version = "1.0.8";
 var _copyright = "Copyright 2021 Josh Duncan";
 var _website = "www.joshbduncan.com";
 
@@ -33,7 +32,12 @@ if (app.documents.length > 0) {
             // prompt for settings user input
             var settings = settingsWin();
             if (settings) {
-                if (!settings.position && !settings.size && !settings.layer) {
+                if (
+                    !settings.position &&
+                    !settings.size &&
+                    !settings.layer &&
+                    !settings.alignment
+                ) {
                     alert("No changes were made!");
                 } else {
                     matchObjects();
@@ -119,6 +123,19 @@ function matchObjects() {
             // move the target object
             target.transform(moveMatrix, true, true, true);
         }
+        // if target should be aligned
+        if (settings.alignment) {
+            // get updated target bounds and info since scaling
+            // clipped objects can shift the obejct on the artboard
+            targetBounds = getVisibleBounds(target);
+            var moveMatrix = getMoveMatrix(
+                sourceBounds,
+                targetBounds,
+                settings.alignTo
+            );
+            // move the target object
+            target.transform(moveMatrix, true, true, true);
+        }
         // if target should be moved to same layer
         if (settings.layer) {
             target.move(source, ElementPlacement.PLACEBEFORE);
@@ -194,49 +211,70 @@ function getScaleMatrix(sourceBounds, targetBounds, scale) {
 function getMoveMatrix(sourceBounds, targetBounds, anchor) {
     var sourceInfo = getObjectInfo(sourceBounds);
     var targetInfo = getObjectInfo(targetBounds);
-    if (anchor == 0) {
+    if (anchor == "tl") {
         return app.getTranslationMatrix(
             sourceInfo.left - targetInfo.left,
             sourceInfo.top - targetInfo.top
         );
-    } else if (anchor == 1) {
+    } else if (anchor == "tc") {
         return app.getTranslationMatrix(
             sourceInfo.centerX - targetInfo.centerX,
             sourceInfo.top - targetInfo.top
         );
-    } else if (anchor == 2) {
+    } else if (anchor == "tr") {
         return app.getTranslationMatrix(
             sourceInfo.right - targetInfo.right,
             sourceInfo.top - targetInfo.top
         );
-    } else if (anchor == 3) {
+    } else if (anchor == "cl") {
         return app.getTranslationMatrix(
             sourceInfo.left - targetInfo.left,
             sourceInfo.centerY - targetInfo.centerY
         );
-    } else if (anchor == 4) {
+    } else if (anchor == "cc") {
         return app.getTranslationMatrix(
             sourceInfo.centerX - targetInfo.centerX,
             sourceInfo.centerY - targetInfo.centerY
         );
-    } else if (anchor == 5) {
+    } else if (anchor == "cr") {
         return app.getTranslationMatrix(
             sourceInfo.right - targetInfo.right,
             sourceInfo.centerY - targetInfo.centerY
         );
-    } else if (anchor == 6) {
+    } else if (anchor == "bl") {
         return app.getTranslationMatrix(
             sourceInfo.left - targetInfo.left,
             sourceInfo.bottom - targetInfo.bottom
         );
-    } else if (anchor == 7) {
+    } else if (anchor == "bc") {
         return app.getTranslationMatrix(
             sourceInfo.centerX - targetInfo.centerX,
             sourceInfo.bottom - targetInfo.bottom
         );
-    } else if (anchor == 8) {
+    } else if (anchor == "br") {
         return app.getTranslationMatrix(
             sourceInfo.right - targetInfo.right,
+            sourceInfo.bottom - targetInfo.bottom
+        );
+    } else if (anchor == "Top Edge") {
+        return app.getTranslationMatrix(0, sourceInfo.top - targetInfo.top);
+    } else if (anchor == "Left Edge") {
+        return app.getTranslationMatrix(sourceInfo.left - targetInfo.left, 0);
+    } else if (anchor == "Horizontal Center") {
+        return app.getTranslationMatrix(
+            sourceInfo.centerX - targetInfo.centerX,
+            0
+        );
+    } else if (anchor == "Vertical Center") {
+        return app.getTranslationMatrix(
+            0,
+            sourceInfo.centerY - targetInfo.centerY
+        );
+    } else if (anchor == "Right Edge") {
+        return app.getTranslationMatrix(sourceInfo.right - targetInfo.right, 0);
+    } else if (anchor == "Bottom Edge") {
+        return app.getTranslationMatrix(
+            0,
             sourceInfo.bottom - targetInfo.bottom
         );
     }
@@ -271,13 +309,8 @@ function settingsWin() {
     win.orientation = "column";
     win.alignChildren = "fill";
 
-    // group - 1
-    var group1 = win.add("group", undefined);
-    group1.alignChildren = "fill";
-    group1.orientation = "row";
-
     // panel - source object
-    var pSource = group1.add("panel", undefined, "Source Object");
+    var pSource = win.add("panel", undefined, "Source Object");
     pSource.alignChildren = "fill";
     pSource.orientation = "column";
     pSource.margins = 18;
@@ -294,22 +327,44 @@ function settingsWin() {
     rbBottom.value = true;
     var cbPreview = pSource.add("checkbox", undefined, "Preview Source");
 
-    // panel - source object
-    var pSource = group1.add("panel", undefined, "Match What?");
-    pSource.alignChildren = "fill";
-    pSource.orientation = "column";
-    pSource.margins = 18;
-    var cbPosition = pSource.add("checkbox", undefined, "Position");
-    var cbSize = pSource.add("checkbox", undefined, "Size");
-    var cbLayer = pSource.add("checkbox", undefined, "Layer");
+    // panel - match what
+    var pWhat = win.add("panel", undefined, "Match What?");
+    pWhat.alignChildren = "fill";
+    pWhat.orientation = "column";
+    pWhat.margins = 18;
+
+    // group - 1
+    var group1 = pWhat.add("group", undefined);
+    group1.alignChildren = "fill";
+    group1.orientation = "row";
+    var cbPosition = group1.add("checkbox", undefined, "Source Position");
+    var cbSize = group1.add("checkbox", undefined, "Source Size");
+    var cbLayer = group1.add("checkbox", undefined, "Source Layer");
 
     // group - 2
-    var group2 = win.add("group", undefined);
+    var group2 = pWhat.add("group", undefined);
     group2.alignChildren = "fill";
     group2.orientation = "row";
+    var cbAlignment = group2.add("checkbox", undefined, "Or Align To Source:");
+    var arrAlignment = [
+        "Top Edge",
+        "Left Edge",
+        "Horizontal Center",
+        "Vertical Center",
+        "Right Edge",
+        "Bottom Edge",
+    ];
+    var ddAlignment = group2.add("dropdownlist", undefined, arrAlignment);
+    ddAlignment.selection = 0;
+    ddAlignment.enabled = false;
+
+    // group - 3
+    var group3 = win.add("group", undefined);
+    group3.alignChildren = "fill";
+    group3.orientation = "row";
 
     // create a radio button panel for position
-    var pPosition = group2.add("panel", undefined, "Position Match");
+    var pPosition = group3.add("panel", undefined, "Position Match");
     pPosition.alignChildren = ["left", "top"];
     pPosition.orientation = "column";
     pPosition.margins = 18;
@@ -346,7 +401,7 @@ function settingsWin() {
     var br = gAnchorsBottom.add("radiobutton", undefined);
 
     // panel - size
-    var pSize = group2.add("panel", undefined, "Size Match");
+    var pSize = group3.add("panel", undefined, "Size Match");
     pSize.alignChildren = ["left", "top"];
     pSize.orientation = "column";
     pSize.margins = 18;
@@ -357,7 +412,7 @@ function settingsWin() {
     var rbScaleBoth = pSize.add("radiobutton", undefined, "Both");
 
     // panel - also scale
-    var pAlsoScale = group2.add("panel", undefined, "Also Scale");
+    var pAlsoScale = group3.add("panel", undefined, "Also Scale");
     pAlsoScale.alignChildren = ["left", "top"];
     pAlsoScale.orientation = "column";
     pAlsoScale.margins = 18;
@@ -411,12 +466,14 @@ function settingsWin() {
         }
     };
 
-    // enable/disable position and size panels
+    // enable/disable position, size, and alignment options
     cbPosition.onClick = function () {
         if (cbPosition.value) {
             pPosition.enabled = true;
+            group2.enabled = false;
         } else {
             pPosition.enabled = false;
+            group2.enabled = true;
         }
     };
     cbSize.onClick = function () {
@@ -428,9 +485,18 @@ function settingsWin() {
             pAlsoScale.enabled = false;
         }
     };
+    cbAlignment.onClick = function () {
+        if (cbAlignment.value) {
+            ddAlignment.enabled = true;
+            cbPosition.enabled = false;
+        } else {
+            ddAlignment.enabled = false;
+            cbPosition.enabled = true;
+        }
+    };
 
-    // since i'm using radio button in different groups
-    // for the anchor point selection, i had reset them
+    // since I'm using radio buttons in different groups
+    // for the anchor point selection, I had reset them
     // all each time a different one is slected so that
     // there are never two anchors selected at the same time
     var anchors = [tl, tc, tr, cl, cc, cr, bl, bc, br];
@@ -461,10 +527,21 @@ function settingsWin() {
         }
 
         // figure out which dimensions to scale
-        var anchorTo = 4;
+        var anchorNames = [
+            "tl",
+            "tc",
+            "tr",
+            "cl",
+            "cc",
+            "cr",
+            "bl",
+            "bc",
+            "br",
+        ];
+        var anchorTo = "cc";
         for (var i = 0; i < anchors.length; i++) {
             if (anchors[i].value == true) {
-                anchorTo = i;
+                anchorTo = anchorNames[i];
             }
         }
 
@@ -479,6 +556,8 @@ function settingsWin() {
             strokeWidth: cbStrokeWidth.value,
             position: cbPosition.value,
             anchor: anchorTo,
+            alignment: cbAlignment.value,
+            alignTo: cbAlignment.value ? ddAlignment.selection.text : false,
         };
     } else {
         // reset selection from preview if cancel is clicked
