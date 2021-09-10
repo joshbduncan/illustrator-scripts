@@ -10,7 +10,7 @@ Versions:
 1.0.0 initial release
 1.0.1 added move to anchor point of source (not just center)
 1.0.2 changed ui dialog
-1.0.3 removed main function so main vars are globbal
+1.0.3 removed main function so main vars are global
 1.0.4 updated settings dialog box
 1.0.5 added fancy source object previewing
 1.0.6 changed position anchor selection from drop-down to radio buttons
@@ -87,7 +87,7 @@ function matchObjects() {
         if (settings.size) {
             // found it worked best to first scale the target object and then
             // move the target object since scaling clipped objects can shift
-            // the object making previous move calculations inccorect
+            // the object making previous move calculations incorrect
             var scaleMatrix = getScaleMatrix(
                 sourceBounds,
                 targetBounds,
@@ -113,7 +113,7 @@ function matchObjects() {
         // if target should be repositioned
         if (settings.position) {
             // get updated target bounds and info since scaling
-            // clipped objects can shift the obejct on the artboard
+            // clipped objects can shift the object on the artboard
             targetBounds = getVisibleBounds(target);
             var moveMatrix = getMoveMatrix(
                 sourceBounds,
@@ -126,7 +126,7 @@ function matchObjects() {
         // if target should be aligned
         if (settings.alignment) {
             // get updated target bounds and info since scaling
-            // clipped objects can shift the obejct on the artboard
+            // clipped objects can shift the object on the artboard
             targetBounds = getVisibleBounds(target);
             var moveMatrix = getMoveMatrix(
                 sourceBounds,
@@ -325,10 +325,14 @@ function settingsWin() {
         "Bottom Object (of selection)"
     );
     rbBottom.value = true;
-    var cbPreview = pSource.add("checkbox", undefined, "Preview Source");
+    var cbPreview = pSource.add(
+        "checkbox",
+        undefined,
+        "Preview Source Selection"
+    );
 
     // panel - match what
-    var pWhat = win.add("panel", undefined, "Match What?");
+    var pWhat = win.add("panel", undefined, "Match To");
     pWhat.alignChildren = "fill";
     pWhat.orientation = "column";
     pWhat.margins = 18;
@@ -497,7 +501,7 @@ function settingsWin() {
 
     // since I'm using radio buttons in different groups
     // for the anchor point selection, I had reset them
-    // all each time a different one is slected so that
+    // all each time a different one is selected so that
     // there are never two anchors selected at the same time
     var anchors = [tl, tc, tr, cl, cc, cr, bl, bc, br];
     for (var i = 0; i < anchors.length; i++) {

@@ -24,7 +24,26 @@ Select only path points and not path segments for editing.
 
 ### MatchObjects
 
-Match one or more objects to another by size and location. **My most used script by far!**
+![Match Objects 1.0.8](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
+
+Match one or more objects to another by size, layer, and or position (or alignment).
+
+**My most used script by far!**
+
+Script Usage:
+
+1. Select two or more objects that you would like to match to each other.
+2. Choose a `SOURCE` object from your selection that all other `TARGET` objects in your selection should be matched to.
+    - If you are not sure where your preferred `SOURCE` object is within your selection stack, you can click the "Preview Source Selection checkbox and Illustrator will select only the current `SOURCE` object.
+3. Choose which attributes of the `SOURCE` object should be matched 
+    - Position: Match the artboard position of all `TARGET` objects to the `SOURCE` object.
+    - Size: Match the dimensional size of all `TARGET` objects to the `SOURCE` object. *Accounts for compound paths and clipping masks.*
+    - Layer: Insert all `TARGET` objects into the same layer as the `SOURCE` object.
+    - Alignment: Align your `TARGET` objects to your `SOURCE` object (just like Illustrators built-in Align panel).
+4. Set the specifics for each attribute you have chosen to match.
+    - Position Match: Choose the `SOURCE` object anchor point that all `TARGET` objects should be positioned at.
+    - Size Match: Choose which dimension all `TARGET` objects should match of the `SOURCE` object. *When matching "Both", your targets may scale disproportionately.*
+    - Also Scale: Pick which attributes (if any) of the `TARGET` objects should also be scaled during the "Size Match".
 
 ### ScreenSepMarks
 
