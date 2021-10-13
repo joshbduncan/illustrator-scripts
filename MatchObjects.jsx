@@ -16,10 +16,11 @@ Versions:
 1.0.6 changed position anchor selection from drop-down to radio buttons
 1.0.7 added ability to move targets to source object layer
 1.0.8 added align to source edge option (similar to align panel in Illustrator)
+1.0.9 updated getVisibleBounds() to catch lots of weird edge cases
 */
 
 var _title = "Match Objects";
-var _version = "1.0.8";
+var _version = "1.0.9";
 var _copyright = "Copyright 2021 Josh Duncan";
 var _website = "www.joshbduncan.com";
 
@@ -149,19 +150,45 @@ function matchObjects() {
  */
 function getVisibleBounds(object) {
     var bounds, clippedItem;
-    if ((object.typename = "GroupItem" && object.clipped)) {
-        for (var i = 0; i < object.pageItems.length; i++) {
-            if (object.pageItems[i].clipping) {
-                clippedItem = object.pageItems[i];
-                break;
-            } else if (object.pageItems[i].typename == "CompoundPathItem") {
-                if (object.pageItems[i].pathItems[0].clipping) {
+    if (object.typename == "GroupItem") {
+        // if the object is clipped
+        if (object.clipped) {
+            // check all sub objects to find the clipping path
+            for (var i = 0; i < object.pageItems.length; i++) {
+                if (object.pageItems[i].clipping) {
+                    clippedItem = object.pageItems[i];
+                    break;
+                } else if (object.pageItems[i].typename == "CompoundPathItem") {
+                    if (object.pageItems[i].pathItems[0].clipping) {
+                        clippedItem = object.pageItems[i];
+                        break;
+                    }
+                } else {
                     clippedItem = object.pageItems[i];
                     break;
                 }
             }
+            bounds = clippedItem.geometricBounds;
+        } else {
+            // if the object is not clipped
+            var subObjectBounds;
+            var allBoundPoints = [[], [], [], []];
+            // get the bounds of every object in the group
+            for (var i = 0; i < object.pageItems.length; i++) {
+                subObjectBounds = getVisibleBounds(object.pageItems[i]);
+                allBoundPoints[0].push(subObjectBounds[0]);
+                allBoundPoints[1].push(subObjectBounds[1]);
+                allBoundPoints[2].push(subObjectBounds[2]);
+                allBoundPoints[3].push(subObjectBounds[3]);
+            }
+            // determine the groups bounds from it sub object bound points
+            bounds = [
+                Math.min.apply(Math, allBoundPoints[0]),
+                Math.max.apply(Math, allBoundPoints[1]),
+                Math.max.apply(Math, allBoundPoints[2]),
+                Math.min.apply(Math, allBoundPoints[3]),
+            ];
         }
-        bounds = clippedItem.geometricBounds;
     } else {
         bounds = object.geometricBounds;
     }
