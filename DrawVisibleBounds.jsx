@@ -43,30 +43,32 @@ if (app.documents.length > 0) {
  * draw object bounds with line segments in each corner
  */
 function drawBounds(bounds) {
+    //adjustable length of crosshair lines
+    var lineLength = 20;
     var boundsGroup = doc.groupItems.add();
     boundsGroup.name = "BOUNDS";
     var topLeft = drawBoundMark([
-        [bounds[0], bounds[1] - 10],
+        [bounds[0], bounds[1] - lineLength],
         [bounds[0], bounds[1]],
-        [bounds[0] + 10, bounds[1]],
+        [bounds[0] + lineLength, bounds[1]],
     ]);
     topLeft.moveToEnd(boundsGroup);
     var topRight = drawBoundMark([
-        [bounds[2], bounds[1] - 10],
+        [bounds[2], bounds[1] - lineLength],
         [bounds[2], bounds[1]],
-        [bounds[2] - 10, bounds[1]],
+        [bounds[2] - lineLength, bounds[1]],
     ]);
     topRight.moveToEnd(boundsGroup);
     var bottomLeft = drawBoundMark([
-        [bounds[0], bounds[3] + 10],
+        [bounds[0], bounds[3] + lineLength],
         [bounds[0], bounds[3]],
-        [bounds[0] + 10, bounds[3]],
+        [bounds[0] + lineLength, bounds[3]],
     ]);
     bottomLeft.moveToEnd(boundsGroup);
     var bottomRight = drawBoundMark([
-        [bounds[2], bounds[3] + 10],
+        [bounds[2], bounds[3] + lineLength],
         [bounds[2], bounds[3]],
-        [bounds[2] - 10, bounds[3]],
+        [bounds[2] - lineLength, bounds[3]],
     ]);
     bottomRight.moveToEnd(boundsGroup);
 }
