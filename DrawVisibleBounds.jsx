@@ -16,7 +16,7 @@ Versions:
 */
 
 var _title = "Draw Visible Bounds";
-var _version = "1.0.1";
+var _version = "1.0.2";
 var _copyright = "Copyright 2021 Josh Duncan";
 var _website = "joshbduncan.com";
 
@@ -42,9 +42,9 @@ if (app.documents.length > 0) {
 /**
  * draw object bounds with line segments in each corner
  */
-function drawBounds(bounds) {
-    //adjustable length of crosshair lines
-    var lineLength = 20;
+function drawBounds(bounds, lineLength) {
+    // adjustable length of crosshair lines
+    lineLength = typeof lineLength !== "undefined" ? lineLength : 20;
     var boundsGroup = doc.groupItems.add();
     boundsGroup.name = "BOUNDS";
     var topLeft = drawBoundMark([
@@ -88,7 +88,7 @@ function drawBoundMark(pathCoordinates) {
  * if clipping mask or compound path items are found
  */
 function getVisibleBounds(object) {
-    var bounds, clippedItem,sandboxLayer,sandboxItem;
+    var bounds, clippedItem, sandboxItem, sandboxLayer;
     var curItem;
     if (object.typename == "GroupItem") {
         // if the object is clipped
@@ -100,16 +100,8 @@ function getVisibleBounds(object) {
                     clippedItem = curItem;
                     break;
                 } else if (curItem.typename == "CompoundPathItem") {
-
-                    if(!curItem.pathItems.length)
-                    {
-                        //this is the part i was talking about. if this
-                        //compound path has no pathItems there'll be a runtime
-                        //error. needs a recursive search for pathItem inside compoundPathItem
-                        //however, there is no pageItems or groupItems property of a compound path
-                        //so it's likely that the best solution is to duplicate the item in question
-                        //into some kind of sandbox like a temp layer, break the compound path(s)
-                        //and set the bounds to the sum of all the sub-items
+                    if (!curItem.pathItems.length) {
+                        // catch compound path items with no pathItems via william dowling @ github.com/wdjsdev
                         sandboxLayer = app.activeDocument.layers.add();
                         sandboxItem = curItem.duplicate(sandboxLayer);
                         app.activeDocument.selection = null;
@@ -119,10 +111,7 @@ function getVisibleBounds(object) {
                         app.executeMenuCommand("group");
                         clippedItem = app.activeDocument.selection[0];
                         break;
-
-
-                    }
-                    else if (curItem.pathItems[0].clipping) {
+                    } else if (curItem.pathItems[0].clipping) {
                         clippedItem = curItem;
                         break;
                     }
@@ -132,9 +121,8 @@ function getVisibleBounds(object) {
                 }
             }
             bounds = clippedItem.geometricBounds;
-            if(sandboxLayer)
-            {
-                //eliminate the sandbox layer since it's no longer needed
+            if (sandboxLayer) {
+                // eliminate the sandbox layer since it's no longer needed
                 sandboxLayer.remove();
                 sandboxLayer = undefined;
             }
