@@ -142,6 +142,7 @@ function getVisibleBounds(object) {
             var allBoundPoints = [[], [], [], []];
             // get the bounds of every object in the group
             for (var i = 0; i < object.pageItems.length; i++) {
+                curItem = object.pageItems[i];
                 subObjectBounds = getVisibleBounds(curItem);
                 allBoundPoints[0].push(subObjectBounds[0]);
                 allBoundPoints[1].push(subObjectBounds[1]);
