@@ -29,6 +29,7 @@ if (app.documents.length > 0) {
             object = sel[i];
             visibleBounds = getVisibleBounds(object);
             drawBounds(visibleBounds);
+            sel[i].selected = true;
         }
     } else {
         alert("No objects are selected!\nSelect at least one object first.");
@@ -84,33 +85,62 @@ function drawBoundMark(pathCoordinates) {
  * if clipping mask or compound path items are found
  */
 function getVisibleBounds(object) {
-    var bounds, clippedItem;
+    var bounds, clippedItem,sandboxLayer,sandboxItem;
+    var curItem;
     if (object.typename == "GroupItem") {
         // if the object is clipped
         if (object.clipped) {
             // check all sub objects to find the clipping path
             for (var i = 0; i < object.pageItems.length; i++) {
-                if (object.pageItems[i].clipping) {
-                    clippedItem = object.pageItems[i];
+                curItem = object.pageItems[i];
+                if (curItem.clipping) {
+                    clippedItem = curItem;
                     break;
-                } else if (object.pageItems[i].typename == "CompoundPathItem") {
-                    if (object.pageItems[i].pathItems[0].clipping) {
-                        clippedItem = object.pageItems[i];
+                } else if (curItem.typename == "CompoundPathItem") {
+
+                    if(!curItem.pathItems.length)
+                    {
+                        //this is the part i was talking about. if this
+                        //compound path has no pathItems there'll be a runtime
+                        //error. needs a recursive search for pathItem inside compoundPathItem
+                        //however, there is no pageItems or groupItems property of a compound path
+                        //so it's likely that the best solution is to duplicate the item in question
+                        //into some kind of sandbox like a temp layer, break the compound path(s)
+                        //and set the bounds to the sum of all the sub-items
+                        sandboxLayer = app.activeDocument.layers.add();
+                        sandboxItem = curItem.duplicate(sandboxLayer);
+                        app.activeDocument.selection = null;
+                        sandboxItem.selected = true;
+                        app.executeMenuCommand("noCompoundPath");
+                        sandboxLayer.hasSelectedArtwork = true;
+                        app.executeMenuCommand("group");
+                        clippedItem = app.activeDocument.selection[0];
+                        break;
+
+
+                    }
+                    else if (curItem.pathItems[0].clipping) {
+                        clippedItem = curItem;
                         break;
                     }
                 } else {
-                    clippedItem = object.pageItems[i];
+                    clippedItem = curItem;
                     break;
                 }
             }
             bounds = clippedItem.geometricBounds;
+            if(sandboxLayer)
+            {
+                sandboxLayer.remove();
+                sandboxLayer = undefined;
+            }
         } else {
             // if the object is not clipped
             var subObjectBounds;
             var allBoundPoints = [[], [], [], []];
             // get the bounds of every object in the group
             for (var i = 0; i < object.pageItems.length; i++) {
-                subObjectBounds = getVisibleBounds(object.pageItems[i]);
+                subObjectBounds = getVisibleBounds(curItem);
                 allBoundPoints[0].push(subObjectBounds[0]);
                 allBoundPoints[1].push(subObjectBounds[1]);
                 allBoundPoints[2].push(subObjectBounds[2]);
