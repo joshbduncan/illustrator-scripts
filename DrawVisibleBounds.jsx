@@ -12,6 +12,7 @@ See the LICENSE file for details.
 Versions:
 1.0.0 initial release
 1.0.1 updated getVisibleBounds() to catch lots of weird edge cases
+1.0.2 updated getVisibleBounds() again for more edge cases: william dowling @ github.com/wdjsdev
 */
 
 var _title = "Draw Visible Bounds";
@@ -131,6 +132,7 @@ function getVisibleBounds(object) {
             bounds = clippedItem.geometricBounds;
             if(sandboxLayer)
             {
+                //eliminate the sandbox layer since it's no longer needed
                 sandboxLayer.remove();
                 sandboxLayer = undefined;
             }
