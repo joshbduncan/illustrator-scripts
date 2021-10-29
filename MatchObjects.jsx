@@ -17,6 +17,7 @@ Versions:
 1.0.7 added ability to move targets to source object layer
 1.0.8 added align to source edge option (similar to align panel in Illustrator)
 1.0.9 updated getVisibleBounds() to catch lots of weird edge cases
+1.1.0 updated getVisibleBounds() again for more edge cases: william dowling @ github.com/wdjsdev
 */
 
 var _title = "Match Objects";
@@ -149,33 +150,52 @@ function matchObjects() {
  * if clipping mask or compound path items are found
  */
 function getVisibleBounds(object) {
-    var bounds, clippedItem;
+    var bounds, clippedItem, sandboxItem, sandboxLayer;
+    var curItem;
     if (object.typename == "GroupItem") {
         // if the object is clipped
         if (object.clipped) {
             // check all sub objects to find the clipping path
             for (var i = 0; i < object.pageItems.length; i++) {
-                if (object.pageItems[i].clipping) {
-                    clippedItem = object.pageItems[i];
+                curItem = object.pageItems[i];
+                if (curItem.clipping) {
+                    clippedItem = curItem;
                     break;
-                } else if (object.pageItems[i].typename == "CompoundPathItem") {
-                    if (object.pageItems[i].pathItems[0].clipping) {
-                        clippedItem = object.pageItems[i];
+                } else if (curItem.typename == "CompoundPathItem") {
+                    if (!curItem.pathItems.length) {
+                        // catch compound path items with no pathItems via william dowling @ github.com/wdjsdev
+                        sandboxLayer = app.activeDocument.layers.add();
+                        sandboxItem = curItem.duplicate(sandboxLayer);
+                        app.activeDocument.selection = null;
+                        sandboxItem.selected = true;
+                        app.executeMenuCommand("noCompoundPath");
+                        sandboxLayer.hasSelectedArtwork = true;
+                        app.executeMenuCommand("group");
+                        clippedItem = app.activeDocument.selection[0];
+                        break;
+                    } else if (curItem.pathItems[0].clipping) {
+                        clippedItem = curItem;
                         break;
                     }
                 } else {
-                    clippedItem = object.pageItems[i];
+                    clippedItem = curItem;
                     break;
                 }
             }
             bounds = clippedItem.geometricBounds;
+            if (sandboxLayer) {
+                // eliminate the sandbox layer since it's no longer needed
+                sandboxLayer.remove();
+                sandboxLayer = undefined;
+            }
         } else {
             // if the object is not clipped
             var subObjectBounds;
             var allBoundPoints = [[], [], [], []];
             // get the bounds of every object in the group
             for (var i = 0; i < object.pageItems.length; i++) {
-                subObjectBounds = getVisibleBounds(object.pageItems[i]);
+                curItem = object.pageItems[i];
+                subObjectBounds = getVisibleBounds(curItem);
                 allBoundPoints[0].push(subObjectBounds[0]);
                 allBoundPoints[1].push(subObjectBounds[1]);
                 allBoundPoints[2].push(subObjectBounds[2]);
