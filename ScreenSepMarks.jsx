@@ -19,11 +19,12 @@ Changelog:
 1.1.1 setup defaults `[Default]` that save to preferences and load on first run, can be updated by user
 1.1.2 took previous last used setting and added them to dropdown selection as [Last Used]
 1.1.3 any changes to settings now empties preset dropdown selection to clear confusion
+1.1.4 cleaned up a bug when not spot colors were found or no info was requested
 */
 
 var _title = "Screen Print Separation Marks";
-var _version = "1.1.3";
-var _copyright = "Copyright 2021 Josh Duncan";
+var _version = "1.1.4";
+var _copyright = "Copyright 2022 Josh Duncan";
 var _website = "joshd.xyz";
 
 // set default settings for first run
@@ -328,29 +329,31 @@ function writeInfo(location, alignment, spots, file, date, time) {
     infoSections.push(timeText);
   }
 
-  // add a text frame to the document
-  var infoRec = doc.pathItems.rectangle(topEdge, 0, doc.width, 12);
-  var info = doc.textFrames.areaText(infoRec);
-  info.contents = infoSections.join(" -- ");
-  info.textRange.baselineShift = baselineShift;
-  info.textRange.characterAttributes.size = 9;
-  info.textRange.fillColor = swatches["[Registration]"].color;
+  if (infoSections.length > 0) {
+    // add a text frame to the document
+    var infoRec = doc.pathItems.rectangle(topEdge, 0, doc.width, 12);
+    var info = doc.textFrames.areaText(infoRec);
+    info.contents = infoSections.join(" -- ");
+    info.textRange.baselineShift = baselineShift;
+    info.textRange.characterAttributes.size = 9;
+    info.textRange.fillColor = swatches["[Registration]"].color;
 
-  // recolor the text using the correct spot color
-  if (spots) {
-    for (var j = 0; j < spotColors.length - 1; j++) {
-      info.words[j].filled = true;
-      info.words[j].fillColor = spotColors[j + 1].color;
+    // recolor the text using the correct spot color
+    if (spots) {
+      for (var j = 0; j < spotColors.length - 1; j++) {
+        info.words[j].filled = true;
+        info.words[j].fillColor = spotColors[j + 1].color;
+      }
     }
-  }
 
-  // sift the spot colors if colliding with file name
-  if (alignment == "Left") {
-    info.textRange.justification = Justification.LEFT;
-  } else if (alignment == "Right") {
-    info.textRange.justification = Justification.RIGHT;
-  } else {
-    info.textRange.justification = Justification.CENTER;
+    // shift the spot colors if colliding with file name
+    if (alignment == "Left") {
+      info.textRange.justification = Justification.LEFT;
+    } else if (alignment == "Right") {
+      info.textRange.justification = Justification.RIGHT;
+    } else {
+      info.textRange.justification = Justification.CENTER;
+    }
   }
 }
 
@@ -754,7 +757,7 @@ function deletedSettingsWindow(name) {
   win.alignChildren = ["fill", "top"];
   win.margins = 18;
 
-  var stSave = win.add(
+  var st = win.add(
     "statictext",
     undefined,
     "Settings preset " + name + " was deleted."
@@ -767,7 +770,6 @@ function deletedSettingsWindow(name) {
   gWindowButtons.alignment = ["center", "top"];
 
   var btOK = gWindowButtons.add("button", undefined, "OK");
-  // var btcancel = gwindowbuttons.add("button", undefined, "cancel");
 
   win.show();
 }
