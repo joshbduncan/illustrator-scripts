@@ -45,6 +45,18 @@ Script Usage:
     - Size Match: Choose which dimension all `TARGET` objects should match of the `SOURCE` object. *When matching "Both", your targets may scale disproportionately.*
     - Also Scale: Pick which attributes (if any) of the `TARGET` objects should also be scaled during the "Size Match".
 
+### OffsetObjects
+
+![Match Objects 1.0.8](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
+
+Offset (stack) selected objects edge-to-edge by their layer palette stacking order. You can offset them either vertically (bottom-edge to top-edge) or horizontally (right-edge to left-edge).
+
+Need some space between objects? Specify a gutter size and all objects will be spaced apart by that amount.
+
+Need to go the opposite direction? Click Reverse Stacking Order and you're set.
+
+> This works very similar to the Distribute Spacing function of the Align palette, except that it uses the objects place in the layer palette stack to dtermine the order in which the object is stacked in relation to the rest.
+
 ### ScreenSepMarks
 
 Easily add screen printing registration marks and spot color info to the current document. Lots of options, highly configurable, saved presets, & more!
