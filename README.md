@@ -10,21 +10,21 @@ JSX Scripts for Adobe Products
 
 ## Adobe Illustrator Scripts
 
-### ArtboardExporter
+### ArtboardExporter.jsx
 
 Quickly export all artboards to individual files.
 
-### DrawVisibleBounds
+### DrawVisibleBounds.jsx
 
 Draw "visible" bounds for selected objects. Accurately shows clipped objects, compounds paths, and even compound objects inside of a clipping mask that's inside of other clipping masks.
 
-### EditPointsOnly
+### EditPointsOnly.jsx
 
 Select only path points and not path segments for editing.
 
-### MatchObjects
+### MatchObjects.jsx
 
-![Match Objects 1.0.8](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
+![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
 
 Match one or more objects to another by size, layer, and or position (or alignment).
 
@@ -45,9 +45,9 @@ Script Usage:
     - Size Match: Choose which dimension all `TARGET` objects should match of the `SOURCE` object. *When matching "Both", your targets may scale disproportionately.*
     - Also Scale: Pick which attributes (if any) of the `TARGET` objects should also be scaled during the "Size Match".
 
-### OffsetObjects
+### OffsetObjects.jsx
 
-![Match Objects 1.0.8](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
+![Offset Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/offset-objects-1.0.1.png)
 
 Offset (stack) selected objects edge-to-edge by their layer palette stacking order. You can offset them either vertically (bottom-edge to top-edge) or horizontally (right-edge to left-edge).
 
@@ -55,12 +55,26 @@ Need some space between objects? Specify a gutter size and all objects will be s
 
 Need to go the opposite direction? Click Reverse Stacking Order and you're set.
 
-> This works very similar to the Distribute Spacing function of the Align palette, except that it uses the objects place in the layer palette stack to dtermine the order in which the object is stacked in relation to the rest.
+> This works very similar to the Distribute Spacing function of the Align palette, except that it uses the objects place in the layer palette stack to determine the order in which the object is stacked in relation to the rest.
 
-### ScreenSepMarks
+### Rename Layers.jsx
+
+![Rename Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/scree-sep-marks.png)
+
+Rename layers in Adobe Illustrator using find and replace (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.
+
+### ScreenSepMarks.jsx
+
+![Screen Print Separation Marks](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/scree-sep-marks.png)
 
 Easily add screen printing registration marks and spot color info to the current document. Lots of options, highly configurable, saved presets, & more!
 
-### ScriptUtils
+### ScriptUtils.jsx
 
 Utilities for developing and debugging Adobe scripts.
+
+### ShowHideLayers.jsx
+
+![Show/Hide Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/show-hide-layers.png)
+
+Show/Hide layers in Adobe Illustrator using find (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.

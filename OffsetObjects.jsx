@@ -36,9 +36,9 @@ if (app.documents.length > 0) {
   } else {
     alert("Not enough objects selected!\nSelect at least two objects first.");
   }
-  } else {
-  alert("No documents open!\nCreate or open a document first.");
-  }
+} else {
+alert("No documents open!\nCreate or open a document first.");
+}
 
 /**
  * offset selected objects by stacking order either vertically or horizontally
