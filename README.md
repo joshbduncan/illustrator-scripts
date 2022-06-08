@@ -24,7 +24,7 @@ Select only path points and not path segments for editing.
 
 ### MatchObjects.jsx
 
-![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-1.0.8.png)
+![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects.png)
 
 Match one or more objects to another by size, layer, and or position (or alignment).
 
@@ -47,7 +47,7 @@ Script Usage:
 
 ### OffsetObjects.jsx
 
-![Offset Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/offset-objects-1.0.1.png)
+![Offset Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/offset-objects.png)
 
 Offset (stack) selected objects edge-to-edge by their layer palette stacking order. You can offset them either vertically (bottom-edge to top-edge) or horizontally (right-edge to left-edge).
 
@@ -59,13 +59,13 @@ Need to go the opposite direction? Click Reverse Stacking Order and you're set.
 
 ### Rename Layers.jsx
 
-![Rename Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/scree-sep-marks.png)
+![Rename Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/rename-layers.png)
 
 Rename layers in Adobe Illustrator using find and replace (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.
 
 ### ScreenSepMarks.jsx
 
-![Screen Print Separation Marks](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/scree-sep-marks.png)
+![Screen Print Separation Marks](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/screen-sep-marks.png)
 
 Easily add screen printing registration marks and spot color info to the current document. Lots of options, highly configurable, saved presets, & more!
 
