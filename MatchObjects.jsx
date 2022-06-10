@@ -18,12 +18,13 @@ Versions:
 1.0.8 added align to source edge option (similar to align panel in Illustrator)
 1.0.9 updated getVisibleBounds() to catch lots of weird edge cases
 1.1.0 updated getVisibleBounds() again for more edge cases: william dowling @ github.com/wdjsdev
+1.1.1 added rotation matching suggested by Sergey Osokin @ github.com/creold
 */
 
 #target Illustrator
 
 var _title = "Match Objects";
-var _version = "1.0.9";
+var _version = "1.1.1";
 var _copyright = "Copyright 2022 Josh Duncan";
 var _website = "joshd.xyz";
 
@@ -39,6 +40,7 @@ if (app.documents.length > 0) {
         if (
           !settings.position &&
           !settings.size &&
+          !settings.rotation &&
           !settings.layer &&
           !settings.alignment
         ) {
@@ -65,6 +67,24 @@ function previewSourceObject(object) {
   app.redraw();
 }
 
+function getRotationRadians(object) {
+  for (var i = 0; i < object.tags.length; i++) {
+    var tag = object.tags[i];
+    if (tag.name == "BBAccumRotation") {
+      var rads = parseFloat(object.tags.BBAccumRotation.value);
+      return rads;
+    }
+  }
+  newTag = object.tags.add();
+  newTag.name = "BBAccumRotation";
+  newTag.value = 0;
+  return 0;
+}
+
+function radians2Degrees(r) {
+  return r * (180 / Math.PI);
+}
+
 // ---------------------
 // main script functions
 // ---------------------
@@ -84,11 +104,28 @@ function matchObjects() {
   var target, targetBounds;
   for (var i = 0; i < sel.length; i++) {
     target = sel[i];
+    // if target should be rotated
+    if (settings.rotation) {
+      // after the addition of the match rotation function I found
+      // it now best to rotate the target first then gets it's updated
+      // bounds and then resize or reposition
+      var sourceRotationRadians = getRotationRadians(source);
+      var sourceRotationDegrees = radians2Degrees(sourceRotationRadians);
+      var targetRotationRadians = getRotationRadians(target);
+      var targetRotationDegrees = radians2Degrees(targetRotationRadians);
+      // "unrotate" target if already rotated
+      if (targetRotationRadians != 0) {
+        target.rotate(-targetRotationDegrees);
+      }
+      target.rotate(sourceRotationDegrees);
+      target.tags["BBAccumRotation"].value = sourceRotationRadians;
+    }
+    // get bounds after rotation so updated size is correct
     targetBounds = getVisibleBounds(target);
     // if target should be resized
     if (settings.size) {
-      // found it worked best to first scale the target object and then
-      // move the target object since scaling clipped objects can shift
+      // (see above) found it worked best to first scale the target object and
+      // then move the target object since scaling clipped objects can shift
       // the object making previous move calculations incorrect
       var scaleMatrix = getTrueScaleMatrix(sourceBounds, targetBounds, settings.scale);
       // work out any adjustment on art with strokes
@@ -342,7 +379,7 @@ function settingsWin() {
   var cbPreview = pSource.add("checkbox", undefined, "Preview Source Selection");
 
   // panel - match what
-  var pWhat = win.add("panel", undefined, "Match To");
+  var pWhat = win.add("panel", undefined, "Match To Source");
   pWhat.alignChildren = "fill";
   pWhat.orientation = "column";
   pWhat.margins = 18;
@@ -351,9 +388,10 @@ function settingsWin() {
   var group1 = pWhat.add("group", undefined);
   group1.alignChildren = "fill";
   group1.orientation = "row";
-  var cbPosition = group1.add("checkbox", undefined, "Source Position");
-  var cbSize = group1.add("checkbox", undefined, "Source Size");
-  var cbLayer = group1.add("checkbox", undefined, "Source Layer");
+  var cbPosition = group1.add("checkbox", undefined, "Position");
+  var cbSize = group1.add("checkbox", undefined, "Size");
+  var cbRotation = group1.add("checkbox", undefined, "Rotation");
+  var cbLayer = group1.add("checkbox", undefined, "Layer");
 
   // group - 2
   var group2 = pWhat.add("group", undefined);
@@ -545,6 +583,7 @@ function settingsWin() {
       source: rbTop.value ? "top" : "bottom",
       size: cbSize.value,
       scale: scale,
+      rotation: cbRotation.value,
       layer: cbLayer.value,
       patterns: cbPatterns.value,
       gradients: cbGradients.value,

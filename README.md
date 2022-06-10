@@ -24,9 +24,9 @@ Select only path points and not path segments for editing.
 
 ### MatchObjects.jsx
 
-![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects.png)
+![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-v2.png)
 
-Match one or more objects to another by size, layer, and or position (or alignment).
+Match one or more objects to another by position, size, rotation, layer, and or alignment.
 
 **My most used script by far!**
 
@@ -38,6 +38,7 @@ Script Usage:
 3. Choose which attributes of the `SOURCE` object should be matched 
     - Position: Match the artboard position of all `TARGET` objects to the `SOURCE` object.
     - Size: Match the dimensional size of all `TARGET` objects to the `SOURCE` object. *Accounts for compound paths and clipping masks.*
+    - Rotation: Set the rotation of all `TARGET` objects to that of the `SOURCE` object.
     - Layer: Insert all `TARGET` objects into the same layer as the `SOURCE` object.
     - Alignment: Align your `TARGET` objects to your `SOURCE` object (just like Illustrators built-in Align panel).
 4. Set the specifics for each attribute you have chosen to match.
