@@ -19,58 +19,61 @@ Changelog:
 1.1.1 setup defaults `[Default]` that save to preferences and load on first run, can be updated by user
 1.1.2 took previous last used setting and added them to dropdown selection as [Last Used]
 1.1.3 any changes to settings now empties preset dropdown selection to clear confusion
-1.1.4 cleaned up a bug when not spot colors were found or no info was requested
+1.1.4 cleaned up a bug when no spot colors were found or no info was requested
+1.1.5 all new save settings function that uses a separate instead of clogging up app.preferences
 */
 
 var _title = "Screen Print Separation Marks";
-var _version = "1.1.4";
+var _version = "1.1.5";
 var _copyright = "Copyright 2022 Josh Duncan";
 var _website = "joshd.xyz";
 
 // set default settings for first run
-defaults = {
-  tl: false,
-  tc: true,
-  tr: false,
-  cl: false,
-  cc: false,
-  cr: false,
-  bl: false,
-  bc: true,
-  br: false,
-  size: 0.5,
-  sizeUnit: "Inches",
-  stroke: 1.0,
-  strokeUnit: "Points",
-  inset: 0.25,
-  insetUnit: "Inches",
-  color: "[Registration]",
-  spots: true,
-  file: false,
-  date: false,
-  time: false,
-  position: "Top",
-  alignment: "Left",
+defaultSettings = {
+  "[Default]": {
+    tl: false,
+    tc: true,
+    tr: false,
+    cl: false,
+    cc: false,
+    cr: false,
+    bl: false,
+    bc: true,
+    br: false,
+    size: 0.5,
+    sizeUnit: "Inches",
+    stroke: 1.0,
+    strokeUnit: "Points",
+    inset: 0.25,
+    insetUnit: "Inches",
+    color: "[Registration]",
+    spots: true,
+    file: false,
+    date: false,
+    time: false,
+    position: "Top",
+    alignment: "Left",
+  },
 };
+
+// setup save settings folder and file and load data
+var settingsFolderName = "Adobe Scripts";
+var settingsFileName = _title.replace(/ /g, "") + ".json";
+var settingsFile = setupSettingsFile(settingsFolderName, settingsFileName);
+var settingsData = settingsFile.exists ? loadJSONData(settingsFile) : defaults;
 
 // run script
 if (app.documents.length > 0) {
   var doc = app.activeDocument;
   var swatches = doc.swatches;
   var spotColors = getSpotColors();
-  var arrSettings = [];
 
-  // check to see if [default] presets are already saved
-  if (!app.preferences.getStringPreference("ssmSettings")) {
-    writeSettings("[Default]", defaults);
-  }
-
-  // load all stored settings names
-  arrSettings = app.preferences.getStringPreference("ssmSettings").split(",");
+  // load all previously saved settings if any
+  var allSettings = getObjectKeys(settingsData);
 
   // load last used or default settings
   var loadedSettingsName, loadedSettings;
-  if (indexOf(arrSettings, "[Last Used]") >= 0) {
+  if (indexOf(allSettings, "[Last Used]") >= 0) {
     loadedSettingsName = "[Last Used]";
   } else {
     loadedSettingsName = "[Default]";
@@ -96,6 +99,14 @@ function indexOf(arr, value) {
     }
   }
   return -1;
+}
+
+function getObjectKeys(obj) {
+  var keys = [];
+  for (var k in obj) {
+    keys.push(k);
+  }
+  return keys;
 }
 
 function getSpotColors(value) {
@@ -135,40 +146,41 @@ function checkForColor(name) {
 // presets and preferences
 // -----------------------
 
-function writePresetNames() {
-  app.preferences.setStringPreference("ssmSettings", arrSettings.join(","));
+function setupSettingsFile(folderName, fileName) {
+  // setup save setting folder and file
+  var settingsFolderPath = Folder.myDocuments + "/" + folderName;
+  var settingsFolder = new Folder(settingsFolderPath);
+  if (!settingsFolder.exists) settingsFolder.create();
+  var settingsFilePath = settingsFolder + "/" + fileName;
+  return new File(settingsFilePath);
 }
 
-function writeSettings(name, dict) {
-  var arr = [];
-  for (var key in dict) {
-    if (dict.hasOwnProperty(key)) {
-      arr.push(key + ":" + dict[key]);
+// load settings if available
+function loadJSONData(file) {
+  if (file.exists) {
+    try {
+      file.encoding = "UTF-8";
+      file.open("r");
+      var json = file.read();
+      file.close();
+      arr = eval(json);
+      return arr;
+    } catch (e) {
+      ("Sorry, error loading settings file!");
     }
   }
-  app.preferences.setStringPreference("ssm" + name, arr.join());
-  if (indexOf(arrSettings, name) < 0) {
-    arrSettings.push(name);
-  }
-  writePresetNames();
 }
 
-function readSettings(name) {
-  var arr = app.preferences.getStringPreference("ssm" + name).split(",");
-  var dict = {};
-  var itemParts;
-  for (var i = 0; i < arr.length; i++) {
-    itemParts = arr[i].split(":");
-    dict[itemParts[0]] = itemParts[1];
+function writeSettings(arr, file) {
+  try {
+    file.encoding = "UTF-8";
+    file.open("w");
+    var data = arr.toSource();
+    file.write(data);
+    file.close();
+  } catch (e) {
+    ("Sorry, error saving settings!");
   }
-  return dict;
-}
-
-function deleteSettings(name) {
-  app.preferences.removePreference("ssm" + name);
-  nameLoc = indexOf(arrSettings, name);
-  arrSettings.splice(nameLoc, 1);
-  writePresetNames();
 }
 
 // ---------------------
@@ -176,7 +188,7 @@ function deleteSettings(name) {
 // ---------------------
 
 function draw() {
-  // check for previous sepmarks layer and delete them
+  // check for previous sep marks layer and delete them
   for (var i = 0; i < doc.layers.length; i++) {
     if (doc.layers[i].name.search("SEPMARKS") >= 0) {
       doc.layers[i].locked = false;
@@ -469,7 +481,7 @@ function settingsWindow() {
   pOutput.alignChildren = ["fill", "top"];
   pOutput.margins = 18;
 
-  // group - outputoptions
+  // group - output options
   // ==============
   var gOutputOptions = pOutput.add("group", undefined);
   gOutputOptions.orientation = "row";
@@ -480,7 +492,7 @@ function settingsWindow() {
   var date = gOutputOptions.add("checkbox", undefined, "Date");
   var time = gOutputOptions.add("checkbox", undefined, "Time");
 
-  // group - outputposition
+  // group - output position
   var gOutputPosition = pOutput.add("group", undefined);
 
   // group - position
@@ -508,8 +520,8 @@ function settingsWindow() {
 
   var stLoad = gSettings.add("statictext", undefined, "Load:");
 
-  var settings = gSettings.add("dropdownlist", undefined, arrSettings);
-  settings.preferredSize.width = 200;
+  var ddSettings = gSettings.add("dropdownlist", undefined, allSettings);
+  ddSettings.preferredSize.width = 200;
 
   var btDelete = gSettings.add("button", undefined, "Delete");
   btDelete.enabled = false;
@@ -518,7 +530,7 @@ function settingsWindow() {
   var btSave = gSettings.add("button", undefined, "Save");
   btSave.preferredSize.width = 70;
 
-  // group - windowbuttons
+  // group - window buttons
   var gWindowButtons = win.add("group", undefined);
   gWindowButtons.orientation = "row";
   gWindowButtons.alignChildren = ["left", "center"];
@@ -538,12 +550,12 @@ function settingsWindow() {
   // onclick/onchange operations
 
   // load saved settings
-  settings.onChange = function () {
-    if (settings.selection) {
-      var settingsValue = settings.selection.text;
+  ddSettings.onChange = function () {
+    if (ddSettings.selection) {
+      var settingsValue = ddSettings.selection.text;
       if (settingsValue) {
         // load in the selected settings
-        loadedSettings = readSettings(settingsValue);
+        loadedSettings = settingsData[settingsValue];
 
         // enable delete button if selection is not a built-in
         if (settingsValue == "[Default]" || settingsValue == "[Last Used]") {
@@ -553,21 +565,21 @@ function settingsWindow() {
         }
 
         // placement checkbox setters
-        tl.value = loadedSettings.tl == "true" ? true : false;
-        tc.value = loadedSettings.tc == "true" ? true : false;
-        tr.value = loadedSettings.tr == "true" ? true : false;
-        cl.value = loadedSettings.cl == "true" ? true : false;
-        cc.value = loadedSettings.cc == "true" ? true : false;
-        cr.value = loadedSettings.cr == "true" ? true : false;
-        bl.value = loadedSettings.bl == "true" ? true : false;
-        bc.value = loadedSettings.bc == "true" ? true : false;
-        br.value = loadedSettings.br == "true" ? true : false;
+        tl.value = loadedSettings.tl ? true : false;
+        tc.value = loadedSettings.tc ? true : false;
+        tr.value = loadedSettings.tr ? true : false;
+        cl.value = loadedSettings.cl ? true : false;
+        cc.value = loadedSettings.cc ? true : false;
+        cr.value = loadedSettings.cr ? true : false;
+        bl.value = loadedSettings.bl ? true : false;
+        bc.value = loadedSettings.bc ? true : false;
+        br.value = loadedSettings.br ? true : false;
 
-        // edittext value setters
-        spots.value = loadedSettings.spots == "true" ? true : false;
-        file.value = loadedSettings.file == "true" ? true : false;
-        date.value = loadedSettings.date == "true" ? true : false;
-        time.value = loadedSettings.time == "true" ? true : false;
+        // edit text value setters
+        spots.value = loadedSettings.spots ? true : false;
+        file.value = loadedSettings.file ? true : false;
+        date.value = loadedSettings.date ? true : false;
+        time.value = loadedSettings.time ? true : false;
 
         // input value setters
         size.text = loadedSettings.size;
@@ -617,30 +629,32 @@ function settingsWindow() {
 
     if (saveName) {
       // add new name to settings dropdown if not a replace
-      if (!settings.find(saveName)) {
-        settings.add("item", saveName);
+      if (!ddSettings.find(saveName)) {
+        ddSettings.add("item", saveName);
       }
       // reset selection setting to new preset
-      settings.selection = settings.find(saveName);
+      ddSettings.selection = ddSettings.find(saveName);
     }
   };
 
   // delete selected settings
   btDelete.onClick = function () {
-    deleteSettings(settings.selection.text);
-    deletedSettingsWindow(settings.selection.text);
-    settings.remove(settings.find(settings.selection.text));
+    delete settingsData[ddSettings.selection.text];
+    allSettings.splice(indexOf(allSettings, ddSettings.selection.text));
+    writeSettings(settingsData, settingsFile);
+    deletedSettingsWindow(ddSettings.selection.text);
+    ddSettings.remove(ddSettings.find(ddSettings.selection.text));
   };
 
-  // load [default] settings
-  settings.selection = indexOf(arrSettings, loadedSettingsName);
+  // load [Default] settings
+  ddSettings.selection = indexOf(allSettings, loadedSettingsName);
 
   // settings reset to null with any changes
   var onClickResets = [tl, tc, tr, cl, cc, cr, bl, bc, br, spots, file, date, time];
 
   for (var i = 0; i < onClickResets.length; i++) {
     onClickResets[i].onClick = function () {
-      settings.selection = null;
+      ddSettings.selection = null;
       btDelete.enabled = false;
     };
   }
@@ -659,7 +673,7 @@ function settingsWindow() {
 
   for (var i = 0; i < onChangeResets.length; i++) {
     onChangeResets[i].onChange = function () {
-      settings.selection = null;
+      ddSettings.selection = null;
       btDelete.enabled = false;
     };
   }
@@ -690,14 +704,15 @@ function settingsWindow() {
       position: position.selection.text,
       alignment: alignment.selection.text,
     };
-    writeSettings("[Last Used]", currentSettings);
+    settingsData["[Last Used]"] = currentSettings;
+    writeSettings(settingsData, settingsFile);
     return currentSettings;
   } else {
     return;
   }
 }
 
-function saveSettingsWindow(settings) {
+function saveSettingsWindow(currentSettings) {
   var win = new Window("dialog");
   win.text = "Save Settings";
   win.orientation = "column";
@@ -709,7 +724,7 @@ function saveSettingsWindow(settings) {
   name.preferredSize.width = 250;
 
   var cbReplace = win.add("checkbox", undefined, "Replace settings:");
-  var replace = win.add("dropdownlist", undefined, arrSettings);
+  var replace = win.add("dropdownlist", undefined, allSettings);
   replace.enabled = false;
   replace.preferredSize.width = 250;
 
@@ -743,7 +758,8 @@ function saveSettingsWindow(settings) {
       );
       return false;
     }
-    writeSettings(saveName, settings);
+    settingsData[saveName] = currentSettings;
+    writeSettings(settingsData, settingsFile);
     return saveName;
   } else {
     return false;
