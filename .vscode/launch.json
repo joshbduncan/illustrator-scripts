@@ -3,16 +3,10 @@
   "configurations": [
     {
       "type": "extendscript-debug",
-      "request": "launch",
-      "name": "Run Current Script",
-      "program": "${file}",
-      "stopOnEntry": false,
-      "excludes": [
-        "undefined",
-        "builtin",
-        // "Function",
-        "prototype"
-      ],
+      "request": "attach",
+      "name": "Start debugger—AI",
+      "hostAppSpecifier": "illustrator",
+      "engineName": "main"
     }
   ]
 }
