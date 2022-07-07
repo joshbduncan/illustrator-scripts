@@ -13,7 +13,7 @@ Chanelog:
 var _title = "Edit Points Only";
 var _version = "1.0.0";
 var _copyright = "Copyright 2022 Josh Duncan";
-var _website = "joshd.xyz";
+var _website = "joshbduncan.com";
 
 // run script
 if (app.documents.length > 0) {

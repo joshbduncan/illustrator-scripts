@@ -26,7 +26,7 @@ Changelog:
 var _title = "Screen Print Separation Marks";
 var _version = "1.1.5";
 var _copyright = "Copyright 2022 Josh Duncan";
-var _website = "joshd.xyz";
+var _website = "joshbduncan.com";
 
 // set default settings for first run
 defaultSettings = {
@@ -60,7 +60,7 @@ defaultSettings = {
 var settingsFolderName = "Adobe Scripts";
 var settingsFileName = _title.replace(/ /g, "") + ".json";
 var settingsFile = setupSettingsFile(settingsFolderName, settingsFileName);
-var settingsData = settingsFile.exists ? loadJSONData(settingsFile) : defaults;
+var settingsData = settingsFile.exists ? loadJSONData(settingsFile) : defaultSettings;
 
 // run script
 if (app.documents.length > 0) {

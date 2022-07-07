@@ -26,7 +26,7 @@ Versions:
 var _title = "Match Objects";
 var _version = "1.1.1";
 var _copyright = "Copyright 2022 Josh Duncan";
-var _website = "joshd.xyz";
+var _website = "joshbduncan.com";
 
 // run script
 if (app.documents.length > 0) {
@@ -75,7 +75,7 @@ function getRotationRadians(object) {
       return rads;
     }
   }
-  newTag = object.tags.add();
+  var newTag = object.tags.add();
   newTag.name = "BBAccumRotation";
   newTag.value = 0;
   return 0;
@@ -91,13 +91,12 @@ function radians2Degrees(r) {
 
 function matchObjects() {
   // set user selected object as source
-  var source, sourceLayer, sourceBounds;
-  if (settings.source == "top") {
+  var source, sourceBounds;
+  if (settings["source"] == "top") {
     source = sel.shift();
   } else {
     source = sel.pop();
   }
-  sourceLayer = source.layer;
   sourceBounds = getVisibleBounds(source);
 
   // iterate over the target objects
