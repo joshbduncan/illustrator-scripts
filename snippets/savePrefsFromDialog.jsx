@@ -29,7 +29,6 @@
   // present the dialog and return the user selected settings as an object
   var settings = settingsWin(prefsData);
   if (settings) {
-    writeJSONData(settings, prefsFile);
     alert(
       "User Settings Saved!\nSelected Location: " +
         settings.location +
@@ -114,6 +113,9 @@
         location: captureRBSelection(locationRBs),
         product: captureRBSelection(productRBs),
       };
+      // save the selected settings
+      writeJSONData(selectedSettings, prefsFile);
+      // return the setting for use later in the script
       return selectedSettings;
     } else {
       return;

@@ -10,6 +10,8 @@ Versions:
 1.0.0 initial release
 */
 
+// FIXME: not coloring compound paths
+
 #target Illustrator
 
 var _title = "Color Randomly";

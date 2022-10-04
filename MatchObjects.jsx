@@ -21,7 +21,7 @@ Versions:
 1.1.1 added rotation matching suggested by Sergey Osokin @ github.com/creold
 */
 
-#target Illustrator
+//@target illustrator
 
 var _title = "Match Objects";
 var _version = "1.1.1";
