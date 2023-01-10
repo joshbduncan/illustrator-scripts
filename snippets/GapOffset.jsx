@@ -59,12 +59,12 @@ function adjustOffset(arr, minGap, highlight) {
         " overlapping shapes. They have been outlined in MAGENTA."
     );
     if (highlight) {
-      addOverlapHighlight(overlappers);
+      addStrokeHighlight(overlappers);
     }
   }
 }
 
-function addOverlapHighlight(arr) {
+function addStrokeHighlight(arr) {
   // setup highlight color
   var hl = new CMYKColor();
   hl.black = 0;
