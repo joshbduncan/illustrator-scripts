@@ -1,6 +1,7 @@
 /*
 RenameLayers.jsx for Adobe Illustrator
 --------------------------------------
+
 Rename layers in Adobe Illustrator using find and replace (regex enabled).
 
 This script is distributed under the MIT License.
@@ -9,8 +10,6 @@ See the LICENSE file for details.
 Versions:
 1.0.0 initial release
 */
-
-#target Illustrator
 
 var _title = "Rename Layers";
 var _version = "1.0.0";
@@ -30,18 +29,21 @@ if (app.documents.length > 0) {
     var changedLayers = [];
     for (var i = 0; i < layers.length; i++) {
       var layer = layers[i];
-      var find = settings.regex ? new RegExp(settings.find, "g") : settings.find
-      if ( (settings.regex && find.test(layer.name)) || (layer.name.indexOf(settings.find) > -1) ) {
-        if ( (settings.selected && layer.hasSelectedArtwork) || (!settings.selected) ) {
+      var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
+      if (
+        (settings.regex && find.test(layer.name)) ||
+        layer.name.indexOf(settings.find) > -1
+      ) {
+        if ((settings.selected && layer.hasSelectedArtwork) || !settings.selected) {
           layer.name = layer.name.replace(find, settings.replace);
-          changedLayers.push(i)
+          changedLayers.push(i);
         }
       }
     }
-    alert("Renamed " + changedLayers.length + " layer(s).")
+    alert("Renamed " + changedLayers.length + " layer(s).");
   }
 } else {
-alert("No documents open!\nCreate or open a document first.");
+  alert("No documents open!\nCreate or open a document first.");
 }
 
 function settingsWin() {
@@ -81,7 +83,11 @@ function settingsWin() {
   var rbRegex = gType.add("radiobutton", undefined, "Regular Expression");
 
   //checkbox - limit to layers with selected artwork
-  var cbSelected = pFind.add("checkbox", undefined, "Limit to layer(s) with selected artwork");
+  var cbSelected = pFind.add(
+    "checkbox",
+    undefined,
+    "Limit to layer(s) with selected artwork"
+  );
   cbSelected.value = false;
 
   // group - window buttons
@@ -99,24 +105,23 @@ function settingsWin() {
   pCopyright.add("statictext", undefined, "Version " + _version + " " + _copyright);
   pCopyright.add("statictext", undefined, _website);
 
-  find.onChanging = function() {
+  find.onChanging = function () {
     if (find.text.length > 0) {
       btOK.enabled = true;
     } else {
       btOK.enabled = false;
     }
-  }
+  };
 
   // if "ok" button clicked then return inputs
   if (win.show() == 1) {
     return {
-      "regex": rbRegex.value,
-      "find": find.text,
-      "replace": replace.text,
-      "selected": cbSelected.value
-    }
+      regex: rbRegex.value,
+      find: find.text,
+      replace: replace.text,
+      selected: cbSelected.value,
+    };
   } else {
     return;
   }
-
 }

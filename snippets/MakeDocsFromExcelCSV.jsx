@@ -1,7 +1,7 @@
 // https://community.adobe.com/t5/illustrator-discussions/ccreating-files-with-different-name-and-size-with-an-excel-file/m-p/13039437#M326695
 
 // put the path to your exported csv here
-var file = new File("~/Dropbox/DEV/projects/adobe-scripts/MakeTheseDocs.csv");
+var file = new File("MakeTheseDocs.csv");
 // read in the csv data
 var fileData = loadFileData(file).split("\n");
 // set the print preset you want to use `Print` in this case

@@ -1,6 +1,7 @@
 /*
 EditPointsOnly.jsx for Adobe Illustrator
 ----------------------------------------
+
 Select only path points and not segments for editing.
 
 This script is distributed under the MIT License.

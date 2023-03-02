@@ -1,6 +1,7 @@
 /*
 OffsetObjects.jsx for Adobe Illustrator
 --------------------------------------
+
 Offset selected objects by stacking order either vertically or horizontally.
 
 This script is distributed under the MIT License.
@@ -11,7 +12,7 @@ Versions:
 1.0.1 fixed bug where if no translation was needed the stroke would scale for some reason
 */
 
-#target Illustrator
+//@target illustrator
 
 var _title = "Offset Objects";
 var _version = "1.0.1";
@@ -37,7 +38,7 @@ if (app.documents.length > 0) {
     alert("Not enough objects selected!\nSelect at least two objects first.");
   }
 } else {
-alert("No documents open!\nCreate or open a document first.");
+  alert("No documents open!\nCreate or open a document first.");
 }
 
 /**
@@ -52,11 +53,11 @@ function offsetObjects(direction, gutter, reverse) {
   var source, sourceBounds;
   var target, targetBounds;
   for (var i = 0; i < sel.length - 1; i++) {
-    source = sel[i]
+    source = sel[i];
     sourceBounds = getVisibleBounds(source);
     target = sel[i + 1];
     targetBounds = getVisibleBounds(target);
-    var noTranslationNeeded = app.getTranslationMatrix(0, 0)
+    var noTranslationNeeded = app.getTranslationMatrix(0, 0);
     var moveMatrix = getMoveMatrix(sourceBounds, targetBounds, direction, gutter);
     // move the target object
     if (moveMatrix != false) {
@@ -77,11 +78,17 @@ function getMoveMatrix(sourceBounds, targetBounds, direction, gutter) {
   var sourceInfo = getObjectInfo(sourceBounds);
   var targetInfo = getObjectInfo(targetBounds);
   if (direction == "Vertical" && sourceInfo.bottom != targetInfo.top) {
-    return app.getTranslationMatrix(0, sourceInfo.bottom - targetInfo.bottom + targetInfo.height - gutter);
+    return app.getTranslationMatrix(
+      0,
+      sourceInfo.bottom - targetInfo.bottom + targetInfo.height - gutter
+    );
   } else if (direction == "Horizontal" && sourceInfo.right != targetInfo.left) {
-    return app.getTranslationMatrix(sourceInfo.right - targetInfo.right + targetInfo.width + gutter, 0);
+    return app.getTranslationMatrix(
+      sourceInfo.right - targetInfo.right + targetInfo.width + gutter,
+      0
+    );
   }
-  return false
+  return false;
 }
 
 /**
@@ -89,7 +96,7 @@ function getMoveMatrix(sourceBounds, targetBounds, direction, gutter) {
  * if clipping mask or compound path items are found
  * determine the visible bounds from the contained objects
  */
- function getVisibleBounds(object) {
+function getVisibleBounds(object) {
   var bounds, clippedItem, sandboxItem, sandboxLayer;
   var curItem;
   if (object.typename == "GroupItem") {
@@ -156,7 +163,7 @@ function getMoveMatrix(sourceBounds, targetBounds, direction, gutter) {
 }
 
 /**
- * return a dictionary of easier to access object specs 
+ * return a dictionary of easier to access object specs
  */
 function getObjectInfo(bounds) {
   var left = bounds[0];
@@ -184,7 +191,7 @@ function getObjectInfo(bounds) {
 /**
  * convert user specified unit of measure to points
  */
-function toPoints(val, unit) {
+function inchesToPoints(val, unit) {
   if (unit == "Inches") {
     return val * 72;
   } else if (unit == "mm") {
@@ -223,7 +230,11 @@ function settingsWin() {
   var gReverse = pOffsetDirection.add("group", undefined);
   gReverse.alignChildren = "fill";
   gReverse.orientation = "row";
-  var cbReverseStackingOrder = gReverse.add("checkbox", undefined, "Reverse Stacking Order");
+  var cbReverseStackingOrder = gReverse.add(
+    "checkbox",
+    undefined,
+    "Reverse Stacking Order"
+  );
 
   // panel - gutter
   var pGutter = win.add("panel", undefined, "Gutter Setup");
@@ -256,11 +267,10 @@ function settingsWin() {
     currentSettings = {
       direction: rbVertical.value ? "Vertical" : "Horizontal",
       reverse: cbReverseStackingOrder.value,
-      gutter: toPoints(size.text ? size.text : 0, ddSizeUnit.selection.text)
+      gutter: inchesToPoints(size.text ? size.text : 0, ddSizeUnit.selection.text),
     };
     return currentSettings;
   } else {
     return;
   }
-
 }

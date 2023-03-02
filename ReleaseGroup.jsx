@@ -1,4 +1,16 @@
-// Ungroup.jsx
+/*
+ReleaseGroup.jsx for Adobe Illustrator
+--------------------------------------
+
+Release object from within a group container similar to
+`Object > Ungroup` but also works recursively.
+
+This script is distributed under the MIT License.
+See the LICENSE file for details.
+
+Versions:
+0.1.0 initial release
+*/
 
 var doc = app.activeDocument;
 var sel = doc.selection;

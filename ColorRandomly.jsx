@@ -1,6 +1,7 @@
 /*
 ColorRandomly.jsx for Adobe Illustrator
 ---------------------------------------
+
 Randomly color selected objects.
 
 This script is distributed under the MIT License.
@@ -12,7 +13,7 @@ Versions:
 
 // FIXME: not coloring compound paths
 
-#target Illustrator
+//@target illustrator
 
 var _title = "Color Randomly";
 var _version = "1.0.0";
@@ -37,10 +38,10 @@ if (app.documents.length > 0) {
       recolorObjects(scheme, min, max);
     }
   } else {
-    alert("Please select at least one object!")
+    alert("Please select at least one object!");
   }
 } else {
-alert("No documents open!\nCreate or open a document first.");
+  alert("No documents open!\nCreate or open a document first.");
 }
 
 function getObjects(s, chars) {

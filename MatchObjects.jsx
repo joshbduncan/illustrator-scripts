@@ -1,6 +1,7 @@
 /*
 MatchObjects.jsx for Adobe Illustrator
 --------------------------------------
+
 Match one or more objects to another by size and/or position.
 
 This script is distributed under the MIT License.
@@ -242,10 +243,10 @@ function getObjectInfo(bounds) {
   var bottom = bounds[3];
   // calculate target dimensions from "visual" bounds
   var width = right - left;
-  var height = bottom - top;
+  var height = top - bottom;
   // calculate target object center point
-  var centerX = (right - left) / 2 + left;
-  var centerY = (bottom - top) / 2 + top;
+  var centerX = width / 2 + left;
+  var centerY = height / 2 + top;
   return {
     left: left,
     top: top,

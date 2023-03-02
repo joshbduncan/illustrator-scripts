@@ -1,6 +1,7 @@
 /*
 ShowHideLayers.jsx for Adobe Illustrator
 --------------------------------------
+
 Show/Hide layers in Adobe Illustrator using find (regex enabled).
 
 This script is distributed under the MIT License.

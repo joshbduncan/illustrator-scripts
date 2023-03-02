@@ -1,6 +1,7 @@
 /*
 ScreenSepMarks.jsx for Adobe Illustrator
 ---------------------------------------
+
 Easily add screen printing registration marks
 and spot color info to the current document.
 
@@ -123,7 +124,7 @@ function getSpotColors(value) {
   return arr;
 }
 
-function toPoints(val, unit) {
+function inchesToPoints(val, unit) {
   if (unit == "Inches") {
     return val * 72;
   } else if (unit == "mm") {
@@ -204,9 +205,9 @@ function draw() {
   layer.name = "SEPMARKS";
 
   // convert provided inputs to points
-  var size = toPoints(settings.size, settings.sizeUnit);
-  var stroke = toPoints(settings.stroke, settings.strokeUnit);
-  var inset = toPoints(settings.inset, settings.insetUnit);
+  var size = inchesToPoints(settings.size, settings.sizeUnit);
+  var stroke = inchesToPoints(settings.stroke, settings.strokeUnit);
+  var inset = inchesToPoints(settings.inset, settings.insetUnit);
 
   // make sure spot color is available
   var color = checkForColor(settings.color);

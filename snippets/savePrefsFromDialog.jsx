@@ -67,11 +67,10 @@
 
   // get selected radio button from array
   function captureRBSelection(rbs) {
-    var selection = null;
     for (var i = 0; i < rbs.length; i++) {
-      if (rbs[i].value) selection = rbs[i].text;
+      if (rbs[i].value) return rbs[i].text;
     }
-    return selection;
+    return null;
   }
 
   function settingsWin(prefsData) {

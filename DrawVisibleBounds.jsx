@@ -1,6 +1,7 @@
 /*
 DrawVisibleBounds.jsx for Adobe Illustrator
 -------------------------------------------
+
 Draw the "visible" bounds for selected objects.
 Accurately shows clipped objects, compounds paths,
 and even compound objects inside of a clipping mask

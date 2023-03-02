@@ -1,6 +1,7 @@
 /*
 ArtboardExporter.jsx for Adobe Illustrator
 ------------------------------------------
+
 Export all artboards in a variety of ways.
 
 This script is distributed under the MIT License.

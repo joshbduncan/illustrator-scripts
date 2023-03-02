@@ -1,4 +1,4 @@
-// Collect all layer into a single layer named 'COLLECTED'
+// Collect all layers into a single layer named 'COLLECTED'
 // Also includes locked and hidden layers.
 
 // https://community.adobe.com/t5/illustrator-discussions/script-for-quot-select-all-layers-quot-and-quot-collect-in-new-layer-quot/td-p/13256232
