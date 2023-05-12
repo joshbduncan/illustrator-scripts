@@ -20,6 +20,7 @@ Versions:
 1.0.9 updated getVisibleBounds() to catch lots of weird edge cases
 1.1.0 updated getVisibleBounds() again for more edge cases: william dowling @ github.com/wdjsdev
 1.1.1 added rotation matching suggested by Sergey Osokin @ github.com/creold
+1.1.2 fixed center/center position matching
 */
 
 //@target illustrator
@@ -245,8 +246,8 @@ function getObjectInfo(bounds) {
   var width = right - left;
   var height = top - bottom;
   // calculate target object center point
-  var centerX = width / 2 + left;
-  var centerY = height / 2 + top;
+  var centerX = left + width / 2;
+  var centerY = top - height / 2;
   return {
     left: left,
     top: top,
