@@ -3,7 +3,7 @@
     "ignoreDeprecations": "5.0",
     "module": "none",
     "target": "ES3",
-    "noLib": true
-    // "checkJs": true
+    "noLib": true,
+    "checkJs": false
   }
 }

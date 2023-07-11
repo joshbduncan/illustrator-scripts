@@ -3,7 +3,7 @@ GroupObjectsByRow.jsx for Adobe Illustrator
 -------------------------------------------
 
 Take a selection of objects that are separated by a unknown
-vertical gap and group all that are in the same row together.
+vertical gap and group all that vertically overlap.
 
 Note: This script was designed to group text characters but
 works just fine for most types of pageItems.

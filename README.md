@@ -1,4 +1,4 @@
-# Adobe Scripts
+# Adobe Illustrator Scripts
 
 JSX Scripts for Adobe Products
 
@@ -8,21 +8,19 @@ JSX Scripts for Adobe Products
 2. Install .jsx files into the Presets folder. **[How To Guide](https://www.marspremedia.com/software/how-to-adobe-cc)**
 3. Restart
 
-## Adobe Illustrator Scripts
-
-### ArtboardExporter.jsx
+## ArtboardExporter.jsx
 
 Quickly export all artboards to individual files.
 
-### DrawVisibleBounds.jsx
+## DrawVisibleBounds.jsx
 
 Draw "visible" bounds for selected objects. Accurately shows clipped objects, compounds paths, and even compound objects inside of a clipping mask that's inside of other clipping masks.
 
-### EditPointsOnly.jsx
+## EditPointsOnly.jsx
 
 Select only path points and not path segments for editing.
 
-### MatchObjects.jsx
+## MatchObjects.jsx
 
 ![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-v2.png)
 
@@ -46,7 +44,7 @@ Script Usage:
     - Size Match: Choose which dimension all `TARGET` objects should match of the `SOURCE` object. *When matching "Both", your targets may scale disproportionately.*
     - Also Scale: Pick which attributes (if any) of the `TARGET` objects should also be scaled during the "Size Match".
 
-### OffsetObjects.jsx
+## OffsetObjects.jsx
 
 ![Offset Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/offset-objects.png)
 
@@ -58,23 +56,23 @@ Need to go the opposite direction? Click Reverse Stacking Order and you're set.
 
 > This works very similar to the Distribute Spacing function of the Align palette, except that it uses the objects place in the layer palette stack to determine the order in which the object is stacked in relation to the rest.
 
-### Rename Layers.jsx
+## Rename Layers.jsx
 
 ![Rename Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/rename-layers.png)
 
 Rename layers in Adobe Illustrator using find and replace (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.
 
-### ScreenSepMarks.jsx
+## ScreenSepMarks.jsx
 
 ![Screen Print Separation Marks](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/screen-sep-marks.png)
 
 Easily add screen printing registration marks and spot color info to the current document. Lots of options, highly configurable, saved presets, & more!
 
-### ScriptUtils.jsx
+## ScriptUtils.jsx
 
 Utilities for developing and debugging Adobe scripts.
 
-### ShowHideLayers.jsx
+## ShowHideLayers.jsx
 
 ![Show/Hide Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/show-hide-layers.png)
 

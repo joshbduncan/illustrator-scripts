@@ -4,7 +4,7 @@
     {
       "type": "extendscript-debug",
       "request": "attach",
-      "name": "Start debugger—AI",
+      "name": "SextendScript-Debug attach",
       "hostAppSpecifier": "illustrator",
       "engineName": "main"
     }

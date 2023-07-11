@@ -1,0 +1,4 @@
+function hey() {
+  alert("hey from hey");
+  // comment
+}

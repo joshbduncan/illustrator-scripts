@@ -24,7 +24,7 @@ if (app.documents.length > 0) {
     if (sel instanceof Array) {
       // setup vars
       var paths = [];
-      var points = [];
+      var calculatedPoints = [];
       // grab all path objects in the selection
       getPaths();
       // grab all selected points of paths
@@ -32,8 +32,8 @@ if (app.documents.length > 0) {
       // deselect everything
       app.activeDocument.selection = null;
       // iterate over all points and reselect them for editing
-      for (var i = 0; i < points.length; i++) {
-        points[i].selected = PathPointSelection.ANCHORPOINT;
+      for (var i = 0; i < calculatedPoints.length; i++) {
+        calculatedPoints[i].selected = PathPointSelection.ANCHORPOINT;
       }
     }
   } else {
@@ -68,7 +68,7 @@ function getPoints() {
       var objPoints = paths[i].pathPoints;
       for (var j = 0; j < objPoints.length; j++) {
         if (objPoints[j].selected == PathPointSelection.ANCHORPOINT) {
-          points.push(objPoints[j]);
+          calculatedPoints.push(objPoints[j]);
         }
       }
     }
