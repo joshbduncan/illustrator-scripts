@@ -22,9 +22,9 @@ Select only path points and not path segments for editing.
 
 ## MatchObjects.jsx
 
-![Match Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/match-objects-v2.png)
+![Match Objects](files/match-objects.png)
 
-Match one or more objects to another by position, size, rotation, layer, and or alignment.
+Match one or more objects to another by position, size, rotation, layer, and or alignment [\[learn more\]](MatchObjects/README.md).
 
 **My most used script by far!**
 
@@ -43,6 +43,40 @@ Script Usage:
     - Position Match: Choose the `SOURCE` object anchor point that all `TARGET` objects should be positioned at.
     - Size Match: Choose which dimension all `TARGET` objects should match of the `SOURCE` object. *When matching "Both", your targets may scale disproportionately.*
     - Also Scale: Pick which attributes (if any) of the `TARGET` objects should also be scaled during the "Size Match".
+
+## OffsetObjects.jsx
+
+![Offset Objects](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/offset-objects.png)
+
+Offset (stack) selected objects edge-to-edge by their layer palette stacking order. You can offset them either vertically (bottom-edge to top-edge) or horizontally (right-edge to left-edge).
+
+Need some space between objects? Specify a gutter size and all objects will be spaced apart by that amount.
+
+Need to go the opposite direction? Click Reverse Stacking Order and you're set.
+
+> This works very similar to the Distribute Spacing function of the Align palette, except that it uses the objects place in the layer palette stack to determine the order in which the object is stacked in relation to the rest.
+
+## Rename Layers.jsx
+
+![Rename Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/rename-layers.png)
+
+Rename layers in Adobe Illustrator using find and replace (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.
+
+## ScreenSepMarks.jsx
+
+![Screen Print Separation Marks](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/screen-sep-marks.png)
+
+Easily add screen printing registration marks and spot color info to the current document. Lots of options, highly configurable, saved presets, & more!
+
+## ScriptUtils.jsx
+
+Utilities for developing and debugging Adobe scripts.
+
+## ShowHideLayers.jsx
+
+![Show/Hide Layers](https://raw.githubusercontent.com/joshbduncan/adobe-scripts/main/files/show-hide-layers.png)
+
+Show/Hide layers in Adobe Illustrator using find (regex enabled). Make changes on all matched layers or only matched layers with selected artwork.
 
 ## OffsetObjects.jsx
 
