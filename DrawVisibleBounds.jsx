@@ -40,6 +40,7 @@ Updates:
 2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
            error catch for selected guides (William Dowling @ github.com/wdjsdev)
            error catch for empty objects or item with no bounds
+           error catch for clipping masks inside of an empty group
 */
 
 function getVisibleBounds(object) {
@@ -82,7 +83,10 @@ function getVisibleBounds(object) {
           }
         }
       }
-      bounds = clippedItem ? clippedItem.geometricBounds : object.geometricBounds;
+      if (!clippedItem) {
+        clippedItem = object.pageItems[0];
+      }
+      bounds = clippedItem.geometricBounds;
       if (sandboxLayer) {
         // eliminate the sandbox layer since it's no longer needed
         sandboxLayer.remove();
