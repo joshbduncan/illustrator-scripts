@@ -6,3 +6,4 @@ types
 working
 .prettierignore
 KEEPERS.txt
+_*.jsx
