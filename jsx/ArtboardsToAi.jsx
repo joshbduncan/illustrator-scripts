@@ -2,7 +2,15 @@
 ArtboardsToAi.jsx for Adobe Illustrator
 ---------------------------------------
 
-Export the all artboards to a Ai files.
+Export all artboards to individual Ai files.
+
+Copyright 2023 Josh Duncan
+https://joshbduncan.com
+
+See README.md for more info
+
+This script is distributed under the MIT License.
+See the LICENSE file for details.
 
 Changelog:
 0.1.0 initial release
@@ -11,12 +19,23 @@ Changelog:
 (function () {
   //@target illustrator
 
-  var _title = "Artboard to Ai";
-  var _version = "0.1.0";
-  var _copyright = "Copyright 2023 Josh Duncan";
-  var _website = "joshbduncan.com";
-
-  //@include "include/OverwriteFileProtection.jsxinc"
+  /**
+   * If a file already exists, prompt for permission to overwrite.
+   * @param {File} file ExtendScript file constructor.
+   * @returns {Boolean} Is it okay to overwrite the file.
+   */
+  function OverwriteFileProtection(file) {
+    if (
+      file.exists &&
+      !Window.confirm(
+        "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
+        "noAsDflt",
+        "File Already Exists"
+      )
+    )
+      return false;
+    return true;
+  }
 
   // define script variables
   var ab;
@@ -41,7 +60,7 @@ Changelog:
   // get the current file name
   fileName = doc.name.split(".")[0];
 
-  // set up pdf save options
+  // set up save options
   saveOptions = new IllustratorSaveOptions();
   saveOptions.saveMultipleArtboards = true;
 
@@ -57,7 +76,7 @@ Changelog:
     // overwrite protection
     if (!OverwriteFileProtection(exportPath)) continue;
 
-    // export the pdf file
+    // export the file
     doc.saveAs(exportPath, saveOptions);
 
     // remove the old file
