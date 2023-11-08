@@ -8,6 +8,12 @@ JSX Scripts for Adobe Products
 2. Install .jsx files into the Presets folder. **[How To Guide](https://www.marspremedia.com/software/how-to-adobe-cc)**
 3. Restart
 
+## ⚠️ PLEASE NOTE
+
+I have recently changed the layout of this repository. Some of the scripts in the base directly are modular so they require importing other `.jsxinc` files to work properly. They work perfectly fine if you clone this directory exactly as in to you local machine.
+
+If you only need one (or a few) of my scripts, you can download compiled versions directly from the [compile_scripts](/compiled_scripts/) folder. Compiled scripts are standalone and don't require any additional files to work.
+
 ## ArtboardExporter.jsx
 
 Quickly export all artboards to individual files.

@@ -16,7 +16,23 @@ Changelog:
   var _copyright = "Copyright 2023 Josh Duncan";
   var _website = "joshbduncan.com";
 
-  //@include "../include/OverwriteFileProtection.jsxinc"
+  /**
+   * If a file already exists, prompt for permission to overwrite.
+   * @param {File} file ExtendScript file constructor.
+   * @returns {Boolean} Is it okay to overwrite the file.
+   */
+  function OverwriteFileProtection(file) {
+    if (
+      file.exists &&
+      !Window.confirm(
+        "File already exists!\nOverwrite File?\n" + file.displayName,
+        "noAsDflt",
+        "File Already Exists"
+      )
+    )
+      return false;
+    return true;
+  }
 
   // define script variables
   var ab;

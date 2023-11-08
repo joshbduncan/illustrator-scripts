@@ -6,33 +6,18 @@ Export the current artboard to a Ai file.
 
 Changelog:
 0.1.0 initial release
+0.1.1 fix where ai appends the artboard name to the end of saved files
 */
 
 (function () {
   //@target illustrator
 
   var _title = "Artboard to Ai";
-  var _version = "0.1.0";
+  var _version = "0.1.1";
   var _copyright = "Copyright 2023 Josh Duncan";
   var _website = "joshbduncan.com";
 
-  /**
-   * If a file already exists, prompt for permission to overwrite.
-   * @param {File} file ExtendScript file constructor.
-   * @returns {Boolean} Is it okay to overwrite the file.
-   */
-  function OverwriteFileProtection(file) {
-    if (
-      file.exists &&
-      !Window.confirm(
-        "File already exists!\nOverwrite File?\n" + file.displayName,
-        "noAsDflt",
-        "File Already Exists"
-      )
-    )
-      return false;
-    return true;
-  }
+  //@include "include/OverwriteFileProtection.jsxinc"
 
   // define script variables
   var ab;
@@ -74,6 +59,9 @@ Changelog:
   // set the final exportPath
   exportPath = new File(exportFolder + "/" + exportName + ".ai");
 
+  // overwrite protection
+  if (!OverwriteFileProtection(exportPath)) return;
+
   // set up pdf save options
   saveOptions = new IllustratorSaveOptions();
   saveOptions.saveMultipleArtboards = true;
@@ -81,4 +69,11 @@ Changelog:
 
   // export the pdf file
   doc.saveAs(exportPath, saveOptions);
+
+  // remove the old file
+  exportPath.remove();
+
+  // rename the file to remove the appended artboard name
+  exportPath = new File(exportFolder + "/" + exportName + "_" + ab.name + ".ai");
+  exportPath.rename(exportName + ".ai");
 })();
