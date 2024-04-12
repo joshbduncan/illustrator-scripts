@@ -4,7 +4,7 @@ ArtboardsToAi.jsx for Adobe Illustrator
 
 Export all artboards to individual Ai files.
 
-Copyright 2023 Josh Duncan
+Copyright 2024 Josh Duncan
 https://joshbduncan.com
 
 See README.md for more info

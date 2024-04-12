@@ -8,14 +8,15 @@ Changelog:
 0.1.0 initial release
 0.1.1 fixed reg mark placement when ruler origin isn't at normal position
 0.1.2 moved ruler origin fix into `createRegMarks()` function
+0.1.3 better file name output in export notification, parent folder opens after export, dialog closes after export
 */
 
 //@target illustrator
 
 (function () {
   var _title = "Export Print and Cut PDFs";
-  var _version = "0.1.1";
-  var _copyright = "Copyright 2023 Josh Duncan";
+  var _version = "0.1.3";
+  var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
   if (app.documents.length > 0) {
@@ -104,6 +105,7 @@ Changelog:
 
     btnExportFiles.onClick = function () {
       exportFiles();
+      dlg.close();
     };
 
     // show the dialog
@@ -198,6 +200,9 @@ Changelog:
     // grab the base name of the document
     fileName = doc.fullName.fullName.replace(/\.pdf|\.ai|\.eps$/i, "");
 
+    // grab the folder location of the document
+    parentFolder = doc.path;
+
     // grab the required layers
     artLayer = doc.layers[artLayerName];
     cutLayer = doc.layers[cutLayerName];
@@ -246,7 +251,12 @@ Changelog:
     doc.close(SaveOptions.DONOTSAVECHANGES);
 
     // alert user
-    alert("Files Exported!\n" + fileArt.fsName + "\n" + fileCut.fsName);
+    alert(
+      "Files Exported!\n" + File.decode(fileArt.name) + "\n" + File.decode(fileCut.name)
+    );
+
+    // open the parent folder
+    parentFolder.execute();
 
     // close the dialog
     dlg.close();

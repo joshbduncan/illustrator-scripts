@@ -21,7 +21,7 @@ Versions:
   //@target illustrator
   var _title = "Draw Visible Bounds";
   var _version = "1.1.0";
-  var _copyright = "Copyright 2023 Josh Duncan";
+  var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
   /*
