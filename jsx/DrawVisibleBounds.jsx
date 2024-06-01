@@ -25,25 +25,32 @@ Versions:
   var _website = "joshbduncan.com";
 
   /*
-  GetVisibleBounds.jsx for Adobe Illustrator
-  -------------------------------------------
-
-  Determine the actual "visible" bounds for an object
-  if clipping mask or compound path items are found.
-
-  This script is distributed under the MIT License.
-  See the LICENSE file for details.
-
-  Updates:
-  2021-09-13 updated getVisibleBounds() to catch lots of weird edge cases
-  2021-10-13 updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
-  2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
-             error catch for selected guides (William Dowling @ github.com/wdjsdev)
-             error catch for empty objects or item with no bounds
-             error catch for clipping masks inside of an empty group
+    Updates:
+    2021-09-13 updated getVisibleBounds() to catch lots of weird edge cases
+    2021-10-13 updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
+    2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
+              error catch for selected guides (William Dowling @ github.com/wdjsdev)
+              error catch for empty objects or item with no bounds
+              error catch for clipping masks inside of an empty group
   */
 
+  /**
+   * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
+   * @param   {Object} object A single Adobe Illustrator pageItem.
+   * @returns {Array}         Object bounds [left, top, right, bottom].
+   */
   function getVisibleBounds(object) {
+    /*
+      Changelog
+      ---------
+      2021-09-13 updated getVisibleBounds() to catch lots of weird edge cases
+      2021-10-13 updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
+      2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
+                error catch for selected guides (William Dowling @ github.com/wdjsdev)
+                error catch for empty objects or item with no bounds
+                error catch for clipping masks inside of an empty group
+    */
+
     var bounds, clippedItem, sandboxItem, sandboxLayer;
     var curItem;
 
@@ -147,7 +154,7 @@ Versions:
    */
   function drawBounds(bounds, lineLength) {
     // adjustable length of crosshair lines
-    lineLength = typeof lineLength !== "undefined" ? lineLength : 20;
+    lineLength = typeof lineLength !== undefined ? lineLength : 20;
     var boundsGroup = doc.groupItems.add();
     boundsGroup.name = "BOUNDS";
     var topLeft = drawBoundMark([

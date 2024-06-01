@@ -11,11 +11,11 @@ Versions:
 1.0.0 initial release
 */
 
-#target Illustrator
+//@target illustrator
 
 var _title = "Show/Hide Layers";
 var _version = "1.0.0";
-var _copyright = "Copyright 2022 Josh Duncan";
+var _copyright = "Copyright 2024 Josh Duncan";
 var _website = "joshbduncan.com";
 
 // -----------
@@ -31,20 +31,23 @@ if (app.documents.length > 0) {
     var changedLayers = [];
     for (var i = 0; i < layers.length; i++) {
       var layer = layers[i];
-      var find = settings.regex ? new RegExp(settings.find, "g") : settings.find
-      if ( (settings.regex && find.test(layer.name)) || (layer.name.indexOf(settings.find) > -1) ) {
-        if ( (settings.selected && layer.hasSelectedArtwork) || (!settings.selected) ) {
+      var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
+      if (
+        (settings.regex && find.test(layer.name)) ||
+        layer.name.indexOf(settings.find) > -1
+      ) {
+        if ((settings.selected && layer.hasSelectedArtwork) || !settings.selected) {
           if (layer.visible != settings.visibility) {
             layer.visible = settings.visibility;
-            changedLayers.push(i)
+            changedLayers.push(i);
           }
         }
       }
     }
-    alert("Visibility changed on " + changedLayers.length + " layer(s).")
+    alert("Visibility changed on " + changedLayers.length + " layer(s).");
   }
 } else {
-alert("No documents open!\nCreate or open a document first.");
+  alert("No documents open!\nCreate or open a document first.");
 }
 
 function settingsWin() {
@@ -74,9 +77,13 @@ function settingsWin() {
   var rbText = gType.add("radiobutton", undefined, "Plain Text");
   rbText.value = true;
   var rbRegex = gType.add("radiobutton", undefined, "Regular Expression");
- 
+
   //checkbox - limit to layers with selected artwork
-  var cbSelected = pFind.add("checkbox", undefined, "Limit to layer(s) with selected artwork");
+  var cbSelected = pFind.add(
+    "checkbox",
+    undefined,
+    "Limit to layer(s) with selected artwork"
+  );
   cbSelected.value = false;
 
   // panel - visibility
@@ -87,7 +94,6 @@ function settingsWin() {
   var rbShow = pVisibility.add("radiobutton", undefined, "Show Matching Layer(s)");
   rbShow.value = true;
   var rbHide = pVisibility.add("radiobutton", undefined, "Hide Matching Layer(s)");
-
 
   // group - window buttons
   var gWindowButtons = win.add("group", undefined);
@@ -104,24 +110,23 @@ function settingsWin() {
   pCopyright.add("statictext", undefined, "Version " + _version + " " + _copyright);
   pCopyright.add("statictext", undefined, _website);
 
-  find.onChanging = function() {
+  find.onChanging = function () {
     if (find.text.length > 0) {
       btOK.enabled = true;
     } else {
       btOK.enabled = false;
     }
-  }
+  };
 
   // if "ok" button clicked then return inputs
   if (win.show() == 1) {
     return {
-      "visibility": rbShow.value,
-      "regex": rbRegex.value,
-      "find": find.text,
-      "selected": cbSelected.value
-    }
+      visibility: rbShow.value,
+      regex: rbRegex.value,
+      find: find.text,
+      selected: cbSelected.value,
+    };
   } else {
     return;
   }
-
 }

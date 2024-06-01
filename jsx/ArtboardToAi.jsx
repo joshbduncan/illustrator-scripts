@@ -22,8 +22,8 @@ Changelog:
 
   /**
    * If a file already exists, prompt for permission to overwrite.
-   * @param {File} file ExtendScript file constructor.
-   * @returns {Boolean} Is it okay to overwrite the file.
+   * @param   {FileObject} file ExtendScript file constructor.
+   * @returns {Boolean}         Is it okay to overwrite the file.
    */
   function OverwriteFileProtection(file) {
     if (

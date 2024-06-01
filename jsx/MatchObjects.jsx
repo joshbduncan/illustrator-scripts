@@ -28,7 +28,7 @@ Versions:
 (function () {
   var _title = "Match Objects";
   var _version = "1.1.1";
-  var _copyright = "Copyright 2022 Josh Duncan";
+  var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
   // run script

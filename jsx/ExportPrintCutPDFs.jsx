@@ -9,13 +9,14 @@ Changelog:
 0.1.1 fixed reg mark placement when ruler origin isn't at normal position
 0.1.2 moved ruler origin fix into `createRegMarks()` function
 0.1.3 better file name output in export notification, parent folder opens after export, dialog closes after export
+0.1.4 reg mark size calculation now factors in `app.activeDocument.scaleFactor`
 */
 
 //@target illustrator
 
 (function () {
   var _title = "Export Print and Cut PDFs";
-  var _version = "0.1.3";
+  var _version = "0.1.4";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -39,7 +40,7 @@ Changelog:
     // setup reg mark defaults
     var regColor = new GrayColor();
     regColor.gray = 100;
-    var regSize = 72 / 4; // .25 inches
+    var regSize = (72 / 4) * (1 / app.activeDocument.scaleFactor); // .25 inches
     var regPlacements = [
       { top: 0, left: 0 }, // top-left
       { top: 0, left: doc.width - regSize }, // top-right

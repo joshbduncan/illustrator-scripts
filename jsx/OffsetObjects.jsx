@@ -16,7 +16,7 @@ Versions:
 
 var _title = "Offset Objects";
 var _version = "1.0.1";
-var _copyright = "Copyright 2022 Josh Duncan";
+var _copyright = "Copyright 2024 Josh Duncan";
 var _website = "joshbduncan.com";
 
 // -----------

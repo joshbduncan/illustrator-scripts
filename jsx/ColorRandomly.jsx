@@ -17,7 +17,7 @@ Versions:
 
 var _title = "Color Randomly";
 var _version = "1.0.0";
-var _copyright = "Copyright 2022 Josh Duncan";
+var _copyright = "Copyright 2024 Josh Duncan";
 var _website = "joshbduncan.com";
 
 // run script
