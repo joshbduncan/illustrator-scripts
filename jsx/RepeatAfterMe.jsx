@@ -24,14 +24,17 @@
 
   Changelog
   ---------
-  0.1.0 initial release
+  0.1.0 2024-05-31 initial release
+  0.2.0 2024-06-03 added repeat pattern option (grid, brick by row, brick by column)
+                   gutter values can be negative now, input arrows work below 0 as well
+                   gutter arrows work in 1/8 inches and 1 inch with shift, when value is in inches, else 1 and 10
 */
 
 (function () {
   //@target illustrator
 
   var _title = "RepeateAfterMe";
-  var _version = "0.1.0";
+  var _version = "0.2.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -42,8 +45,8 @@
 
   /**
    * Setup folder object or create if doesn't exist.
-   * @param   {String} path System folder path.
-   * @returns {Object}      Folder object.
+   * @param {String} path System folder path.
+   * @returns {Folder} Folder object.
    */
   function setupFolderObject(path) {
     var folder = new Folder(path);
@@ -53,9 +56,9 @@
 
   /**
    * Setup file object.
-   * @param   {Object} path Folder object where file should exist,
-   * @param   {String} name File name.
-   * @returns {Object}      File object.
+   * @param {Object} path Folder object where file should exist,
+   * @param {String} name File name.
+   * @returns {File} File object.
    */
   function setupFileObject(path, name) {
     return new File(path + "/" + name);
@@ -63,8 +66,8 @@
 
   /**
    * Read ExtendScript "json-like" data from file.
-   * @param   {Object} f File object to read.
-   * @returns {Object}   Evaluated JSON data.
+   * @param {File} f File object to read.
+   * @returns {Object} Evaluated JSON data.
    */
   function readJSONData(f) {
     var json, obj;
@@ -82,15 +85,14 @@
 
   /**
    * Write ExtendScript "json-like" data to disk.
-   * @param {Object} obj Data to be written.
-   * @param {Object} f   File object to write to.
+   * @param {Object} data Data to be written.
+   * @param {File} f File object to write to.
    */
-  function writeJSONData(obj, f) {
-    var data = obj.toSource();
+  function writeJSONData(data, f) {
     try {
       f.encoding = "UTF-8";
       f.open("w");
-      f.write(data);
+      f.write(data.toSource());
       f.close();
     } catch (e) {
       alert("Error writing file:\n" + f);
@@ -98,8 +100,8 @@
   }
   /**
    * Provide easy access page item placement information.
-   * @param   {Array}  bounds Illustrator object bounds (e.g. [left, top, right, bottom]).
-   * @returns {Object}        Object information (left, top, right, bottom, width, height, centerX, centerY)
+   * @param {Array} bounds Illustrator object bounds (e.g. [left, top, right, bottom]).
+   * @returns {Object} Object information (left, top, right, bottom, width, height, centerX, centerY)
    */
   function GetObjectPlacementInfo(bounds) {
     var left = bounds[0];
@@ -133,7 +135,7 @@
 
   /**
    * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
-   * @param   {Object} object A single Adobe Illustrator pageItem.
+   * @param {PageItem} object A single Adobe Illustrator pageItem.
    * @returns {Array}         Object bounds [left, top, right, bottom].
    */
   function getVisibleBounds(object) {
@@ -225,12 +227,12 @@
 
   /**
    * Determine the overall current document selection bounds.
-   * @param   {Object}  doc     Open Adobe Illustrator document.
-   * @param   {Boolean} visible Return true visible bounds (as opposed to geometric bounds). Defaults to false.
-   * @returns {Array}           Object bounds [left, top, right, bottom].
+   * @param {Object} doc Open Adobe Illustrator document.
+   * @param {Boolean} visible Return true visible bounds (as opposed to geometric bounds). Defaults to false.
+   * @returns {Array} Object bounds [left, top, right, bottom].
    */
   function getSelectionBounds(doc, visible) {
-    visible = typeof visible !== undefined ? visible : false;
+    visible = typeof visible !== "undefined" ? visible : false;
     var bounds = [[], [], [], []];
     var cur;
     for (var i = 0; i < doc.selection.length; i++) {
@@ -271,7 +273,7 @@
    */
   function Prefs(fname, location, version) {
     // if `fname` is not specified, pull the base script name from the stack
-    if (fname == undefined) {
+    if (fname == "undefined") {
       var stack = $.stack.split("\n");
       var foo, bar;
       for (var i = 0; i < stack.length; i++) {
@@ -286,8 +288,8 @@
       }
     }
     this.fname = fname;
-    this.location = typeof location !== undefined ? location : Folder.userData;
-    this.version = typeof version !== undefined ? version : null;
+    this.location = typeof location !== "undefined" ? location : Folder.userData;
+    this.version = typeof version !== "undefined" ? version : null;
     this.data = {};
   }
 
@@ -310,7 +312,7 @@
      * @param defaultData Default data to load if the data file does not exist.
      */
     load: function (defaultData) {
-      defaultData = typeof defaultData !== undefined ? defaultData : {};
+      defaultData = typeof defaultData !== "undefined" ? defaultData : {};
       var file = this.file();
       var json;
 
@@ -361,8 +363,8 @@
   };
   /**
    * Dialog for saving/overwriting presets.
-   * @param   {Array}       currentOptions Current presets that can be possibly overwritten.
-   * @returns {String|bool}                Preset name on OK, false on Cancel.
+   * @param {Array} currentOptions Current presets (can be overwritten).
+   * @returns {String|Boolean} Preset name on OK, false on Cancel.
    */
   function savePresetDialog(currentOptions) {
     var win = new Window("dialog");
@@ -442,6 +444,7 @@
     rowGutter: ".25 in",
     cols: 2,
     colGutter: ".25 in",
+    pattern: "Grid",
     color: "Red",
     weight: "3 pt",
   };
@@ -471,6 +474,11 @@
   // HELPER FUNCTIONS //
   //////////////////////
 
+  /**
+   *
+   * @param {String} k Key for color name lookup.
+   * @returns {RGBColor}
+   */
   function loadPreviewColor(k) {
     var color = new RGBColor();
     switch (k) {
@@ -492,6 +500,13 @@
     return color;
   }
 
+  /**
+   * Parse a ScriptUI `edittext` value into a valid `UnitType` number.
+   * @param {Number|String} n Value to parse.
+   * @param {Number} defaultValue Default value to return if `n` is invalid.
+   * @param {String} defaultUnit Default unit type to return the input as if not included in `n`.
+   * @returns {UnitValue}
+   */
   function parseNumberInput(n, defaultValue, defaultUnit) {
     defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
     defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
@@ -506,36 +521,55 @@
     return val;
   }
 
-  function calculateTranslationDeltas(rows, rowGutter, cols, colGutter, up, right) {
-    // determine which direction grid should be drawn
-    up = typeof up !== "undefined" ? up : false;
-    right = typeof right !== "undefined" ? up : true;
+  /**
+   * Calculate translation deltas for each repeat item.
+   * @param {Number} rows Rows to repeat.
+   * @param {Number} rowGutter Space between rows.
+   * @param {Number} cols Columns to repeat.
+   * @param {Number} colGutter Space between columns.
+   * @param {String} pattern Repeat pattern (grid or brick).
+   * @returns {Array} Translation offset values for each repeat as [x, y].
+   */
+  function calculateRepeatTranslationDeltas(rows, rowGutter, cols, colGutter, pattern) {
+    pattern = typeof pattern !== "undefined" ? pattern.toLowerCase() : "grid";
+
+    $.writeln("calculating translation deltas");
 
     // convert user input to points
     rowGutter = UnitValue(rowGutter).as("pt");
     colGutter = UnitValue(colGutter).as("pt");
 
-    var xDirection = up ? 1 : -1;
-    var yDirection = right ? 1 : -1;
-
-    // get starting position
-    var left = placementInfo.left;
-    var top = placementInfo.top;
+    // determine which pattern of grid should be drawn
+    var rowPatternOffset = (placementInfo.width + colGutter) * 0.5;
+    var colPatternOffset = (placementInfo.height + rowGutter) * 0.5;
 
     // calculate the x and y translation offset values for each repeat
     var positions = [];
+    var tx, ty;
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
         if (r === 0 && c === 0) continue;
-        positions.push([
-          c * ((placementInfo.width + colGutter) * yDirection),
-          r * ((placementInfo.height + rowGutter) * xDirection),
-        ]);
+        tx = c * (placementInfo.width + colGutter);
+        ty = r * (placementInfo.height + rowGutter) * -1;
+
+        // offset tx and ty for selected pattern
+        if (r % 2 === 1 && pattern === "brick by row") {
+          tx = tx + colPatternOffset;
+        }
+
+        if (c % 2 === 1 && pattern === "brick by column") {
+          ty = ty - rowPatternOffset;
+        }
+
+        positions.push([tx, ty]);
       }
     }
     return positions;
   }
 
+  /**
+   * Clean up any script template information.
+   */
   function cleanup() {
     try {
       templateLayer = doc.layers.getByName(layerName);
@@ -543,6 +577,13 @@
     } catch (e) {}
   }
 
+  /**
+   *
+   * @param {Array} positions Translation deltas for each repeat item.
+   * @param {RGBColor} outlineColor Template preview outline color.
+   * @param {Number|String|UnitName} strokeWeight Template preview stroke weight.
+   * @returns {Layer} Template layout layer.
+   */
   function drawPreview(positions, outlineColor, strokeWeight) {
     cleanup();
 
@@ -577,6 +618,10 @@
     return templateLayer;
   }
 
+  /**
+   * Repeat the selected artwork at the specified positions.
+   * @param {Array} positions Translation deltas for each repeat item.
+   */
   function duplicateObjects(positions) {
     var selectedObjects = doc.selection;
     for (var i = 0; i < selectedObjects.length; i++) {
@@ -593,6 +638,11 @@
   // MAIN SCRIPT DIALOG //
   ////////////////////////
 
+  /**
+   *
+   * @param {String} s Key for preset lookup. Defaults to '[Default]'.
+   * @returns {Array} Translation offset values for each repeat as [x, y].
+   */
   function settingsWin(s) {
     s = typeof s !== "undefined" ? s : "[Default]";
 
@@ -602,7 +652,7 @@
     var win = new Window("dialog");
     win.text = _title + " " + _version;
     win.orientation = "column";
-    win.alignChildren = ["center", "top"];
+    win.alignChildren = ["center", "center"];
     win.spacing = 10;
     win.margins = 16;
 
@@ -610,10 +660,10 @@
     var pLayout = win.add("panel", undefined, undefined, { name: "pLayout" });
     pLayout.text = "Layout";
     pLayout.orientation = "column";
-    pLayout.alignChildren = ["left", "top"];
+    pLayout.alignChildren = ["left", "center"];
     pLayout.spacing = 10;
     pLayout.margins = 18;
-    pLayout.alignment = ["fill", "top"];
+    pLayout.alignment = ["fill", "center"];
 
     // Group - Row
     var gRow = pLayout.add("group", undefined, { name: "gRow" });
@@ -670,6 +720,28 @@
     );
     colGutter.text = "";
     colGutter.preferredSize.width = 100;
+
+    // Group - Repeat Type
+    var gType = pLayout.add("group", undefined, { name: "gType" });
+    gType.orientation = "row";
+    gType.alignChildren = ["left", "center"];
+    gType.spacing = 10;
+    gType.margins = 0;
+
+    var stType = gType.add("statictext", undefined, undefined, {
+      name: "stType",
+    });
+    stType.text = "Pattern:";
+    stType.preferredSize.width = 60;
+    stType.justify = "right";
+
+    var patterns = ["Grid", "Brick by Row", "Brick by Column"];
+    var pattern = gType.add("dropdownlist", undefined, undefined, {
+      name: "pattern",
+      items: patterns,
+    });
+    pattern.alignment = ["fill", "center"];
+    pattern.selection = 0;
 
     var divider1 = pLayout.add("panel", undefined, undefined, { name: "divider1" });
     divider1.alignment = "fill";
@@ -737,10 +809,10 @@
     var pPreview = win.add("panel", undefined, undefined, { name: "pPreview" });
     pPreview.text = "Preview";
     pPreview.orientation = "row";
-    pPreview.alignChildren = ["left", "top"];
+    pPreview.alignChildren = ["left", "center"];
     pPreview.spacing = 10;
     pPreview.margins = 18;
-    pPreview.alignment = ["left", "top"];
+    pPreview.alignment = ["fill", "center"];
 
     // Group - Color
     var gColor = pPreview.add("group", undefined, { name: "gColor" });
@@ -781,7 +853,7 @@
     var pPresets = win.add("panel", undefined, undefined, { name: "pPresets" });
     pPresets.text = "Presets";
     pPresets.orientation = "column";
-    pPresets.alignChildren = ["left", "top"];
+    pPresets.alignChildren = ["left", "center"];
     pPresets.spacing = 10;
     pPresets.margins = 18;
 
@@ -834,32 +906,14 @@
     });
     stCopyright.text = _copyright + " @ " + _website;
 
-    ///////////////////////////////////
-    // WINDOW ITEMS REFERENCE OBJECT //
-    ///////////////////////////////////
-
-    win.items = {
-      rows: rows, // edittext
-      rowGutter: rowGutter, // edittext
-      cols: cols, // edittext
-      colGutter: colGutter, // edittext
-      copies: copies, // statictext
-      width: width, // statictext
-      height: height, // statictext
-      color: color, // dropdownlist
-      weight: weight, // edittext
-      preset: preset, // dropdownlist
-      btDelete: btDelete, // button
-      btSave: btSave, // button
-      btOK: btOK, // button
-      btCancel: btCancel, // button
-      stCopyright: stCopyright, // statictext
-    };
-
     /////////////////////////////
     // WINDOW HELPER FUNCTIONS //
     /////////////////////////////
 
+    /**
+     * Load preset data into.
+     * @param {String} k Key for preset lookup. Defaults to '[Default]'.
+     */
     function loadPreset(k) {
       loading = true;
 
@@ -877,6 +931,7 @@
       cols.text = s.cols;
       colGutter.text = UnitValue(s.colGutter);
       color.selection = color.find(s.color);
+      pattern.selection = pattern.find(s.pattern);
       weight.text = UnitValue(s.weight);
       preset.selection = preset.find(k);
 
@@ -885,6 +940,9 @@
       updatePreview();
     }
 
+    /**
+     * Update the repeat preview template.
+     */
     function updatePreview() {
       $.writeln("updating preview");
       try {
@@ -898,11 +956,12 @@
         outlineColor = loadPreviewColor(color.selection.text);
 
         // calculate all positions
-        positions = calculateTranslationDeltas(
+        positions = calculateRepeatTranslationDeltas(
           parseInt(rows.text),
           rowGutter.text,
           parseInt(cols.text),
-          colGutter.text
+          colGutter.text,
+          pattern.selection.text
         );
 
         // draw preview rectangles
@@ -939,6 +998,10 @@
     // INPUT HELPERS, VALIDATORS, AND EVENT LISTENERS //
     ////////////////////////////////////////////////////
 
+    /**
+     * Process user input changes.
+     * @param {UIEvent} e ScriptUI change event.
+     */
     function processChanges(e) {
       if (e.target.hasOwnProperty("validate")) {
         e.target.validate();
@@ -988,8 +1051,14 @@
       // add onChange listener
       floatInputs[i].addEventListener("change", processChanges);
       // add arrow key listener
-      floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutterStroke);
+      if (floatInputs[i].properties.name == "weight") {
+        floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsWeight);
+      } else {
+        floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutter);
+      }
     }
+
+    pattern.addEventListener("change", processChanges);
 
     color.addEventListener("change", processChanges);
 
@@ -1024,9 +1093,12 @@
       loadPreset(s);
     };
 
+    /**
+     * Reset the preset ui panel when a user makes input changes.
+     */
     function resetPresetUI() {
       if (preset.selection != null) {
-        $.writeln("resetPresetUI()");
+        $.writeln("resetting preset ui");
         preset.selection = null;
         btDelete.enabled = false;
       }
@@ -1056,6 +1128,7 @@
         rowGutter: UnitValue(rowGutter.text).toString(),
         cols: parseInt(cols.text),
         colGutter: UnitValue(colGutter.text).toString(),
+        pattern: pattern.selection.text,
         color: color.selection.text,
         weight: UnitValue(weight.text).toString(),
       };
@@ -1101,6 +1174,10 @@
   // EDIT TEXT ARROW FUNCTIONS //
   ///////////////////////////////
 
+  /**
+   * Allow user to adjust `edittext` input values using the keyboard.
+   * @param {UIEvent} e ScriptUI keyboard event.
+   */
   function editTextArrowAdjustmentsRowCol(e) {
     // Attempt mimic the behavior of the built-in Ai text input boxes
     // allowing users to change the value using the "Up" and "Down" arrow
@@ -1141,7 +1218,72 @@
     }
   }
 
-  function editTextArrowAdjustmentsGutterStroke(e) {
+  /**
+   * Allow user to adjust `edittext` input values using the keyboard.
+   * @param {UIEvent} e ScriptUI keyboard event.
+   */
+  function editTextArrowAdjustmentsGutter(e) {
+    // Attempt mimic the behavior of the built-in Ai text input boxes
+    // allowing users to change the value using the "Up" and "Down" arrow
+    // key, and adding the "Shift" key modifier to change the value by +/- 10
+    //
+    // 0 is increased to 0.25 (without "Shift")
+    // 1 is decreased to 0.75 (without "Shift")
+    // Float values .25, .50, and .75 are increased/decreased to the next .25 increment
+    var val, shift;
+    if (e.keyName == "Up" || e.keyName == "Down") {
+      // if shift key is pressed when "Up" or "Down" key pressed
+      // +/- the current value by 10 or round to the next 10th value
+      //
+      // Examples:
+      // - "Up" with "Shift" at 22 increase value to 30
+      // - "Down" with "Shift" at 22 decreases value to 20
+      // - "Up" with "Shift" at 2.25 increase value to 10
+      // - "Down" with "Shift" at 2.25 decreases value to 0
+      shift = e.getModifierState("Shift");
+      val = parseNumberInput(this.text);
+
+      // determine proper increments for arrow key
+      var increment = val.type === "in" ? 0.125 : 1;
+      var shiftIncrement = val.type === "in" ? 1 : 10;
+
+      $.writeln("val.type: " + val.type);
+      $.writeln("increment: " + increment);
+      $.writeln("shiftIncrement: " + shiftIncrement);
+
+      // ensure 'weight' is always in points
+      if (e.target.properties.name == "weight") val.convert("pt");
+
+      if (e.keyName == "Up") {
+        if (shift) {
+          val = UnitValue(
+            parseInt(val.value / shiftIncrement) * shiftIncrement + shiftIncrement,
+            val.type
+          );
+        } else {
+          val = val + increment;
+        }
+      } else {
+        if (shift) {
+          val = UnitValue(
+            parseInt((val.value - 1) / shiftIncrement) * shiftIncrement,
+            val.type
+          );
+        } else {
+          val = UnitValue(val.value - increment, val.type);
+        }
+      }
+      this.text = val;
+      e.preventDefault();
+      e.target.notify("onChange");
+    }
+  }
+
+  /**
+   * Allow user to adjust `edittext` input values using the keyboard.
+   * @param {UIEvent} e ScriptUI keyboard event.
+   */
+  function editTextArrowAdjustmentsWeight(e) {
     // Attempt mimic the behavior of the built-in Ai text input boxes
     // allowing users to change the value using the "Up" and "Down" arrow
     // key, and adding the "Shift" key modifier to change the value by +/- 10
@@ -1167,7 +1309,7 @@
 
       if (e.keyName == "Up") {
         if (shift) {
-          val = UnitValue(Math.max(0, parseInt(val.value / 10) * 10 + 10), val.type);
+          val = UnitValue(Math.max(1, parseInt(val.value / 10) * 10 + 10), val.type);
         } else {
           if (
             val.value === 0 ||
@@ -1182,7 +1324,7 @@
         }
       } else {
         if (shift) {
-          val = UnitValue(Math.max(0, parseInt((val.value - 1) / 10) * 10), val.type);
+          val = UnitValue(Math.max(1, parseInt((val.value - 1) / 10) * 10), val.type);
         } else {
           if (
             val.value === 0.25 ||
@@ -1190,9 +1332,9 @@
             val.value === 0.75 ||
             val.value === 1
           ) {
-            val = UnitValue(Math.max(0, val.value - 0.25), val.type);
+            val = UnitValue(Math.max(1, val.value - 0.25), val.type);
           } else {
-            val = UnitValue(Math.max(0, val.value - 1), val.type);
+            val = UnitValue(Math.max(1, val.value - 1), val.type);
           }
         }
       }
