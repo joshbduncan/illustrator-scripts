@@ -36,7 +36,7 @@ Versions:
 
   /**
    * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
-   * @param   {Object} object A single Adobe Illustrator pageItem.
+   * @param {PageItem} object A single Adobe Illustrator pageItem.
    * @returns {Array}         Object bounds [left, top, right, bottom].
    */
   function getVisibleBounds(object) {
@@ -154,7 +154,7 @@ Versions:
    */
   function drawBounds(bounds, lineLength) {
     // adjustable length of crosshair lines
-    lineLength = typeof lineLength !== undefined ? lineLength : 20;
+    lineLength = typeof lineLength !== "undefined" ? lineLength : 20;
     var boundsGroup = doc.groupItems.add();
     boundsGroup.name = "BOUNDS";
     var topLeft = drawBoundMark([

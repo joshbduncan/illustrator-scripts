@@ -25,8 +25,8 @@ Versions:
 
   /**
    * Find all container objects (groups (including clipping masks), and compound paths) within the array.
-   * @param   {Array} arr   Adobe Illustrator pageItems.
-   * @returns {Array}       Array of container objects.
+   * @param {Array} arr Adobe Illustrator pageItems.
+   * @returns {Array} Array of container objects.
    */
   function findContainerObjects(arr) {
     var matches = [];

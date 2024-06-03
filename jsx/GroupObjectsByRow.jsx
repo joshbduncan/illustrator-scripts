@@ -24,8 +24,8 @@ Versions:
 
   /**
    * Take an array of Adobe Illustrator pageItems and group them by vertical separation.
-   * @param   {Array} sel Adobe Illustrator pageItems
-   * @returns {Array}     Array of Adobe Illustrator groupItems
+   * @param {Array} sel Adobe Illustrator pageItems
+   * @returns {Array} Array of Adobe Illustrator groupItems
    */
   function groupObjectsByRow(sel) {
     var groups = [];

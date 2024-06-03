@@ -23,7 +23,7 @@ Versions:
 
     // Load the XMP library as an ExtendScript ExternalObject via the docs
     // https://extendscript.docsforadobe.dev/scripting-xmp/index.html
-    if (ExternalObject.AdobeXMPScript == undefined)
+    if (ExternalObject.AdobeXMPScript == "undefined")
       ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
 
     //Read XMP string - You can see document XMP info in Illustrator @ File > File Info > Raw Data

@@ -117,10 +117,10 @@ if (app.documents.length > 0) {
 
 /**
  * Calculate equally distanced points between anchor points along a path.
- * @param   {Array}   anchors  Anchor points to calculate new points between.
- * @param   {Number}  points   Number of points to calculate between anchor points.
- * @param   {Array}   position [[x, y],...] coordinates of all calculated points along a path.
- * @returns {Array}            Newly calculated path points in the following format.
+ * @param {Array} anchors Anchor points to calculate new points between.
+ * @param {Number} points Number of points to calculate between anchor points.
+ * @param {Array} position [[x, y],...] coordinates of all calculated points along a path.
+ * @returns {Array} Newly calculated path points in the following format.
  *                             { anchor: [x, y], rightDirection: [x, y], leftDirection: [x, y], pointType: pointType, }
  */
 function calcPointsBetweenAnchors(anchors, points, position) {
@@ -156,11 +156,16 @@ function calcPointsBetweenAnchors(anchors, points, position) {
 /**
  * Calculate a point at position `t` along a path (between to anchors points) using De Casteljau's algorithm.
  * https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm
- * @param   {Array}  start Start point of line segment.
- * @param   {Array}  end   End point of line segment.
- * @param   {Number} t     Percentage along the line the calculated point lies (0.0-1.0).
- * @returns {Array}        Newly calculated/recalculated points [start, newPointAlongPath, end].
- *                         { anchor: [x, y], rightDirection: [x, y], leftDirection: [x, y], pointType: pointType, }
+ * @param {Array} start Start point of line segment.
+ * @param {Array} end End point of line segment.
+ * @param {Number} t Percentage along the line the calculated point lies (0.0-1.0).
+ * @returns {Array} Newly calculated/recalculated points [start, newPointAlongPath, end].
+ * {
+ *   anchor: [x, y],
+ *   rightDirection: [x, y],
+ *   leftDirection: [x, y],
+ *   pointType: pointType,
+ * }
  */
 function deCasteljau(start, end, t) {
   // set points for algorithm to recursively work down from
@@ -229,10 +234,10 @@ function deCasteljau(start, end, t) {
 /**
  * Calculate a point at position `t` along a path (between to anchors points) using De Casteljau's algorithm.
  * https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm
- * @param   {Array}  start Start point of line segment.
- * @param   {Array}  end   End point of line segment.
- * @param   {Number} t     Percentage along the line the calculated point lies (0.0-1.0).
- * @returns {Array}        [x, y] coordinates of the calculated point.
+ * @param {Array} start Start point of line segment.
+ * @param {Array} end End point of line segment.
+ * @param {Number} t Percentage along the line the calculated point lies (0.0-1.0).
+ * @returns {Array} Coordinates [x, y] of the calculated point.
  */
 function deCasteljauSimplified(start, end, t) {
   // set points for algorithm to recursively work down from

@@ -23,15 +23,15 @@ if (sel.length > 0) {
 
 /**
  * Ungroup a groupItem within Adobe Illustrator. Similar to `Object > Ungroup`
- * @param {*} object    An Adobe Illustrator groupItem
- * @param {*} recursive Should nested groupItems also be ungrouped
+ * @param {GroupItem} object An Adobe Illustrator groupItem
+ * @param {Boolean} recursive Should nested groupItems also be ungrouped
  */
 function ungroup(object, recursive) {
   // if a non group item is passed just return
   if (object.typename != "GroupItem") {
     return;
   }
-  recursive = typeof recursive !== undefined ? recursive : true;
+  recursive = typeof recursive !== "undefined" ? recursive : true;
   var subObject;
   while (object.pageItems.length > 0) {
     if (object.pageItems[0].typename == "GroupItem" && !object.pageItems[0].clipped) {
