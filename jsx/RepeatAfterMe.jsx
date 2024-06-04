@@ -37,13 +37,16 @@
     removed:
       - preview stroke weight option, stroke is now calculated based on user view zoom level
       - user alert warning when repeat count was > 100 as it was causing a second redraw during alert
+  0.3.1 2024-06-04
+    fixed:
+      - if user selection had any objects where the appearance panel was "wonky" the template preview stroke wouldn't show
 */
 
 (function () {
   //@target illustrator
 
   var _title = "RepeatAfterMe";
-  var _version = "0.3.0";
+  var _version = "0.3.1";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -604,6 +607,11 @@
     // create a temp layer to hold preview items
     templateLayer = doc.layers.add();
     templateLayer.name = layerName;
+
+    // create a temporary item to fix any issues with the appearance panel
+    var t = templateLayer.pathItems.rectangle(0, 0, 1, 1);
+    app.executeMenuCommand("expandStyle");
+    t.remove();
 
     // draw initial preview outline using `rectangle(top, left, width, height)`
     var rect = templateLayer.pathItems.rectangle(
