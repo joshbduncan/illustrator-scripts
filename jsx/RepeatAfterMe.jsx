@@ -25,16 +25,25 @@
   Changelog
   ---------
   0.1.0 2024-05-31 initial release
-  0.2.0 2024-06-03 added repeat pattern option (grid, brick by row, brick by column)
-                   gutter values can be negative now, input arrows work below 0 as well
-                   gutter arrows work in 1/8 inches and 1 inch with shift, when value is in inches, else 1 and 10
+  0.2.0 2024-06-03
+    added:
+      - repeat pattern option (grid, brick by row, brick by column)
+    changed:
+      - gutter values can be negative now, input arrows work below 0 as well
+      - gutter arrows work in 1/8 inches and 1 inch with shift, when value is in inches, else 1 and 10
+  0.3.0 2024-06-04
+    added:
+      - repeat preview rectangles can filled as well
+    removed:
+      - preview stroke weight option, stroke is now calculated based on user view zoom level
+      - user alert warning when repeat count was > 100 as it was causing a second redraw during alert
 */
 
 (function () {
   //@target illustrator
 
-  var _title = "RepeateAfterMe";
-  var _version = "0.2.0";
+  var _title = "RepeatAfterMe";
+  var _version = "0.3.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -266,6 +275,26 @@
     html.execute();
   }
   /**
+   * Parse a ScriptUI `edittext` value into a valid `UnitType` number.
+   * @param {Number|String} n Value to parse.
+   * @param {Number} defaultValue Default value to return if `n` is invalid.
+   * @param {String} defaultUnit Default unit type to return the input as if not included in `n`.
+   * @returns {UnitValue}
+   */
+  function parseNumberInput(n, defaultValue, defaultUnit) {
+    defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
+    defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
+    var val = UnitValue(n);
+    if (val.type === "?") {
+      val = UnitValue(n, defaultUnit);
+      if (isNaN(val.value)) {
+        app.beep();
+        val = UnitValue(defaultValue, defaultUnit);
+      }
+    }
+    return val;
+  }
+  /**
    * Module for easily storing script preferences.
    * @param fname File name for the saved preferences "JSON-like" file.
    * @param location Optional folder location to save the preferences file. Defaults to `Folder.userData`.
@@ -376,6 +405,7 @@
     win.add("statictext", undefined, "Save current settings as:");
     var name = win.add("edittext");
     name.preferredSize.width = 250;
+    name.active = true;
 
     var cbReplace = win.add("checkbox", undefined, "Replace settings:");
     var replace = win.add("dropdownlist", undefined, currentOptions);
@@ -446,8 +476,10 @@
     colGutter: ".25 in",
     pattern: "Grid",
     color: "Red",
-    weight: "3 pt",
+    filled: false,
   };
+  var patterns = ["Grid", "Brick by Row", "Brick by Column"];
+  var colors = ["Black", "Red", "White", "Yellow"];
   var layerName = "REPEAT-AFTER-ME TEMPLATE";
 
   // load user prefs
@@ -456,6 +488,9 @@
 
   // get doc base ruler unit
   var rulerUnits = doc.rulerUnits.toString().split(".")[1].toLowerCase();
+
+  // calculate sensible stroke width for preview
+  var strokeWidth = UnitValue(Math.min(4.5, 1 / doc.views[0].visibleZoom), "pt");
 
   // get info about the selected objects
   var selectionBounds = getSelectionBounds(doc, true);
@@ -498,27 +533,6 @@
         break;
     }
     return color;
-  }
-
-  /**
-   * Parse a ScriptUI `edittext` value into a valid `UnitType` number.
-   * @param {Number|String} n Value to parse.
-   * @param {Number} defaultValue Default value to return if `n` is invalid.
-   * @param {String} defaultUnit Default unit type to return the input as if not included in `n`.
-   * @returns {UnitValue}
-   */
-  function parseNumberInput(n, defaultValue, defaultUnit) {
-    defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
-    defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
-    var val = UnitValue(n);
-    if (val.type === "?") {
-      val = UnitValue(n, defaultUnit);
-      if (isNaN(val.value)) {
-        app.beep();
-        val = UnitValue(defaultValue, defaultUnit);
-      }
-    }
-    return val;
   }
 
   /**
@@ -580,11 +594,11 @@
   /**
    *
    * @param {Array} positions Translation deltas for each repeat item.
-   * @param {RGBColor} outlineColor Template preview outline color.
-   * @param {Number|String|UnitName} strokeWeight Template preview stroke weight.
+   * @param {RGBColor} color Template preview shape color.
+   * @param {Boolean} filled Fill template preview rectangles (as opposed to stroked).
    * @returns {Layer} Template layout layer.
    */
-  function drawPreview(positions, outlineColor, strokeWeight) {
+  function drawPreview(positions, color, filled) {
     cleanup();
 
     // create a temp layer to hold preview items
@@ -598,10 +612,17 @@
       placementInfo.width,
       placementInfo.height
     );
-    rect.filled = false;
-    rect.stroked = true;
-    rect.strokeWidth = strokeWeight;
-    rect.strokeColor = outlineColor;
+
+    if (filled) {
+      rect.filled = true;
+      rect.fillColor = color;
+      rect.stroked = false;
+    } else {
+      rect.stroked = true;
+      rect.strokeColor = color;
+      rect.strokeWidth = strokeWidth;
+      rect.filled = false;
+    }
 
     // draw all copies
     var dup;
@@ -646,7 +667,9 @@
   function settingsWin(s) {
     s = typeof s !== "undefined" ? s : "[Default]";
 
-    var outlineColor, positions, lastEvent;
+    var outlineColor, positions;
+
+    // helper to prevent multiple event from firing when loading presets
     var loading = false;
 
     var win = new Window("dialog");
@@ -735,7 +758,6 @@
     stType.preferredSize.width = 60;
     stType.justify = "right";
 
-    var patterns = ["Grid", "Brick by Row", "Brick by Column"];
     var pattern = gType.add("dropdownlist", undefined, undefined, {
       name: "pattern",
       items: patterns,
@@ -809,7 +831,7 @@
     var pPreview = win.add("panel", undefined, undefined, { name: "pPreview" });
     pPreview.text = "Preview";
     pPreview.orientation = "row";
-    pPreview.alignChildren = ["left", "center"];
+    pPreview.alignChildren = ["fill", "center"];
     pPreview.spacing = 10;
     pPreview.margins = 18;
     pPreview.alignment = ["fill", "center"];
@@ -824,30 +846,22 @@
     var stColor = gColor.add("statictext", undefined, undefined, { name: "stColor" });
     stColor.text = "Color:";
 
-    var colors = ["Black", "Red", "White", "Yellow"];
     var color = gColor.add("dropdownlist", undefined, undefined, {
       name: "color",
       items: colors,
     });
-    color.selection = null;
+    color.selection = 0;
 
-    // Group - Stroke
-    var gStroke = pPreview.add("group", undefined, { name: "gStroke" });
-    gStroke.orientation = "row";
-    gStroke.alignChildren = ["left", "center"];
-    gStroke.spacing = 10;
-    gStroke.margins = 0;
+    // Group - Filled
+    var gFilled = pPreview.add("group", undefined, { name: "gFilled" });
+    gFilled.orientation = "row";
+    gFilled.alignChildren = ["fill", "center"];
+    gFilled.spacing = 10;
+    gFilled.margins = 0;
+    pLayout.alignment = ["fill", "center"];
 
-    var stWeight = gStroke.add("statictext", undefined, undefined, {
-      name: "stWeight",
-    });
-    stWeight.text = "Weight:";
-
-    var weight = gStroke.add(
-      'edittext {justify: "center", properties: {name: "weight"}}'
-    );
-    weight.text = "";
-    weight.preferredSize.width = 75;
+    var filled = gFilled.add("radiobutton", undefined, "Filled", { name: "filled" });
+    var stroked = gFilled.add("radiobutton", undefined, "Stroked", { name: "stroked" });
 
     // Panel - Presets
     var pPresets = win.add("panel", undefined, undefined, { name: "pPresets" });
@@ -856,6 +870,7 @@
     pPresets.alignChildren = ["left", "center"];
     pPresets.spacing = 10;
     pPresets.margins = 18;
+    pLayout.alignment = ["fill", "center"];
 
     // Group - Presets
     var gPresets = pPresets.add("group", undefined, { name: "gPresets" });
@@ -867,13 +882,11 @@
     var stLoad = gPresets.add("statictext", undefined, undefined, { name: "stLoad" });
     stLoad.text = "Load:";
 
-    var presets = [];
-    // load presets from prefs
-    for (var prop in prefs.data) presets.push(prop);
     var preset = gPresets.add("dropdownlist", undefined, undefined, {
       name: "preset",
-      items: presets,
+      items: undefined,
     });
+    var presets = loadPresetsDropdown();
     preset.selection = 0;
 
     var btDelete = gPresets.add("button", undefined, undefined, { name: "btDelete" });
@@ -932,7 +945,8 @@
       colGutter.text = UnitValue(s.colGutter);
       color.selection = color.find(s.color);
       pattern.selection = pattern.find(s.pattern);
-      weight.text = UnitValue(s.weight);
+      filled.value = s.filled;
+      stroked.value = !s.filled;
       preset.selection = preset.find(k);
 
       loading = false;
@@ -941,17 +955,40 @@
     }
 
     /**
+     * Load built-in and user presets into the `preset` dropdown list.
+     * @returns {Array} Available presets, sorted by built-in, then all user presets (sorted by name).
+     */
+    function loadPresetsDropdown() {
+      preset.removeAll();
+
+      // setup built-in presets
+      var presets = ["[Default]"];
+      if (prefs.data.hasOwnProperty("[Last Used]")) presets.push("[Last Used]");
+
+      // load presets from prefs
+      var userPresets = [];
+      for (var prop in prefs.data) {
+        if (prop === "[Default]" || prop === "[Last Used]") continue;
+        userPresets.push(prop);
+      }
+      userPresets.sort();
+
+      // combine built-in and user presets
+      presets = presets.concat(userPresets);
+
+      for (var i = 0; i < presets.length; i++) {
+        preset.add("item", presets[i]);
+      }
+
+      return presets;
+    }
+
+    /**
      * Update the repeat preview template.
      */
     function updatePreview() {
       $.writeln("updating preview");
       try {
-        if (rows.text * cols.text > 100) {
-          alert(
-            "Warning\nThat's a lot of copies, so please be patient while the script works."
-          );
-        }
-
         // setup preview outline color
         outlineColor = loadPreviewColor(color.selection.text);
 
@@ -965,11 +1002,7 @@
         );
 
         // draw preview rectangles
-        templateLayer = drawPreview(
-          positions,
-          outlineColor,
-          UnitValue(weight.text).as("pt")
-        );
+        templateLayer = drawPreview(positions, outlineColor, filled.value);
 
         // update copies
         copies.text = rows.text * cols.text;
@@ -1002,12 +1035,8 @@
      * Process user input changes.
      * @param {UIEvent} e ScriptUI change event.
      */
-    function processChanges(e) {
-      if (e.target.hasOwnProperty("validate")) {
-        e.target.validate();
-      }
+    function processChanges() {
       if (loading == false) {
-        $.writeln("processing changes from " + e.target.properties.name);
         resetPresetUI();
         updatePreview();
       }
@@ -1016,7 +1045,9 @@
     integerInputs = [rows, cols]; // int inputs
     for (var i = 0; i < integerInputs.length; i++) {
       integerInputs[i].validate = function () {
-        $.writeln("validating " + this.properties.name + ": " + this.text);
+        $.writeln("validating " + this.properties.name);
+        $.writeln("  input: " + this.text);
+
         var val;
         if (isNaN(this.text)) {
           app.beep();
@@ -1025,45 +1056,59 @@
           val = parseInt(this.text);
         }
         this.text = val;
+        $.writeln("  result: " + val);
       };
-      // add onChange listener
-      integerInputs[i].addEventListener("change", processChanges);
       // add arrow key listener
       integerInputs[i].addEventListener("keydown", editTextArrowAdjustmentsRowCol);
     }
 
-    var floatInputs = [rowGutter, colGutter, weight];
+    var floatInputs = [rowGutter, colGutter];
     for (var i = 0; i < floatInputs.length; i++) {
       // add validation method
       floatInputs[i].validate = function () {
         var n;
         $.writeln("validating " + this.properties.name + ": " + this.text);
-        if (this.properties.name == "weight") {
-          n = parseNumberInput(this.text, undefined, "pt");
-          n.convert("pt");
-        } else {
-          n = parseNumberInput(this.text);
-        }
+        n = parseNumberInput(this.text);
         // trim value
         n.value = n.value.toFixed(4);
         this.text = n;
       };
-      // add onChange listener
-      floatInputs[i].addEventListener("change", processChanges);
       // add arrow key listener
-      if (floatInputs[i].properties.name == "weight") {
-        floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsWeight);
-      } else {
-        floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutter);
-      }
+      floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutter);
     }
 
-    pattern.addEventListener("change", processChanges);
+    // validate `edittext` inputs on before processing any template changes
+    var textInputs = integerInputs.concat(floatInputs);
+    for (var i = 0; i < textInputs.length; i++) {
+      textInputs[i].onChange = function (e) {
+        if (this.hasOwnProperty("validate")) {
+          this.validate();
+        }
+        $.writeln(this.properties.name + " changed to " + this.text);
+        processChanges();
+      };
+    }
 
-    color.addEventListener("change", processChanges);
+    pattern.onChange = function () {
+      $.writeln(this.properties.name + " changed to " + this.selection.text);
+      processChanges();
+    };
+
+    color.onChange = function () {
+      $.writeln(this.properties.name + " changed to " + this.selection.text);
+      processChanges();
+    };
+
+    var radioButtons = [filled, stroked];
+    for (var i = 0; i < radioButtons.length; i++) {
+      radioButtons[i].onClick = function () {
+        $.writeln(this.properties.name + " changed to " + this.value);
+        processChanges();
+      };
+    }
 
     // load new setting check a saved setting is picked from the dropdown
-    preset.addEventListener("change", function (e) {
+    preset.onChange = function (e) {
       // don't update if the selection is null and disable preset delete button
       if (this.selection == null) {
         btDelete.enabled = false;
@@ -1078,15 +1123,14 @@
           // enable delete for any user saved presets
           btDelete.enabled = true;
         }
+        $.writeln(this.properties.name + " changed to " + this.selection.text);
         loadPreset(this.selection.text);
       }
-    });
+    };
 
     ////////////////////////////
     // WINDOW EVENT LISTENERS //
     ////////////////////////////
-
-    // win.addEventListener("change", processWindowChanges);
 
     // load initial presets
     win.onShow = function () {
@@ -1130,7 +1174,7 @@
         colGutter: UnitValue(colGutter.text).toString(),
         pattern: pattern.selection.text,
         color: color.selection.text,
-        weight: UnitValue(weight.text).toString(),
+        filled: filled.value,
       };
 
       var saveName = savePresetDialog(presets);
@@ -1138,10 +1182,8 @@
       if (saveName) {
         prefs.data[saveName] = currentSettings;
         prefs.save();
-        // add new name to presets dropdown if not a replace
-        if (!preset.find(saveName)) {
-          preset.add("item", saveName);
-        }
+        // reload preset dropdown
+        presets = loadPresetsDropdown();
         // reset selection setting to new preset
         preset.selection = preset.find(saveName);
       }
@@ -1159,8 +1201,9 @@
         rowGutter: UnitValue(rowGutter.text).toString(),
         cols: parseInt(cols.text),
         colGutter: UnitValue(colGutter.text).toString(),
+        pattern: pattern.selection.text,
         color: color.selection.text,
-        weight: UnitValue(weight.text).toString(),
+        filled: filled.value,
       };
       prefs.save();
       return positions;
@@ -1247,13 +1290,6 @@
       var increment = val.type === "in" ? 0.125 : 1;
       var shiftIncrement = val.type === "in" ? 1 : 10;
 
-      $.writeln("val.type: " + val.type);
-      $.writeln("increment: " + increment);
-      $.writeln("shiftIncrement: " + shiftIncrement);
-
-      // ensure 'weight' is always in points
-      if (e.target.properties.name == "weight") val.convert("pt");
-
       if (e.keyName == "Up") {
         if (shift) {
           val = UnitValue(
@@ -1271,71 +1307,6 @@
           );
         } else {
           val = UnitValue(val.value - increment, val.type);
-        }
-      }
-      this.text = val;
-      e.preventDefault();
-      e.target.notify("onChange");
-    }
-  }
-
-  /**
-   * Allow user to adjust `edittext` input values using the keyboard.
-   * @param {UIEvent} e ScriptUI keyboard event.
-   */
-  function editTextArrowAdjustmentsWeight(e) {
-    // Attempt mimic the behavior of the built-in Ai text input boxes
-    // allowing users to change the value using the "Up" and "Down" arrow
-    // key, and adding the "Shift" key modifier to change the value by +/- 10
-    //
-    // 0 is increased to 0.25 (without "Shift")
-    // 1 is decreased to 0.75 (without "Shift")
-    // Float values .25, .50, and .75 are increased/decreased to the next .25 increment
-    var val, shift;
-    if (e.keyName == "Up" || e.keyName == "Down") {
-      // if shift key is pressed when "Up" or "Down" key pressed
-      // +/- the current value by 10 or round to the next 10th value
-      //
-      // Examples:
-      // - "Up" with "Shift" at 22 increase value to 30
-      // - "Down" with "Shift" at 22 decreases value to 20
-      // - "Up" with "Shift" at 2.25 increase value to 10
-      // - "Down" with "Shift" at 2.25 decreases value to 0
-      shift = e.getModifierState("Shift");
-      val = parseNumberInput(this.text);
-
-      // ensure 'weight' is always in points
-      if (e.target.properties.name == "weight") val.convert("pt");
-
-      if (e.keyName == "Up") {
-        if (shift) {
-          val = UnitValue(Math.max(1, parseInt(val.value / 10) * 10 + 10), val.type);
-        } else {
-          if (
-            val.value === 0 ||
-            val.value === 0.25 ||
-            val.value === 0.5 ||
-            val.value === 0.75
-          ) {
-            val = val + 0.25;
-          } else {
-            val = val + 1;
-          }
-        }
-      } else {
-        if (shift) {
-          val = UnitValue(Math.max(1, parseInt((val.value - 1) / 10) * 10), val.type);
-        } else {
-          if (
-            val.value === 0.25 ||
-            val.value === 0.5 ||
-            val.value === 0.75 ||
-            val.value === 1
-          ) {
-            val = UnitValue(Math.max(1, val.value - 0.25), val.type);
-          } else {
-            val = UnitValue(Math.max(1, val.value - 1), val.type);
-          }
         }
       }
       this.text = val;
