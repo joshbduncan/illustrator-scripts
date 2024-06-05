@@ -40,13 +40,18 @@
   0.3.1 2024-06-04
     fixed:
       - if user selection had any objects where the appearance panel was "wonky" the template preview stroke wouldn't show
+  0.4.0 2024-06-05
+    added:
+      - button to fill the current artboard with as many repeats as possible using the gutter settings
+    fixed:
+      - brick by row, and brick by column patterns we're slightly off
 */
 
 (function () {
   //@target illustrator
 
   var _title = "RepeatAfterMe";
-  var _version = "0.3.1";
+  var _version = "0.4.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -239,18 +244,17 @@
 
   /**
    * Determine the overall current document selection bounds.
-   * @param {Object} doc Open Adobe Illustrator document.
+   * @param {Array} sel Adobe Illustrator selection. Defaults to the selection of the active document.
    * @param {Boolean} visible Return true visible bounds (as opposed to geometric bounds). Defaults to false.
    * @returns {Array} Object bounds [left, top, right, bottom].
    */
-  function getSelectionBounds(doc, visible) {
+  function getSelectionBounds(sel, visible) {
+    sel = typeof sel !== "undefined" ? sel : app.activeDocument.selection;
     visible = typeof visible !== "undefined" ? visible : false;
     var bounds = [[], [], [], []];
     var cur;
-    for (var i = 0; i < doc.selection.length; i++) {
-      cur = visible
-        ? getVisibleBounds(doc.selection[i])
-        : doc.selection[i].geometricBounds;
+    for (var i = 0; i < sel.length; i++) {
+      cur = visible ? getVisibleBounds(sel[i]) : sel[i].geometricBounds;
       for (var j = 0; j < cur.length; j++) {
         bounds[j].push(cur[j]);
       }
@@ -489,14 +493,17 @@
   prefs = new Prefs(_title, Folder.userData + "/JBD", _version);
   prefs.load(defaults);
 
+  // get the current artboard
+  ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
+
   // get doc base ruler unit
   var rulerUnits = doc.rulerUnits.toString().split(".")[1].toLowerCase();
 
   // calculate sensible stroke width for preview
-  var strokeWidth = UnitValue(Math.min(4.5, 1 / doc.views[0].visibleZoom), "pt");
+  var strokeWidth = UnitValue(Math.min(3, 1 / doc.views[0].visibleZoom), "pt");
 
   // get info about the selected objects
-  var selectionBounds = getSelectionBounds(doc, true);
+  var selectionBounds = getSelectionBounds(doc.selection, true);
   var placementInfo = GetObjectPlacementInfo(selectionBounds);
 
   // show the settings dialog
@@ -541,9 +548,9 @@
   /**
    * Calculate translation deltas for each repeat item.
    * @param {Number} rows Rows to repeat.
-   * @param {Number} rowGutter Space between rows.
+   * @param {UnitValue} rowGutter Space between rows.
    * @param {Number} cols Columns to repeat.
-   * @param {Number} colGutter Space between columns.
+   * @param {UnitValue} colGutter Space between columns.
    * @param {String} pattern Repeat pattern (grid or brick).
    * @returns {Array} Translation offset values for each repeat as [x, y].
    */
@@ -552,13 +559,13 @@
 
     $.writeln("calculating translation deltas");
 
-    // convert user input to points
-    rowGutter = UnitValue(rowGutter).as("pt");
-    colGutter = UnitValue(colGutter).as("pt");
+    // convert gutter values into points
+    rowGutter.convert("pt");
+    colGutter.convert("pt");
 
-    // determine which pattern of grid should be drawn
-    var rowPatternOffset = (placementInfo.width + colGutter) * 0.5;
-    var colPatternOffset = (placementInfo.height + rowGutter) * 0.5;
+    // if a pattern is selected, determine the proper offset
+    var rowPatternOffset = (placementInfo.height + rowGutter) * 0.5;
+    var colPatternOffset = (placementInfo.width + colGutter) * 0.5;
 
     // calculate the x and y translation offset values for each repeat
     var positions = [];
@@ -677,8 +684,9 @@
 
     var outlineColor, positions;
 
-    // helper to prevent multiple event from firing when loading presets
+    // helpers to prevent multiple event from firing when loading presets
     var loading = false;
+    var savingPreset = false;
 
     var win = new Window("dialog");
     win.text = _title + " " + _version;
@@ -695,6 +703,10 @@
     pLayout.spacing = 10;
     pLayout.margins = 18;
     pLayout.alignment = ["fill", "center"];
+
+    var btFill = pLayout.add("button", undefined, undefined, { name: "btFill" });
+    btFill.text = "Fill Current Artboard";
+    btFill.alignment = ["fill", "center"];
 
     // Group - Row
     var gRow = pLayout.add("group", undefined, { name: "gRow" });
@@ -936,6 +948,9 @@
      * @param {String} k Key for preset lookup. Defaults to '[Default]'.
      */
     function loadPreset(k) {
+      // no need to load after saving a preset
+      if (savingPreset) return;
+
       loading = true;
 
       k = prefs.data.hasOwnProperty(k) ? k : "[Default]";
@@ -1003,9 +1018,9 @@
         // calculate all positions
         positions = calculateRepeatTranslationDeltas(
           parseInt(rows.text),
-          rowGutter.text,
+          UnitValue(rowGutter.text),
           parseInt(cols.text),
-          colGutter.text,
+          UnitValue(colGutter.text),
           pattern.selection.text
         );
 
@@ -1024,9 +1039,11 @@
           placementInfo.height - positions[positions.length - 1][1],
           "pt"
         );
+
         // convert width and height to current ruler unit
         overallWidth.convert(rulerUnits);
         overallHeight.convert(rulerUnits);
+
         // update the dialog text and truncate to 4 decimal places
         width.text = overallWidth.value.toFixed(4) + " " + overallWidth.type;
         height.text = overallHeight.value.toFixed(4) + " " + overallHeight.type;
@@ -1049,6 +1066,42 @@
         updatePreview();
       }
     }
+
+    btFill.onClick = function () {
+      // calculate rows and cols to fill the entire artboard
+      $.writeln("filling artboard");
+      var calcRows, calcCols, width, height;
+
+      // get the artboard width and height
+      width = Math.abs(ab.artboardRect[0] - ab.artboardRect[2]);
+      height = Math.abs(ab.artboardRect[1] - ab.artboardRect[3]);
+
+      // if a pattern is selected, determine the proper offset and adjust the available width and height
+      var rowPatternOffset =
+        (placementInfo.height + UnitValue(rowGutter.text).as("pt")) * 0.5;
+      var colPatternOffset =
+        (placementInfo.width + UnitValue(colGutter.text).as("pt")) * 0.5;
+      if (pattern.selection.text.toLowerCase() === "brick by row")
+        width -= colPatternOffset;
+      if (pattern.selection.text.toLowerCase() === "brick by column")
+        height -= rowPatternOffset;
+
+      // calculate the max rows and cols that will fit on the artboard
+      calcCols = Math.floor(
+        width / (placementInfo.width + UnitValue(colGutter.text).as("pt"))
+      );
+      calcRows = Math.floor(
+        height / (placementInfo.height + UnitValue(rowGutter.text).as("pt"))
+      );
+
+      rows.text = calcRows;
+      cols.text = calcCols;
+
+      $.writeln("  calculated rows: " + calcRows);
+      $.writeln("  calculated cols: " + calcCols);
+
+      processChanges();
+    };
 
     integerInputs = [rows, cols]; // int inputs
     for (var i = 0; i < integerInputs.length; i++) {
@@ -1077,10 +1130,12 @@
         var n;
         $.writeln("validating " + this.properties.name + ": " + this.text);
         n = parseNumberInput(this.text);
+
         // trim value
         n.value = n.value.toFixed(4);
         this.text = n;
       };
+
       // add arrow key listener
       floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutter);
     }
@@ -1188,12 +1243,17 @@
       var saveName = savePresetDialog(presets);
 
       if (saveName) {
+        // since `dropdownlist.find()` send an onChange event, halt reloading the same preset
+        savingPreset = true;
+
         prefs.data[saveName] = currentSettings;
         prefs.save();
         // reload preset dropdown
         presets = loadPresetsDropdown();
         // reset selection setting to new preset
         preset.selection = preset.find(saveName);
+
+        savingPreset = false;
       }
     };
 
