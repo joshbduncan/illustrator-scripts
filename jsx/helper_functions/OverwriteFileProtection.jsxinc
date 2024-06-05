@@ -1,0 +1,17 @@
+/**
+ * If a file already exists, prompt for permission to overwrite.
+ * @param {FileObject} file ExtendScript file constructor.
+ * @returns {Boolean} Is it okay to overwrite the file.
+ */
+function OverwriteFileProtection(file) {
+  if (
+    file.exists &&
+    !Window.confirm(
+      "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
+      "noAsDflt",
+      "File Already Exists"
+    )
+  )
+    return false;
+  return true;
+}
