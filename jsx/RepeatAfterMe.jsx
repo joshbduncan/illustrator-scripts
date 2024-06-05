@@ -45,13 +45,21 @@
       - button to fill the current artboard with as many repeats as possible using the gutter settings
     fixed:
       - brick by row, and brick by column patterns we're slightly off
+  0.5.0 2024-06-05
+    added:
+      - ability to change the bounds used to determine repeat placement
+    fixed:
+      - height number sign
 */
+
+// TODO: should fill artboard move original selection to top left of artboard
+// TODO: if not above, the artboard width and height calculation need to account for the selection top and left
 
 (function () {
   //@target illustrator
 
   var _title = "RepeatAfterMe";
-  var _version = "0.4.0";
+  var _version = "0.5.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -141,50 +149,44 @@
     };
   }
   /*
-    Updates:
-    2021-09-13 updated getVisibleBounds() to catch lots of weird edge cases
-    2021-10-13 updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
-    2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
-              error catch for selected guides (William Dowling @ github.com/wdjsdev)
-              error catch for empty objects or item with no bounds
-              error catch for clipping masks inside of an empty group
+    Changelog
+    ---------
+    2021-09-13
+      - updated getVisibleBounds() to catch lots of weird edge cases
+    2021-10-13
+      - updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
+    2021-10-15
+      - fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
+      - error catch for selected guides (William Dowling @ github.com/wdjsdev)
+      - error catch for empty objects or item with no bounds
+      - error catch for clipping masks inside of an empty group
   */
 
   /**
    * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
-   * @param {PageItem} object A single Adobe Illustrator pageItem.
-   * @returns {Array}         Object bounds [left, top, right, bottom].
+   * @param {PageItem} o A single Adobe Illustrator pageItem.
+   *
+   * @returns {Array} Object bounds [left, top, right, bottom].
    */
-  function getVisibleBounds(object) {
-    /*
-      Changelog
-      ---------
-      2021-09-13 updated getVisibleBounds() to catch lots of weird edge cases
-      2021-10-13 updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
-      2021-10-15 fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
-                error catch for selected guides (William Dowling @ github.com/wdjsdev)
-                error catch for empty objects or item with no bounds
-                error catch for clipping masks inside of an empty group
-    */
-
+  function getVisibleBounds(o) {
     var bounds, clippedItem, sandboxItem, sandboxLayer;
     var curItem;
 
     // skip guides (via william dowling @ github.com/wdjsdev)
-    if (object.guides) {
+    if (o.guides) {
       return undefined;
     }
 
-    if (object.typename == "GroupItem") {
+    if (o.typename == "GroupItem") {
       // if the group has no pageItems, return undefined
-      if (!object.pageItems || object.pageItems.length == 0) {
+      if (!o.pageItems || o.pageItems.length == 0) {
         return undefined;
       }
       // if the object is clipped
-      if (object.clipped) {
+      if (o.clipped) {
         // check all sub objects to find the clipping path
-        for (var i = 0; i < object.pageItems.length; i++) {
-          curItem = object.pageItems[i];
+        for (var i = 0; i < o.pageItems.length; i++) {
+          curItem = o.pageItems[i];
           if (curItem.clipping) {
             clippedItem = curItem;
             break;
@@ -207,7 +209,7 @@
           }
         }
         if (!clippedItem) {
-          clippedItem = object.pageItems[0];
+          clippedItem = o.pageItems[0];
         }
         bounds = clippedItem.geometricBounds;
         if (sandboxLayer) {
@@ -220,13 +222,12 @@
         var subObjectBounds;
         var allBoundPoints = [[], [], [], []];
         // get the bounds of every object in the group
-        for (var i = 0; i < object.pageItems.length; i++) {
-          curItem = object.pageItems[i];
+        for (var i = 0; i < o.pageItems.length; i++) {
+          curItem = o.pageItems[i];
           subObjectBounds = getVisibleBounds(curItem);
-          allBoundPoints[0].push(subObjectBounds[0]);
-          allBoundPoints[1].push(subObjectBounds[1]);
-          allBoundPoints[2].push(subObjectBounds[2]);
-          allBoundPoints[3].push(subObjectBounds[3]);
+          for (var j = 0; j < subObjectBounds.length; j++) {
+            allBoundPoints[j].push(subObjectBounds[j]);
+          }
         }
         // determine the groups bounds from it sub object bound points
         bounds = [
@@ -237,24 +238,38 @@
         ];
       }
     } else {
-      bounds = object.geometricBounds;
+      bounds = o.geometricBounds;
     }
     return bounds;
   }
 
   /**
-   * Determine the overall current document selection bounds.
+   * Determine the overall bounds of an Adobe Illustrator selection.
    * @param {Array} sel Adobe Illustrator selection. Defaults to the selection of the active document.
-   * @param {Boolean} visible Return true visible bounds (as opposed to geometric bounds). Defaults to false.
-   * @returns {Array} Object bounds [left, top, right, bottom].
+   * @param {string} type Type of bounds to return (control, geometric, visible, clipped). Defaults to geometric.
+   * @returns {Array} Selection bounds [left, top, right, bottom].
    */
-  function getSelectionBounds(sel, visible) {
+  function getSelectionBounds(sel, type) {
     sel = typeof sel !== "undefined" ? sel : app.activeDocument.selection;
-    visible = typeof visible !== "undefined" ? visible : false;
+    type = typeof type !== "undefined" ? type.toLowerCase() : "geometric";
+
     var bounds = [[], [], [], []];
     var cur;
     for (var i = 0; i < sel.length; i++) {
-      cur = visible ? getVisibleBounds(sel[i]) : sel[i].geometricBounds;
+      switch (type) {
+        case "control":
+          cur = sel[i].geometricBounds;
+          break;
+        case "visible":
+          cur = sel[i].visibleBounds;
+          break;
+        case "clipped":
+          cur = getVisibleBounds(sel[i]);
+          break;
+        default:
+          cur = sel[i].geometricBounds;
+          break;
+      }
       for (var j = 0; j < cur.length; j++) {
         bounds[j].push(cur[j]);
       }
@@ -482,6 +497,7 @@
     cols: 2,
     colGutter: ".25 in",
     pattern: "Grid",
+    bounds: "clipped",
     color: "Red",
     filled: false,
   };
@@ -503,8 +519,7 @@
   var strokeWidth = UnitValue(Math.min(3, 1 / doc.views[0].visibleZoom), "pt");
 
   // get info about the selected objects
-  var selectionBounds = getSelectionBounds(doc.selection, true);
-  var placementInfo = GetObjectPlacementInfo(selectionBounds);
+  var selectionBounds, placementInfo;
 
   // show the settings dialog
   var positions = settingsWin();
@@ -764,32 +779,70 @@
     colGutter.text = "";
     colGutter.preferredSize.width = 100;
 
-    // Group - Repeat Type
-    var gType = pLayout.add("group", undefined, { name: "gType" });
-    gType.orientation = "row";
-    gType.alignChildren = ["left", "center"];
-    gType.spacing = 10;
-    gType.margins = 0;
+    // Group - Pattern
+    var gPattern = pLayout.add("group", undefined, { name: "gPattern" });
+    gPattern.orientation = "row";
+    gPattern.alignChildren = ["left", "center"];
+    gPattern.spacing = 10;
+    gPattern.margins = 0;
 
-    var stType = gType.add("statictext", undefined, undefined, {
+    var stType = gPattern.add("statictext", undefined, undefined, {
       name: "stType",
     });
     stType.text = "Pattern:";
     stType.preferredSize.width = 60;
     stType.justify = "right";
 
-    var pattern = gType.add("dropdownlist", undefined, undefined, {
+    var pattern = gPattern.add("dropdownlist", undefined, undefined, {
       name: "pattern",
       items: patterns,
     });
     pattern.alignment = ["fill", "center"];
     pattern.selection = 0;
 
-    var divider1 = pLayout.add("panel", undefined, undefined, { name: "divider1" });
-    divider1.alignment = "fill";
+    // Group - Bounds & Info
+    var gBoundsInfo = win.add("group", undefined, { name: "gBoundsInfo" });
+    gBoundsInfo.orientation = "row";
+    gBoundsInfo.alignChildren = ["fill", "center"];
+    gBoundsInfo.spacing = 10;
+    gBoundsInfo.margins = 0;
+    gBoundsInfo.alignment = ["fill", "fill"];
+
+    // Panel - Bounds
+    var pBounds = gBoundsInfo.add("panel", undefined, undefined, { name: "pBounds" });
+    pBounds.text = "Bounds";
+    pBounds.orientation = "row";
+    pBounds.alignChildren = ["fill", "center"];
+    pBounds.spacing = 10;
+    pBounds.margins = 18;
+    pBounds.alignment = ["fill", "fill"];
+
+    // Group - Bounds
+    var gBounds = pBounds.add("group", undefined, { name: "gBounds" });
+    gBounds.orientation = "column";
+    gBounds.alignChildren = ["left", "center"];
+    gBounds.spacing = 10;
+    gBounds.margins = 0;
+
+    var geometric = gBounds.add("radiobutton", undefined, "Geometric", {
+      name: "geometric",
+    });
+    var visible = gBounds.add("radiobutton", undefined, "Visible", { name: "visible" });
+    var trueVisible = gBounds.add("radiobutton", undefined, "Clipped", {
+      name: "clipped",
+    });
+
+    // Panel - Info
+    var pInfo = gBoundsInfo.add("panel", undefined, undefined, { name: "pInfo" });
+    pInfo.text = "Repeat Info";
+    pInfo.orientation = "row";
+    pInfo.alignChildren = ["fill", "center"];
+    pInfo.spacing = 10;
+    pInfo.margins = 18;
+    pInfo.alignment = ["fill", "fill"];
 
     // Group - Info
-    var gInfo = pLayout.add("group", undefined, { name: "gInfo" });
+    var gInfo = pInfo.add("group", undefined, { name: "gInfo" });
     gInfo.orientation = "column";
     gInfo.alignChildren = ["left", "center"];
     gInfo.spacing = 10;
@@ -810,15 +863,8 @@
     var copies = gCopies.add("statictext", undefined, undefined, { name: "copies" });
     copies.text = "123";
 
-    // Group Size
-    var gSize = gInfo.add("group", undefined, { name: "gSize" });
-    gSize.orientation = "row";
-    gSize.alignChildren = ["left", "center"];
-    gSize.spacing = 10;
-    gSize.margins = 0;
-
     // Group - Width
-    var gWidth = gSize.add("group", undefined, { name: "gWidth" });
+    var gWidth = gInfo.add("group", undefined, { name: "gWidth" });
     gWidth.orientation = "row";
     gWidth.alignChildren = ["left", "center"];
     gWidth.spacing = 10;
@@ -832,7 +878,7 @@
     width.text = "";
 
     // Group - Height
-    var gHeight = gSize.add("group", undefined, { name: "gHeight" });
+    var gHeight = gInfo.add("group", undefined, { name: "gHeight" });
     gHeight.orientation = "row";
     gHeight.alignChildren = ["left", "center"];
     gHeight.spacing = 10;
@@ -968,6 +1014,8 @@
       colGutter.text = UnitValue(s.colGutter);
       color.selection = color.find(s.color);
       pattern.selection = pattern.find(s.pattern);
+      // find the correct bounds radio button and click on it
+      win.findElement(s.bounds.toLowerCase()).notify("onClick");
       filled.value = s.filled;
       stroked.value = !s.filled;
       preset.selection = preset.find(k);
@@ -1032,11 +1080,11 @@
 
         // update overall dimensions
         var overallWidth = new UnitValue(
-          placementInfo.width + positions[positions.length - 1][0],
+          Math.abs(placementInfo.width + positions[positions.length - 1][0]),
           "pt"
         );
         var overallHeight = new UnitValue(
-          placementInfo.height - positions[positions.length - 1][1],
+          Math.abs(placementInfo.height - positions[positions.length - 1][1]),
           "pt"
         );
 
@@ -1064,6 +1112,22 @@
       if (loading == false) {
         resetPresetUI();
         updatePreview();
+      }
+    }
+
+    // load initial presets
+    win.onShow = function () {
+      loadPreset(s);
+    };
+
+    /**
+     * Reset the preset ui panel when a user makes input changes.
+     */
+    function resetPresetUI() {
+      if (preset.selection != null) {
+        $.writeln("resetting preset ui");
+        preset.selection = null;
+        btDelete.enabled = false;
       }
     }
 
@@ -1123,6 +1187,7 @@
       integerInputs[i].addEventListener("keydown", editTextArrowAdjustmentsRowCol);
     }
 
+    // validate `edittext` float inputs on before processing any template changes
     var floatInputs = [rowGutter, colGutter];
     for (var i = 0; i < floatInputs.length; i++) {
       // add validation method
@@ -1140,7 +1205,7 @@
       floatInputs[i].addEventListener("keydown", editTextArrowAdjustmentsGutter);
     }
 
-    // validate `edittext` inputs on before processing any template changes
+    // validate `edittext` integer inputs on before processing any template changes
     var textInputs = integerInputs.concat(floatInputs);
     for (var i = 0; i < textInputs.length; i++) {
       textInputs[i].onChange = function (e) {
@@ -1162,9 +1227,19 @@
       processChanges();
     };
 
-    var radioButtons = [filled, stroked];
-    for (var i = 0; i < radioButtons.length; i++) {
-      radioButtons[i].onClick = function () {
+    var boundsRadioButtons = [geometric, visible, trueVisible];
+    for (var i = 0; i < boundsRadioButtons.length; i++) {
+      boundsRadioButtons[i].onClick = function () {
+        $.writeln(this.properties.name + " changed to " + this.value);
+        selectionBounds = getSelectionBounds(doc.selection, this.properties.name);
+        placementInfo = GetObjectPlacementInfo(selectionBounds);
+        processChanges();
+      };
+    }
+
+    var previewRadioButtons = [filled, stroked];
+    for (var i = 0; i < previewRadioButtons.length; i++) {
+      previewRadioButtons[i].onClick = function () {
         $.writeln(this.properties.name + " changed to " + this.value);
         processChanges();
       };
@@ -1191,26 +1266,6 @@
       }
     };
 
-    ////////////////////////////
-    // WINDOW EVENT LISTENERS //
-    ////////////////////////////
-
-    // load initial presets
-    win.onShow = function () {
-      loadPreset(s);
-    };
-
-    /**
-     * Reset the preset ui panel when a user makes input changes.
-     */
-    function resetPresetUI() {
-      if (preset.selection != null) {
-        $.writeln("resetting preset ui");
-        preset.selection = null;
-        btDelete.enabled = false;
-      }
-    }
-
     // delete selected preset
     btDelete.onClick = function () {
       if (
@@ -1230,12 +1285,20 @@
 
     // save new preset
     btSave.onClick = function () {
+      var boundsType;
+      for (var i = 0; i < boundsRadioButtons.length; i++) {
+        if (boundsRadioButtons[i].value) {
+          boundsType = boundsRadioButtons[i].properties.name;
+          break;
+        }
+      }
       var currentSettings = {
         rows: parseInt(rows.text),
         rowGutter: UnitValue(rowGutter.text).toString(),
         cols: parseInt(cols.text),
         colGutter: UnitValue(colGutter.text).toString(),
         pattern: pattern.selection.text,
+        bounds: boundsType,
         color: color.selection.text,
         filled: filled.value,
       };
@@ -1264,12 +1327,20 @@
     // if "ok" button clicked then return inputs
     if (win.show() == 1) {
       cleanup();
+      var boundsType;
+      for (var i = 0; i < boundsRadioButtons.length; i++) {
+        if (boundsRadioButtons[i].value) {
+          boundsType = boundsRadioButtons[i].properties.name;
+          break;
+        }
+      }
       prefs.data["[Last Used]"] = {
         rows: parseInt(rows.text),
         rowGutter: UnitValue(rowGutter.text).toString(),
         cols: parseInt(cols.text),
         colGutter: UnitValue(colGutter.text).toString(),
         pattern: pattern.selection.text,
+        bounds: boundsType,
         color: color.selection.text,
         filled: filled.value,
       };
