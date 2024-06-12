@@ -1,47 +1,43 @@
-/*
-  Changelog
-  ---------
-  2021-09-13
-    - updated getVisibleBounds() to catch lots of weird edge cases
-  2021-10-13
-    - updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
-  2021-10-15
-    - fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
-    - error catch for selected guides (William Dowling @ github.com/wdjsdev)
-    - error catch for empty objects or item with no bounds
-    - error catch for clipping masks inside of an empty group
-*/
+/**
+ * write text to the document for debugging
+ */
+function writeText(text, position, fontSize, align) {
+  if (typeof position == "undefined") position = [0, 0];
+  if (typeof fontSize == "undefined") fontSize = 12;
+  if (typeof align == "undefined") align = "c";
+  var doc = app.activeDocument;
+  var textObject = doc.textFrames.pointText([position[0], position[1]]);
+  textObject.contents = text;
+  textObject.textRange.characterAttributes.size = fontSize;
+  if (align == "l") {
+    textObject.textRange.justification = Justification.LEFT;
+  } else if (align == "r") {
+    textObject.textRange.justification = Justification.RIGHT;
+  } else {
+    textObject.textRange.justification = Justification.CENTER;
+  }
+  return textObject;
+}
 
 /**
- * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
- * @param {PageItem} o A single Adobe Illustrator pageItem.
- * @returns {Array} Object bounds [left, top, right, bottom].
+ * figure out the actual "visible" bounds for an object
+ * if clipping mask or compound path items are found
  */
-function getVisibleBounds(o) {
+function getVisibleBounds(object) {
   var bounds, clippedItem, sandboxItem, sandboxLayer;
   var curItem;
-
-  // skip guides (via william dowling @ github.com/wdjsdev)
-  if (o.guides) {
-    return undefined;
-  }
-
-  if (o.typename == "GroupItem") {
-    // if the group has no pageItems, return undefined
-    if (!o.pageItems || o.pageItems.length == 0) {
-      return undefined;
-    }
+  if (object.typename == "GroupItem") {
     // if the object is clipped
-    if (o.clipped) {
+    if (object.clipped) {
       // check all sub objects to find the clipping path
-      for (var i = 0; i < o.pageItems.length; i++) {
-        curItem = o.pageItems[i];
+      for (var i = 0; i < object.pageItems.length; i++) {
+        curItem = object.pageItems[i];
         if (curItem.clipping) {
           clippedItem = curItem;
           break;
         } else if (curItem.typename == "CompoundPathItem") {
           if (!curItem.pathItems.length) {
-            // catch compound path items with no pathItems (via William Dowling @ github.com/wdjsdev)
+            // catch compound path items with no pathItems via william dowling @ github.com/wdjsdev
             sandboxLayer = app.activeDocument.layers.add();
             sandboxItem = curItem.duplicate(sandboxLayer);
             app.activeDocument.selection = null;
@@ -55,10 +51,10 @@ function getVisibleBounds(o) {
             clippedItem = curItem;
             break;
           }
+        } else {
+          clippedItem = curItem;
+          break;
         }
-      }
-      if (!clippedItem) {
-        clippedItem = o.pageItems[0];
       }
       bounds = clippedItem.geometricBounds;
       if (sandboxLayer) {
@@ -71,12 +67,13 @@ function getVisibleBounds(o) {
       var subObjectBounds;
       var allBoundPoints = [[], [], [], []];
       // get the bounds of every object in the group
-      for (var i = 0; i < o.pageItems.length; i++) {
-        curItem = o.pageItems[i];
+      for (var i = 0; i < object.pageItems.length; i++) {
+        curItem = object.pageItems[i];
         subObjectBounds = getVisibleBounds(curItem);
-        for (var j = 0; j < subObjectBounds.length; j++) {
-          allBoundPoints[j].push(subObjectBounds[j]);
-        }
+        allBoundPoints[0].push(subObjectBounds[0]);
+        allBoundPoints[1].push(subObjectBounds[1]);
+        allBoundPoints[2].push(subObjectBounds[2]);
+        allBoundPoints[3].push(subObjectBounds[3]);
       }
       // determine the groups bounds from it sub object bound points
       bounds = [
@@ -87,7 +84,7 @@ function getVisibleBounds(o) {
       ];
     }
   } else {
-    bounds = o.geometricBounds;
+    bounds = object.geometricBounds;
   }
   return bounds;
 }

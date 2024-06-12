@@ -1,8 +1,8 @@
 /*
-ArtboardsToAi.jsx for Adobe Illustrator
----------------------------------------
+ArtboardsToPDF.jsx for Adobe Illustrator
+----------------------------------------
 
-Export all artboards to individual Ai files.
+Export all artboards to individual PDF files.
 
 Copyright 2024 Josh Duncan
 https://joshbduncan.com
@@ -19,24 +19,9 @@ Changelog:
 (function () {
   //@target illustrator
 
+  //@includepath "include"
 
-  /**
-   * If a file already exists, prompt for permission to overwrite it.
-   * @param {File} file ExtendScript file constructor.
-   * @returns {Boolean} Is it okay to overwrite the file.
-   */
-  function OverwriteFileProtection(file) {
-    if (
-      file.exists &&
-      !Window.confirm(
-        "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
-        "noAsDflt",
-        "File Already Exists"
-      )
-    )
-      return false;
-    return true;
-  }
+  //@include "OverwriteFileProtection.jsxinc"
 
   // define script variables
   var ab;
@@ -62,8 +47,10 @@ Changelog:
   fileName = doc.name.split(".")[0];
 
   // set up save options
-  saveOptions = new IllustratorSaveOptions();
-  saveOptions.saveMultipleArtboards = true;
+  saveOptions = new PDFSaveOptions();
+  saveOptions.compatibility = PDFCompatibility.ACROBAT7;
+  saveOptions.preserveEditability = false;
+  saveOptions.pDFPreset = "[Illustrator Default]";
 
   for (var i = 0; i < doc.artboards.length; i++) {
     // set the current artboard
@@ -72,19 +59,12 @@ Changelog:
     saveOptions.artboardRange = i + 1;
 
     // set the final exportPath
-    exportPath = new File(exportFolder + "/" + ab.name + ".ai");
+    exportPath = new File(exportFolder + "/" + ab.name + ".pdf");
 
     // overwrite protection
     if (!OverwriteFileProtection(exportPath)) continue;
 
     // export the file
     doc.saveAs(exportPath, saveOptions);
-
-    // remove the old file
-    exportPath.remove();
-
-    // rename the file to remove the appended artboard name
-    exportPath = new File(exportFolder + "/" + ab.name + "_" + ab.name + ".ai");
-    exportPath.rename(ab.name + ".ai");
   }
 })();

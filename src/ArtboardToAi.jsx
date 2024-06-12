@@ -1,8 +1,8 @@
 /*
-ArtboardToPDF.jsx for Adobe Illustrator
----------------------------------------
+ArtboardToAi.jsx for Adobe Illustrator
+--------------------------------------
 
-Export the current artboard to a PDF file.
+Export the current artboard to a Ai file.
 
 Copyright 2024 Josh Duncan
 https://joshbduncan.com
@@ -14,29 +14,15 @@ See the LICENSE file for details.
 
 Changelog:
 0.1.0 initial release
+0.1.1 fix where ai appends the artboard name to the end of saved files
 */
 
 (function () {
   //@target illustrator
 
+  //@includepath "include"
 
-  /**
-   * If a file already exists, prompt for permission to overwrite it.
-   * @param {File} file ExtendScript file constructor.
-   * @returns {Boolean} Is it okay to overwrite the file.
-   */
-  function OverwriteFileProtection(file) {
-    if (
-      file.exists &&
-      !Window.confirm(
-        "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
-        "noAsDflt",
-        "File Already Exists"
-      )
-    )
-      return false;
-    return true;
-  }
+  //@include "OverwriteFileProtection.jsxinc"
 
   // define script variables
   var ab;
@@ -64,7 +50,7 @@ Changelog:
   ab = doc.artboards[abIdx];
 
   // prompt for a filename
-  exportName = prompt("Save File As", ab.name + ".pdf");
+  exportName = prompt("Save File As", ab.name + ".ai");
 
   if (exportName === null) return;
 
@@ -72,18 +58,23 @@ Changelog:
   exportName = exportName.replace(/\.pdf|\.ai|\.eps$/i, "");
 
   // set the final exportPath
-  exportPath = new File(exportFolder + "/" + exportName + ".pdf");
+  exportPath = new File(exportFolder + "/" + exportName + ".ai");
 
   // overwrite protection
   if (!OverwriteFileProtection(exportPath)) return;
 
   // set up save options
-  saveOptions = new PDFSaveOptions();
-  saveOptions.compatibility = PDFCompatibility.ACROBAT7;
-  saveOptions.preserveEditability = false;
-  saveOptions.pDFPreset = "[Illustrator Default]";
-  saveOptions.artboardRange = (abIdx + 1).toString();
+  saveOptions = new IllustratorSaveOptions();
+  saveOptions.saveMultipleArtboards = true;
+  saveOptions.artboardRange = abIdx + 1;
 
   // export the file
   doc.saveAs(exportPath, saveOptions);
+
+  // remove the old file
+  exportPath.remove();
+
+  // rename the file to remove the appended artboard name
+  exportPath = new File(exportFolder + "/" + exportName + "_" + ab.name + ".ai");
+  exportPath.rename(exportName + ".ai");
 })();

@@ -15,7 +15,6 @@
 /**
  * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
  * @param {PageItem} o A single Adobe Illustrator pageItem.
- *
  * @returns {Array} Object bounds [left, top, right, bottom].
  */
 function getVisibleBounds(o) {

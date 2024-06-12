@@ -19,9 +19,10 @@ Changelog:
 (function () {
   //@target illustrator
 
+
   /**
-   * If a file already exists, prompt for permission to overwrite.
-   * @param {FileObject} file ExtendScript file constructor.
+   * If a file already exists, prompt for permission to overwrite it.
+   * @param {File} file ExtendScript file constructor.
    * @returns {Boolean} Is it okay to overwrite the file.
    */
   function OverwriteFileProtection(file) {

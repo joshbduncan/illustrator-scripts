@@ -1,0 +1,20 @@
+{
+  "cSpell.words": [
+    "artboard",
+    "artboards",
+    "Dflt",
+    "dowling",
+    "edittext",
+    "getenv",
+    "Osokin",
+    "prefs",
+    "radiobutton",
+    "savename",
+    "Sergey",
+    "statictext",
+    "wdjsdev"
+  ],
+  "search.exclude": {
+    "**/jsx": true
+  }
+}

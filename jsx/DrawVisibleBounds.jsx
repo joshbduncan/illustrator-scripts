@@ -19,10 +19,12 @@ Versions:
 
 (function () {
   //@target illustrator
+
   var _title = "Draw Visible Bounds";
   var _version = "1.1.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
+
 
   /*
     Changelog
@@ -41,7 +43,6 @@ Versions:
   /**
    * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
    * @param {PageItem} o A single Adobe Illustrator pageItem.
-   *
    * @returns {Array} Object bounds [left, top, right, bottom].
    */
   function getVisibleBounds(o) {
