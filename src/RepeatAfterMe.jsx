@@ -58,13 +58,20 @@
       - removed preview stroke color option
     fixed:
       - preset gutter values converted to document ruler units on load
+  0.7.0 2024-06-18
+    added:
+      - auto centering when fill artboard is selected
+      - preview checkbox to enable/disable preview
+    fixed:
+      - fixed lookup for pattern
+      - loading padding value
 */
 
 (function () {
   //@target illustrator
 
   var _title = "RepeatAfterMe";
-  var _version = "0.6.0";
+  var _version = "0.7.0";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -72,7 +79,7 @@
   // INCLUDES //
   //////////////
 
-  //@includepath "include"
+  //@includepath "utils"
 
   //@include "Logger.jsxinc"
   //@include "GetObjectPlacementInfo.jsxinc"
@@ -111,12 +118,14 @@
   defaults["[Default]"] = {
     fill: false,
     padding: "0 in",
+    center: true,
     rows: 3,
     rowGutter: ".25 in",
     cols: 2,
     colGutter: ".25 in",
     pattern: "Grid",
     bounds: "clipped",
+    preview: true,
   };
   var patterns = ["Grid", "Brick by Row", "Brick by Column"];
   var layerName = "REPEAT-AFTER-ME TEMPLATE";
@@ -141,11 +150,13 @@
   }
 
   // load user prefs
+  var prefs;
   prefs = new Prefs(Folder.userData + "/JBD/" + _title + ".json", _version);
   prefs.load(defaults);
 
   // get the current artboard
-  ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
+  var ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
+  var abInfo = GetObjectPlacementInfo(ab.artboardRect);
 
   // get doc base ruler unit
   var rulerUnits = doc.rulerUnits.toString().split(".")[1].toLowerCase();
@@ -167,7 +178,7 @@
    * Main Script Dialog
    */
   function dialog() {
-    s = "[Default]";
+    var s = "[Default]";
 
     var positions;
     var top, left;
@@ -190,39 +201,6 @@
     pLayout.spacing = 10;
     pLayout.margins = 18;
     pLayout.alignment = ["fill", "center"];
-
-    // Group - Fill Artboard
-    var gFill = pLayout.add("group", undefined, { name: "gFill" });
-    gFill.orientation = "row";
-    gFill.alignChildren = ["left", "bottom"];
-    gFill.spacing = 10;
-    gFill.margins = 0;
-    gFill.alignment = ["fill", "center"];
-
-    var fill = gFill.add("checkbox", undefined, "Fill Current Artboard", {
-      name: "fill",
-    });
-
-    // Group - Padding
-    var gPadding = gFill.add("group", undefined, { name: "gPadding" });
-    gPadding.orientation = "row";
-    gPadding.alignChildren = ["left", "center"];
-    gPadding.spacing = 10;
-    gPadding.margins = 0;
-    gPadding.alignment = ["right", "center"];
-
-    var stPadding = gPadding.add("statictext", undefined, "Padding:", {
-      name: "stPadding",
-    });
-    stPadding.justify = "right";
-    stPadding.preferredSize.width = 60;
-
-    var padding = gPadding.add(
-      'edittext {justify: "center", properties: {name: "margin"}}'
-    );
-    padding.text = UnitValue(0, rulerUnits);
-    padding.preferredSize.width = 100;
-    padding.enabled = false;
 
     // Group - Rows
     var gRows = pLayout.add("group", undefined, { name: "gRows" });
@@ -302,7 +280,7 @@
     gPattern.alignChildren = ["left", "center"];
     gPattern.spacing = 10;
     gPattern.margins = 0;
-    gPattern.alignment = ["fill", "center"];
+    gPattern.alignment = ["left", "center"];
 
     var stType = gPattern.add("statictext", undefined, "Pattern:", {
       name: "stType",
@@ -316,6 +294,55 @@
     });
     pattern.selection = 0;
     pattern.alignment = ["fill", "center"];
+
+    var divider1 = pLayout.add("panel", undefined, undefined, { name: "divider1" });
+    divider1.alignment = "fill";
+
+    // Group - Artboard
+    var gArtboard = pLayout.add("group", undefined, { name: "gArtboard" });
+    gArtboard.orientation = "column";
+    gArtboard.alignChildren = ["left", "bottom"];
+    gArtboard.spacing = 10;
+    gArtboard.margins = 0;
+    gArtboard.alignment = ["fill", "center"];
+
+    // Group - Fill Artboard
+    var gFill = gArtboard.add("group", undefined, { name: "gFill" });
+    gFill.orientation = "row";
+    gFill.alignChildren = ["left", "bottom"];
+    gFill.spacing = 10;
+    gFill.margins = 0;
+    gFill.alignment = ["fill", "center"];
+
+    var fill = gFill.add("checkbox", undefined, "Fill Current Artboard", {
+      name: "fill",
+    });
+
+    // Group - Padding
+    var gPadding = gFill.add("group", undefined, { name: "gPadding" });
+    gPadding.orientation = "row";
+    gPadding.alignChildren = ["left", "center"];
+    gPadding.spacing = 10;
+    gPadding.margins = 0;
+    gPadding.alignment = ["right", "center"];
+
+    var stPadding = gPadding.add("statictext", undefined, "Padding:", {
+      name: "stPadding",
+    });
+    stPadding.justify = "right";
+    stPadding.preferredSize.width = 60;
+
+    var padding = gPadding.add(
+      'edittext {justify: "center", properties: {name: "margin"}}'
+    );
+    padding.text = UnitValue(0, rulerUnits);
+    padding.preferredSize.width = 100;
+    padding.enabled = false;
+
+    var center = gArtboard.add("checkbox", undefined, "Center on Artboard", {
+      name: "fill",
+    });
+    center.enabled = false;
 
     // Group - Bounds & Info
     var gBoundsInfo = win.add("group", undefined, { name: "gBoundsInfo" });
@@ -441,24 +468,36 @@
     var btDelete = gPresetButtons.add("button", undefined, "Delete", {
       name: "btDelete",
     });
-    btDelete.preferredSize.width = 70;
+    btDelete.preferredSize.width = 80;
     btDelete.enabled = false;
 
     var btSave = gPresetButtons.add("button", undefined, "Save", { name: "btSave" });
-    btSave.preferredSize.width = 70;
+    btSave.preferredSize.width = 80;
+
+    // Group - Preview
+    var gPreview = win.add("group", undefined, { name: "gPreview" });
+    gPreview.orientation = "row";
+    gPreview.alignChildren = ["left", "center"];
+    gPreview.spacing = 10;
+    gPreview.margins = [10, 5, 0, 0];
+    gPreview.alignment = ["left", "center"];
+
+    var preview = gPreview.add("checkbox", undefined, "Preview", {
+      name: "preview",
+    });
 
     // Group - Buttons
     var gButtons = win.add("group", undefined, { name: "gButtons" });
     gButtons.orientation = "row";
-    gButtons.alignChildren = ["left", "center"];
+    gButtons.alignChildren = ["right", "center"];
     gButtons.spacing = 10;
-    gButtons.margins = 0;
+    gButtons.margins = 10;
 
     var btOK = gButtons.add("button", undefined, "OK", { name: "btOK" });
-    btOK.preferredSize.width = 70;
+    btOK.preferredSize.width = 100;
 
     var btCancel = gButtons.add("button", undefined, "Cancel", { name: "btCancel" });
-    btCancel.preferredSize.width = 70;
+    btCancel.preferredSize.width = 100;
 
     // Copyright
     var stCopyright = win.add("statictext", undefined, _copyright + " @ " + _website, {
@@ -495,19 +534,23 @@
       var colGutterUnitValue = parseNumberInput(s.colGutter);
       colGutterUnitValue.convert(rulerUnits);
       colGutterUnitValue.value = colGutterUnitValue.value.toFixed(4);
-      var paddingUnitValue = parseNumberInput(s.colGutter);
+      var paddingUnitValue = parseNumberInput(s.padding);
       paddingUnitValue.convert(rulerUnits);
       paddingUnitValue.value = paddingUnitValue.value.toFixed(4);
 
       padding.text = paddingUnitValue;
+      center.value = s.center;
       rows.text = s.rows;
       rowGutter.text = rowGutterUnitValue;
       cols.text = s.cols;
       colGutter.text = colGutterUnitValue;
       pattern.selection = pattern.find(s.pattern);
+      preview.value = s.preview;
 
       // find the correct bounds radio button and click on it
       win.findElement(s.bounds.toLowerCase()).notify("onClick");
+
+      // set the preset dropdown
       preset.selection = preset.find(k);
 
       // click fill artboard if set
@@ -515,7 +558,7 @@
 
       loading = false;
 
-      updatePreview();
+      update();
     }
 
     /**
@@ -564,33 +607,45 @@
     function drawPreview() {
       cleanup();
 
-      // create a temp layer to hold preview items
-      templateLayer = doc.layers.add();
-      templateLayer.name = layerName;
+      if (preview.value) {
+        // create a temp layer to hold preview items
+        templateLayer = doc.layers.add();
+        templateLayer.name = layerName;
 
-      // create a temporary item to fix any issues with the appearance panel
-      var t = templateLayer.pathItems.rectangle(0, 0, 1, 1);
-      app.executeMenuCommand("expandStyle");
-      t.remove();
+        // create a temporary item to fix any issues with the appearance panel
+        var t = templateLayer.pathItems.rectangle(0, 0, 1, 1);
+        app.executeMenuCommand("expandStyle");
+        t.remove();
 
-      // draw initial preview outline using `rectangle(top, left, width, height)`
-      var rect = templateLayer.pathItems.rectangle(
-        top,
-        left,
-        placementInfo.width,
-        placementInfo.height
-      );
+        // draw initial preview rectangle.
+        var rect = templateLayer.pathItems.rectangle(
+          placementInfo.top,
+          placementInfo.left,
+          placementInfo.width,
+          placementInfo.height
+        );
 
-      rect.filled = false;
-      rect.stroked = true;
-      rect.strokeColor = outlineColor;
-      rect.strokeWidth = strokeWidth;
+        rect.filled = false;
+        rect.stroked = true;
+        rect.strokeColor = outlineColor;
+        rect.strokeWidth = strokeWidth;
 
-      // draw all copies
-      var dup;
-      for (var i = 0; i < positions.length; i++) {
-        dup = rect.duplicate();
-        dup.translate(positions[i][0], positions[i][1]);
+        // offset original base rectangle if artboard fill
+        if (fill.value) {
+          // determine correct offset for artboard
+          var abOffsets = calculateArtboardOffsets(center.value);
+          var topOffset = abOffsets[0];
+          var leftOffset = abOffsets[1];
+
+          rect.translate(leftOffset, topOffset);
+        }
+
+        // draw all copies
+        var dup;
+        for (var i = 1; i < positions.length; i++) {
+          dup = rect.duplicate();
+          dup.translate(positions[i][0], positions[i][1]);
+        }
       }
 
       // hack from Sergey Osokin to not pollute undo stack
@@ -616,12 +671,14 @@
       return {
         fill: fill.value,
         padding: UnitValue(padding.text).toString(),
+        center: center.value,
         rows: parseInt(rows.text),
         rowGutter: UnitValue(rowGutter.text).toString(),
         cols: parseInt(cols.text),
         colGutter: UnitValue(colGutter.text).toString(),
         pattern: pattern.selection.text,
         bounds: boundsType,
+        preview: preview.value,
       };
     }
 
@@ -629,91 +686,118 @@
      * Calculate translation deltas for each repeat item.
      * @returns {Array} Translation offset values for each repeat as [x, y].
      */
-    function calculateRepeatTranslationDeltas() {
+    function calculateTranslationDeltas() {
       logger.log("calculating translation deltas");
 
       // convert required values
       var _rows = parseInt(rows.text);
-      var _rowGutter = UnitValue(rowGutter.text);
+      var _rowGutter = UnitValue(rowGutter.text).as("pt");
       var _cols = parseInt(cols.text);
-      var _colGutter = UnitValue(colGutter.text);
-      var _pattern = pattern.selection.text;
-
-      // convert gutter values into points
-      _rowGutter.convert("pt");
-      _colGutter.convert("pt");
-
-      // if a pattern is selected, determine the proper offset
-      var rowPatternOffset = (placementInfo.height + _rowGutter) * 0.5;
-      var colPatternOffset = (placementInfo.width + _colGutter) * 0.5;
+      var _colGutter = UnitValue(colGutter.text).as("pt");
+      var _pattern = pattern.selection.text.toLowerCase();
 
       // calculate the x and y translation offset values for each repeat
       var positions = [];
-      var tx, ty;
+      var tx, ty, rowOffset, colOffset;
       for (var r = 0; r < _rows; r++) {
+        // offset every other row when pattern is "brick by row"
+        rowOffset =
+          r % 2 === 1 && _pattern === "brick by row" ? placementInfo.width / 2 : 0;
         for (var c = 0; c < _cols; c++) {
-          if (r === 0 && c === 0) continue;
+          // offset every other column when pattern is "brick by column"
+          colOffset =
+            c % 2 === 1 && _pattern === "brick by column"
+              ? placementInfo.height / 2
+              : 0;
+
           tx = c * (placementInfo.width + _colGutter);
           ty = r * (placementInfo.height + _rowGutter) * -1;
 
-          // offset tx and ty for selected pattern
-          if (r % 2 === 1 && _pattern === "brick by row") {
-            tx = tx + colPatternOffset;
-          }
-
-          if (c % 2 === 1 && _pattern === "brick by column") {
-            ty = ty - rowPatternOffset;
-          }
-
-          positions.push([tx, ty]);
+          positions.push([tx + rowOffset, ty - colOffset]);
         }
       }
       return positions;
     }
 
     /**
+     * Calculate the offset for filling the artboard with the current repeat pattern.
+     * @param {Boolean} center Should the pattern be centered? Defaults to false.
+     * @returns {Array} Offset `[topOffset, leftOffset]` as points.
+     */
+    function calculateArtboardOffsets(center) {
+      center = typeof center !== "undefined" ? center : false;
+
+      // get pattern dimensions
+      var patternDimensions = calculateRepeatDimensions();
+      var patternWidth = patternDimensions[0].as("pt");
+      var patternHeight = patternDimensions[1].as("pt");
+
+      // zero out to artboard origin
+      var topOffset = abInfo.top - placementInfo.top;
+      var leftOffset = abInfo.left - placementInfo.left;
+
+      // adjust offset to center repeat pattern on current artboard
+      if (center) {
+        topOffset = topOffset - (abInfo.height - patternHeight) / 2;
+        leftOffset = leftOffset + (abInfo.width - patternWidth) / 2;
+      }
+
+      return [topOffset, leftOffset];
+    }
+
+    /**
+     * Calculate the overall dimension of the repeat pattern.
+     * @returns {Array} Pattern dimensions `[width, height]` in document ruler units.
+     */
+    function calculateRepeatDimensions() {
+      // convert required values
+      var _rows = parseInt(rows.text);
+      var _rowGutter = UnitValue(rowGutter.text);
+      _rowGutter.convert("pt");
+      var _cols = parseInt(cols.text);
+      var _colGutter = UnitValue(colGutter.text);
+      _colGutter.convert("pt");
+      var _pattern = pattern.selection.text.toLowerCase();
+
+      var width =
+        _cols * placementInfo.width +
+        (_cols - 1) * _colGutter +
+        (_pattern === "brick by row" ? placementInfo.width / 2 : 0);
+      var height =
+        _rows * placementInfo.height +
+        (_rows - 1) * _rowGutter +
+        (_pattern === "brick by column" ? placementInfo.height / 2 : 0);
+
+      // convert to current ruler unit
+      width.convert(rulerUnits);
+      height.convert(rulerUnits);
+
+      return [width, height];
+    }
+
+    /**
      * Update the repeat preview template.
      */
-    function updatePreview() {
-      logger.log("updating preview");
+    function update() {
       try {
         // calculate all positions
-        positions = calculateRepeatTranslationDeltas();
+        positions = calculateTranslationDeltas();
 
-        // calculate top/left values
-        var abPadding = UnitValue(padding.text).as("pt");
-        if (fill.value) {
-          top = ab.artboardRect[0] - abPadding;
-          left = ab.artboardRect[1] + abPadding;
-        } else {
-          top = placementInfo.top;
-          left = placementInfo.left;
-        }
+        logger.log("updating preview");
+
+        // update info
+        var patternDimensions = calculateRepeatDimensions();
+        var _width = patternDimensions[0];
+        var _height = patternDimensions[1];
+        width.text = _width.value.toFixed(4) + " " + _width.type;
+        height.text = _height.value.toFixed(4) + " " + _height.type;
+
+        copies.text = (parseInt(rows.text) * parseInt(cols.text)).toString();
 
         // draw preview rectangles
-        templateLayer = drawPreview(positions, top, left);
-
-        // update copies
-        copies.text = rows.text * cols.text;
-
-        // update overall dimensions
-        var overallWidth = new UnitValue(
-          Math.abs(placementInfo.width + positions[positions.length - 1][0]),
-          "pt"
-        );
-        var overallHeight = new UnitValue(
-          Math.abs(placementInfo.height - positions[positions.length - 1][1]),
-          "pt"
-        );
-
-        // convert width and height to current ruler unit
-        overallWidth.convert(rulerUnits);
-        overallHeight.convert(rulerUnits);
-
-        // update the dialog text and truncate to 4 decimal places
-        width.text = overallWidth.value.toFixed(4) + " " + overallWidth.type;
-        height.text = overallHeight.value.toFixed(4) + " " + overallHeight.type;
+        templateLayer = drawPreview(positions);
       } catch (e) {
+        logger.log("ERROR!", $.fileName + ":" + $.line, e.message);
         cleanup();
       }
     }
@@ -722,20 +806,32 @@
      * Duplicate the selected artwork.
      */
     function duplicateObjects() {
-      for (var i = 0; i < sel.length; i++) {
-        // offset original selection if fill artboard
-        if (fill.value) {
-          var abPadding = UnitValue(padding.text).as("pt");
-          sel[i].translate(
-            ab.artboardRect[1] + abPadding - placementInfo.left,
-            ab.artboardRect[0] - abPadding - placementInfo.top
-          );
+      try {
+        var repeats = [];
+        for (var i = 0; i < sel.length; i++) {
+          // offset original selection if fill artboard
+          if (fill.value) {
+            // determine correct offset for artboard
+            var abOffsets = calculateArtboardOffsets(center.value);
+            var topOffset = abOffsets[0];
+            var leftOffset = abOffsets[1];
+
+            sel[i].translate(leftOffset, topOffset);
+          }
+          // draw all copies
+          var dup;
+          for (var j = 1; j < positions.length; j++) {
+            dup = sel[i].duplicate();
+            dup.translate(positions[j][0], positions[j][1]);
+            repeats.push(dup);
+          }
         }
-        // draw all copies
-        var dup;
-        for (var j = 0; j < positions.length; j++) {
-          dup = sel[i].duplicate();
-          dup.translate(positions[j][0], positions[j][1]);
+      } catch (e) {
+        logger.log("ERROR!", $.fileName + ":" + $.line, e);
+        alert("ERROR!\n" + e.message);
+        // clean up newly created objects
+        for (var i = 0; i < repeats.length; i++) {
+          repeats[i].remove();
         }
       }
     }
@@ -746,50 +842,50 @@
 
     /**
      * Process user input changes.
-     * @param {UIEvent} e ScriptUI change event.
      */
     function processChanges() {
+      logger.log("processing changes...", "(loading: " + loading + ")");
+
       if (loading) return;
 
       // calculate artboard fill if needed
       if (fill.value) {
         // calculate rows and cols to fill the entire artboard
-        var calcRows, calcCols, width, height;
+        var availableWidth, availableHeight, calcRows, calcCols, width, height;
 
-        // get the current padding value as points
-        var abPadding = UnitValue(padding.text).as("pt");
+        var _rows = parseInt(rows.text);
+        var _rowGutter = UnitValue(rowGutter.text).as("pt");
+        var _cols = parseInt(cols.text);
+        var _colGutter = UnitValue(colGutter.text).as("pt");
+        var _padding = UnitValue(padding.text).as("pt");
+        var _pattern = pattern.selection.text.toLowerCase();
 
         // get the artboard width and height
-        width = Math.abs(ab.artboardRect[0] - ab.artboardRect[2]) - abPadding * 2;
-        height = Math.abs(ab.artboardRect[1] - ab.artboardRect[3]) - abPadding * 2;
+        availableWidth = abInfo.width - _padding * 2;
+        availableHeight = abInfo.height - _padding * 2;
 
-        // if a pattern is selected, determine the proper offset and adjust the available width and height
-        var rowPatternOffset =
-          (placementInfo.height + UnitValue(rowGutter.text).as("pt")) * 0.5;
-        var colPatternOffset =
-          (placementInfo.width + UnitValue(colGutter.text).as("pt")) * 0.5;
-        if (pattern.selection.text.toLowerCase() === "brick by row")
-          width -= colPatternOffset;
-        if (pattern.selection.text.toLowerCase() === "brick by column")
-          height -= rowPatternOffset;
+        // account for pattern
+        if (pattern.selection.text.toLowerCase() == "brick by row") {
+          availableWidth -= placementInfo.width / 2;
+        }
+        if (pattern.selection.text.toLowerCase() == "brick by column") {
+          availableHeight -= placementInfo.height / 2;
+        }
 
         // calculate the max rows and cols that will fit on the artboard
         calcCols = Math.floor(
-          width / (placementInfo.width + UnitValue(colGutter.text).as("pt"))
+          (availableWidth + _colGutter) / (placementInfo.width + _colGutter)
         );
         calcRows = Math.floor(
-          height / (placementInfo.height + UnitValue(rowGutter.text).as("pt"))
+          (availableHeight + _rowGutter) / (placementInfo.height + _rowGutter)
         );
 
-        rows.text = calcRows;
-        cols.text = calcCols;
-
-        logger.log("calculated rows:", calcRows);
-        logger.log("calculated cols:", calcCols);
+        rows.text = Math.max(1, calcRows);
+        cols.text = Math.max(1, calcCols);
       }
 
       resetPresetUI();
-      updatePreview();
+      update();
     }
 
     // load initial presets
@@ -813,8 +909,15 @@
 
       // enable/disable inputs
       padding.enabled = this.value;
+      center.enabled = this.value;
       rows.enabled = !this.value;
       cols.enabled = !this.value;
+
+      processChanges();
+    };
+
+    center.onClick = function () {
+      logger.log("changed:", this.properties.name, "(" + this.value + ")");
 
       processChanges();
     };
@@ -824,14 +927,14 @@
       integerInputs[i].validate = function () {
         logger.log("validating:", this.properties.name, "(" + this.text + ")");
 
-        var val;
+        var n;
         if (isNaN(this.text)) {
           app.beep();
-          val = 1;
+          n = 1;
         } else {
-          val = parseInt(this.text);
+          n = parseInt(this.text);
         }
-        this.text = val;
+        this.text = Math.max(1, n);
       };
       // add arrow key listener
       integerInputs[i].addEventListener("keydown", editTextArrowAdjustmentsRowCol);
@@ -851,6 +954,9 @@
 
         // trim value
         n.value = n.value.toFixed(4);
+
+        // limit downside
+        if (n.value < 0) n.value = 0;
         this.text = n;
       };
 
@@ -948,6 +1054,11 @@
 
         savingPreset = false;
       }
+    };
+
+    preview.onClick = function () {
+      logger.log("changed:", this.properties.name, "(" + this.value + ")");
+      processChanges();
     };
 
     stCopyright.addEventListener("click", function (e) {

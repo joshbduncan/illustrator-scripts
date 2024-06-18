@@ -24,4 +24,4 @@ while IFS= read -r FILE; do
     echo "compiling $BASE_NAME..."
     DEST_PATH="jsx/helper_functions/$BASE_NAME"
     /Users/jbd/Dropbox/DEV/projects/escompile/escompile.sh "$FILE" >"$DEST_PATH"
-done <<<"$(find src/include -type f -name "[^_]*.jsx*" -d 1)"
+done <<<"$(find src/utils -type f -name "[^_]*.jsx*" -d 1)"

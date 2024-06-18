@@ -25,7 +25,7 @@ Versions:
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
-  //@includepath "include"
+  //@includepath "utils"
 
   //@include "GetVisibleBounds.jsxinc"
 

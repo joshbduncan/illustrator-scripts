@@ -19,7 +19,7 @@ Changelog:
 (function () {
   //@target illustrator
 
-  //@includepath "include"
+  //@includepath "utils"
 
   //@include "OverwriteFileProtection.jsxinc"
 
