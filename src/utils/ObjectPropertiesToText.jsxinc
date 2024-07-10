@@ -1,7 +1,0 @@
-function objectPropertiesToText(obj) {
-  var s = "";
-  for (prop in obj) {
-    s += prop + ": " + obj[prop] + "\n";
-  }
-  return s;
-}

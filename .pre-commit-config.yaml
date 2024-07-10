@@ -1,9 +1,0 @@
-repos:
-  - repo: local
-    hooks:
-      - id: compile-scripts
-        name: compile-scripts
-        entry: bash -c './tools/compile.sh'
-        language: system
-        types: [bash]
-        always_run: true
