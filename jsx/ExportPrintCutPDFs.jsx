@@ -174,7 +174,7 @@ Changelog:
         regPlacement.top,
         regPlacement.left,
         regSize,
-        regSize
+        regSize,
       );
       regMark.filled = true;
       regMark.stroked = false;
@@ -215,7 +215,7 @@ Changelog:
         !Window.confirm(
           "Document Has Unsaved Changes!\nContinuing exporting files?",
           "noAsDflt",
-          "Unsaved Changes"
+          "Unsaved Changes",
         )
       ) {
         return;
@@ -253,7 +253,10 @@ Changelog:
 
     // alert user
     alert(
-      "Files Exported!\n" + File.decode(fileArt.name) + "\n" + File.decode(fileCut.name)
+      "Files Exported!\n" +
+        File.decode(fileArt.name) +
+        "\n" +
+        File.decode(fileCut.name),
     );
 
     // open the parent folder

@@ -22,7 +22,7 @@ PathPointPlus.prototype = {
     // validate provided index
     if (idx < 0 || idx > parentPath.pathPoints.length) {
       alert(
-        "Invalid insertion index (`idx`).\n0 <= idx <= " + parentPath.pathPoints.length
+        "Invalid insertion index (`idx`).\n0 <= idx <= " + parentPath.pathPoints.length,
       );
       return;
     }

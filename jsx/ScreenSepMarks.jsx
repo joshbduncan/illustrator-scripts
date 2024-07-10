@@ -240,7 +240,7 @@ function draw() {
       doc.height - inset - size / 2,
       size,
       color,
-      stroke
+      stroke,
     );
   }
 
@@ -252,7 +252,7 @@ function draw() {
       settings.spots,
       settings.file,
       settings.date,
-      settings.time
+      settings.time,
     );
   }
 
@@ -269,7 +269,7 @@ function makeReg(x, y, size, color, strokeWeight) {
     -y + size / 2 / 2,
     x - size / 2 / 2,
     size / 2,
-    size / 2
+    size / 2,
   );
   circle.strokeColor = color.color;
   circle.stroked = true;
@@ -755,7 +755,7 @@ function saveSettingsWindow(currentSettings) {
       saveName = name.text;
     } else {
       alert(
-        "No name provided!\nMake sure to provide a save name or pick a current present to replace."
+        "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
       );
       return false;
     }
@@ -777,7 +777,7 @@ function deletedSettingsWindow(name) {
   var st = win.add(
     "statictext",
     undefined,
-    "Settings preset " + name + " was deleted."
+    "Settings preset " + name + " was deleted.",
   );
 
   // window buttons

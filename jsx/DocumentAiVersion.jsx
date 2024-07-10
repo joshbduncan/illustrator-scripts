@@ -55,7 +55,7 @@ Versions:
 
     // Show the results for debugging
     alert(
-      "Ai Version Info\nXMP String: " + xmpString + "\nParsed Version: " + aiVersion
+      "Ai Version Info\nXMP String: " + xmpString + "\nParsed Version: " + aiVersion,
     );
 
     return aiVersion;

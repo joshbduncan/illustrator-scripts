@@ -73,7 +73,7 @@ if (app.documents.length > 0) {
         hlPathPoints = calcPointsBetweenAnchors(
           anchors,
           settings.points,
-          settings.position
+          settings.position,
         );
       } else {
         hlPathPoints = calcPointsBetweenAnchors(anchors, settings.points);
@@ -102,7 +102,7 @@ if (app.documents.length > 0) {
     }
   } else {
     alert(
-      "Invalid Selection\nPlease select a path or a minimum of two consecutive anchor points along a path before running this script."
+      "Invalid Selection\nPlease select a path or a minimum of two consecutive anchor points along a path before running this script.",
     );
   }
 } else {
@@ -142,7 +142,7 @@ function calcPointsBetweenAnchors(anchors, points, position) {
       segmentPoints = deCasteljau(
         calculatedPoints[calculatedPoints.length - 2],
         calculatedPoints[calculatedPoints.length - 1],
-        position ? position : 1 / (points + 1 - j)
+        position ? position : 1 / (points + 1 - j),
       );
       // splice the intermediate segments points in the array for this path segment
       calculatedPoints.spliceArray(j, 2, segmentPoints);
@@ -325,13 +325,13 @@ function settingsWin() {
   var rbSinglePoint = pType.add(
     "radiobutton",
     undefined,
-    "Place Single Point At Position"
+    "Place Single Point At Position",
   );
   rbSinglePoint.value = false;
   var rbEqualPoints = pType.add(
     "radiobutton",
     undefined,
-    "Place Points Equally Between Anchors"
+    "Place Points Equally Between Anchors",
   );
   rbEqualPoints.value = true;
 
@@ -453,7 +453,7 @@ function settingsWin() {
       return;
     } else if (Number(position.text) < 0.1 || Number(position.text) > 99.9) {
       alert(
-        "Invalid Value\nPosition Input must be between 0.1 and 99.9 for this example."
+        "Invalid Value\nPosition Input must be between 0.1 and 99.9 for this example.",
       );
       return;
     } else if (Number(points.text) < 1) {
@@ -462,7 +462,7 @@ function settingsWin() {
     }
     if (!cbHlPoints.value && !cbDrawNewPath.value) {
       alert(
-        "Whoops\nYou didn't select either or both of the dialog checkboxes so this example script won't actually do anything."
+        "Whoops\nYou didn't select either or both of the dialog checkboxes so this example script won't actually do anything.",
       );
       return;
     }

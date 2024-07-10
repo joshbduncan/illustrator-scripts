@@ -32,7 +32,7 @@ Changelog:
       !Window.confirm(
         "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
         "noAsDflt",
-        "File Already Exists"
+        "File Already Exists",
       )
     )
       return false;

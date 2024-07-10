@@ -82,7 +82,7 @@ function settingsWin() {
   var cbSelected = pFind.add(
     "checkbox",
     undefined,
-    "Limit to layer(s) with selected artwork"
+    "Limit to layer(s) with selected artwork",
   );
   cbSelected.value = false;
 

@@ -46,7 +46,7 @@ function savePresetDialog(currentOptions) {
       saveName = name.text;
     } else {
       alert(
-        "No name provided!\nMake sure to provide a save name or pick a current present to replace."
+        "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
       );
       return false;
     }

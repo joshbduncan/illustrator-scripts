@@ -175,7 +175,7 @@ function settingsWin() {
   var gRangeSliderMin = gRangeMin.add("group", undefined);
   gRangeSliderMin.orientation = "row";
   var valMin = gRangeSliderMin.add(
-    'edittext{text:5, characters:3, justify:"center", active:true}'
+    'edittext{text:5, characters:3, justify:"center", active:true}',
   );
   var sldMin = gRangeSliderMin.add("slider{minvalue:0, maxvalue:50, value:5}");
   sldMin.preferredSize.width = 125;
@@ -197,7 +197,7 @@ function settingsWin() {
   var gRangeSliderMax = gRangeMax.add("group", undefined);
   gRangeSliderMax.orientation = "row";
   var valMax = gRangeSliderMax.add(
-    'edittext{text:95, characters:3, justify:"center", active:true}'
+    'edittext{text:95, characters:3, justify:"center", active:true}',
   );
   var sldMax = gRangeSliderMax.add("slider{minvalue:50, maxvalue:100, value:95}");
   sldMax.preferredSize.width = 125;

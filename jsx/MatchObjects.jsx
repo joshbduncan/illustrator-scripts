@@ -132,7 +132,7 @@ Versions:
         var scaleMatrix = getTrueScaleMatrix(
           sourceBounds,
           targetBounds,
-          settings.scale
+          settings.scale,
         );
         // work out any adjustment on art with strokes
         var strokeScale = getStrokeScale(sourceBounds, targetBounds, settings.scale);
@@ -144,7 +144,7 @@ Versions:
           settings.gradients,
           settings.strokePatterns,
           settings.strokeWidth ? strokeScale : false,
-          Transformation.CENTER
+          Transformation.CENTER,
         );
       }
       // if target should be repositioned
@@ -288,47 +288,47 @@ Versions:
     if (anchor == "tl") {
       return app.getTranslationMatrix(
         sourceInfo.left - targetInfo.left,
-        sourceInfo.top - targetInfo.top
+        sourceInfo.top - targetInfo.top,
       );
     } else if (anchor == "tc") {
       return app.getTranslationMatrix(
         sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.top - targetInfo.top
+        sourceInfo.top - targetInfo.top,
       );
     } else if (anchor == "tr") {
       return app.getTranslationMatrix(
         sourceInfo.right - targetInfo.right,
-        sourceInfo.top - targetInfo.top
+        sourceInfo.top - targetInfo.top,
       );
     } else if (anchor == "cl") {
       return app.getTranslationMatrix(
         sourceInfo.left - targetInfo.left,
-        sourceInfo.centerY - targetInfo.centerY
+        sourceInfo.centerY - targetInfo.centerY,
       );
     } else if (anchor == "cc") {
       return app.getTranslationMatrix(
         sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.centerY - targetInfo.centerY
+        sourceInfo.centerY - targetInfo.centerY,
       );
     } else if (anchor == "cr") {
       return app.getTranslationMatrix(
         sourceInfo.right - targetInfo.right,
-        sourceInfo.centerY - targetInfo.centerY
+        sourceInfo.centerY - targetInfo.centerY,
       );
     } else if (anchor == "bl") {
       return app.getTranslationMatrix(
         sourceInfo.left - targetInfo.left,
-        sourceInfo.bottom - targetInfo.bottom
+        sourceInfo.bottom - targetInfo.bottom,
       );
     } else if (anchor == "bc") {
       return app.getTranslationMatrix(
         sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.bottom - targetInfo.bottom
+        sourceInfo.bottom - targetInfo.bottom,
       );
     } else if (anchor == "br") {
       return app.getTranslationMatrix(
         sourceInfo.right - targetInfo.right,
-        sourceInfo.bottom - targetInfo.bottom
+        sourceInfo.bottom - targetInfo.bottom,
       );
     } else if (anchor == "Top Edge") {
       return app.getTranslationMatrix(0, sourceInfo.top - targetInfo.top);
@@ -383,7 +383,7 @@ Versions:
     var rbBottom = pSource.add(
       "radiobutton",
       undefined,
-      "Bottom Object (of selection)"
+      "Bottom Object (of selection)",
     );
     rbBottom.value = true;
     var cbPreview = pSource.add("checkbox", undefined, "Preview Source Selection");

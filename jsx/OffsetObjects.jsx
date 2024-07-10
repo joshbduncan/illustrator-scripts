@@ -80,12 +80,12 @@ function getMoveMatrix(sourceBounds, targetBounds, direction, gutter) {
   if (direction == "Vertical" && sourceInfo.bottom != targetInfo.top) {
     return app.getTranslationMatrix(
       0,
-      sourceInfo.bottom - targetInfo.bottom + targetInfo.height - gutter
+      sourceInfo.bottom - targetInfo.bottom + targetInfo.height - gutter,
     );
   } else if (direction == "Horizontal" && sourceInfo.right != targetInfo.left) {
     return app.getTranslationMatrix(
       sourceInfo.right - targetInfo.right + targetInfo.width + gutter,
-      0
+      0,
     );
   }
   return false;
@@ -233,7 +233,7 @@ function settingsWin() {
   var cbReverseStackingOrder = gReverse.add(
     "checkbox",
     undefined,
-    "Reverse Stacking Order"
+    "Reverse Stacking Order",
   );
 
   // panel - gutter

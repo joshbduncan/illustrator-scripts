@@ -557,7 +557,7 @@
         saveName = name.text;
       } else {
         alert(
-          "No name provided!\nMake sure to provide a save name or pick a current present to replace."
+          "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
         );
         return false;
       }
@@ -727,7 +727,7 @@
     stRowGutter.preferredSize.width = 60;
 
     var rowGutter = gRowGutter.add(
-      'edittext {justify: "center", properties: {name: "rowGutter"}}'
+      'edittext {justify: "center", properties: {name: "rowGutter"}}',
     );
     rowGutter.text = "";
     rowGutter.preferredSize.width = 100;
@@ -763,7 +763,7 @@
     stColGutter.preferredSize.width = 60;
 
     var colGutter = gColGutter.add(
-      'edittext {justify: "center", properties: {name: "colGutter"}}'
+      'edittext {justify: "center", properties: {name: "colGutter"}}',
     );
     colGutter.text = "";
     colGutter.preferredSize.width = 100;
@@ -827,7 +827,7 @@
     stPadding.preferredSize.width = 60;
 
     var padding = gPadding.add(
-      'edittext {justify: "center", properties: {name: "margin"}}'
+      'edittext {justify: "center", properties: {name: "margin"}}',
     );
     padding.text = UnitValue(0, rulerUnits);
     padding.preferredSize.width = 100;
@@ -1091,7 +1091,9 @@
       try {
         templateLayer = doc.layers.getByName(layerName);
         templateLayer.remove();
-      } catch (e) {}
+      } catch (e) {
+        logger.log("ERROR!", $.fileName + ":" + $.line, e.message);
+      }
     }
 
     /**
@@ -1116,7 +1118,7 @@
           placementInfo.top,
           placementInfo.left,
           placementInfo.width,
-          placementInfo.height
+          placementInfo.height,
         );
 
         rect.filled = false;
@@ -1368,10 +1370,10 @@
 
         // calculate the max rows and cols that will fit on the artboard
         calcCols = Math.floor(
-          (availableWidth + _colGutter) / (placementInfo.width + _colGutter)
+          (availableWidth + _colGutter) / (placementInfo.width + _colGutter),
         );
         calcRows = Math.floor(
-          (availableHeight + _rowGutter) / (placementInfo.height + _rowGutter)
+          (availableHeight + _rowGutter) / (placementInfo.height + _rowGutter),
         );
 
         rows.text = Math.max(1, calcRows);
@@ -1512,7 +1514,7 @@
         Window.confirm(
           "Delete preset?\n" + preset.selection.text,
           "noAsDflt",
-          "Delete Preset"
+          "Delete Preset",
         )
       ) {
         delete prefs.data[preset.selection.text];
