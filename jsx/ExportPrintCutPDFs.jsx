@@ -40,7 +40,7 @@ Changelog:
     // setup reg mark defaults
     var regColor = new GrayColor();
     regColor.gray = 100;
-    var regSize = (72 / 4) * (1 / app.activeDocument.scaleFactor); // .25 inches
+    var regSize = 72 / 4 / app.activeDocument.scaleFactor; // .25 inches
     var regPlacements = [
       { top: 0, left: 0 }, // top-left
       { top: 0, left: doc.width - regSize }, // top-right

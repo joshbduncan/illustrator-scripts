@@ -3,7 +3,7 @@
  * @param {Array} bounds Illustrator object bounds (e.g. [left, top, right, bottom]).
  * @returns {Object} Object information (left, top, right, bottom, width, height, centerX, centerY)
  */
-function GetObjectPlacementInfo(bounds) {
+function getObjectPlacementInfo(bounds) {
   var left = bounds[0];
   var top = bounds[1];
   var right = bounds[2];
