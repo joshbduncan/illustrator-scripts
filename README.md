@@ -23,9 +23,7 @@ JSX Scripts for Adobe Products
 
 Offset selected objects vertically or horizontally by stacking order or artboard placement.
 
-![OffsetObjects Settings](images/OffsetObjects.png "OffsetObjects Settings")
-
-![OffsetObjects Demo](images/OffsetObjects.gif "OffsetObjects Demo")
+![OffsetObjects](https://github.com/user-attachments/assets/69961345-e261-4f04-b592-800a6c762c74)
 
 ## Utility Scripts
 
