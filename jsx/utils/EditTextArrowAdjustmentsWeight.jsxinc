@@ -8,7 +8,7 @@
 function parseNumberInput(n, defaultValue, defaultUnit) {
   defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
 
-  var rulerUnits = doc.rulerUnits.toString().split(".")[1].toLowerCase();
+  var rulerUnits = app.activeDocument.rulerUnits.toString().split(".")[1].toLowerCase();
   defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
 
   var val = UnitValue(n);

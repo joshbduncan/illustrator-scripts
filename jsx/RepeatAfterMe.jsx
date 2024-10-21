@@ -90,12 +90,12 @@
   function Logger(fp, mode, sizeLimit, console) {
     if (typeof fp == "undefined")
       fp = Folder.userData + "/" + resolveBaseScriptFromStack() + ".log";
-  
+
     this.mode = typeof mode !== "undefined" ? mode.toLowerCase() : "w";
     this.console = typeof console !== "undefined" ? console : false;
     this.file = new File(fp);
     this.badPath = false;
-  
+
     // rotate log if too big
     sizeLimit = typeof sizeLimit !== "undefined" ? Number(sizeLimit) : 5000000;
     if (this.file.length > sizeLimit) {
@@ -106,7 +106,7 @@
       alert(this.file);
     }
   }
-  
+
   Logger.prototype = {
     /**
      * Backup the log file.
@@ -125,11 +125,11 @@
     log: function (text) {
       // no need to keep alerting when the log path is bad
       if (this.badPath) return false;
-  
+
       var f = this.file;
       var m = this.mode;
       var ts = new Date().toLocaleString();
-  
+
       // ensure parent folder exists
       if (!f.parent.exists) {
         if (!f.parent.parent.exists) {
@@ -139,11 +139,11 @@
         }
         f.parent.create();
       }
-  
+
       // grab all arguments
       var args = ["[" + ts + "]"];
       for (var i = 0; i < arguments.length; ++i) args.push(arguments[i]);
-  
+
       // write the data
       try {
         f.encoding = "UTF-8";
@@ -154,10 +154,10 @@
         $.writeln("Error writing file:\n" + f);
         return false;
       }
-  
+
       // write `text` to the console if requested
       if (this.console) $.writeln(args.slice(1, args.length).join(" "));
-  
+
       return true;
     },
     /**
@@ -211,7 +211,7 @@
       - error catch for empty objects or item with no bounds
       - error catch for clipping masks inside of an empty group
   */
-  
+
   /**
    * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
    * @param {PageItem} o A single Adobe Illustrator pageItem.
@@ -220,12 +220,12 @@
   function getVisibleBounds(o) {
     var bounds, clippedItem, sandboxItem, sandboxLayer;
     var curItem;
-  
+
     // skip guides (via william dowling @ github.com/wdjsdev)
     if (o.guides) {
       return undefined;
     }
-  
+
     if (o.typename == "GroupItem") {
       // if the group has no pageItems, return undefined
       if (!o.pageItems || o.pageItems.length == 0) {
@@ -291,7 +291,7 @@
     }
     return bounds;
   }
-  
+
   /**
    * Determine the overall bounds of an Adobe Illustrator selection.
    * @param {Array} sel Adobe Illustrator selection. Defaults to the selection of the active document.
@@ -301,7 +301,7 @@
   function getSelectionBounds(sel, type) {
     sel = typeof sel !== "undefined" ? sel : app.activeDocument.selection;
     type = typeof type !== "undefined" ? type.toLowerCase() : "geometric";
-  
+
     var bounds = [[], [], [], []];
     var cur;
     for (var i = 0; i < sel.length; i++) {
@@ -354,10 +354,10 @@
    */
   function parseNumberInput(n, defaultValue, defaultUnit) {
     defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
-  
-    var rulerUnits = doc.rulerUnits.toString().split(".")[1].toLowerCase();
+
+    var rulerUnits = app.activeDocument.rulerUnits.toString().split(".")[1].toLowerCase();
     defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
-  
+
     var val = UnitValue(n);
     if (val.type === "?") {
       val = UnitValue(n, defaultUnit);
@@ -386,7 +386,7 @@
     }
     return bar;
   }
-  
+
   /**
    * Module for easily storing script preferences.
    * @param {String} fp File path for the for the saved preferences "JSON-like" file. Defaults to `Folder.userData/{base_script_file_name}.json`.
@@ -396,11 +396,11 @@
   function Prefs(fp, version) {
     if (typeof fp == "undefined")
       fp = Folder.userData + "/" + resolveBaseScriptFromStack() + ".json";
-  
+
     this.version = typeof version !== "undefined" ? version : null;
     this.file = new File(fp);
     this.data = {};
-  
+
     if (typeof logger == "undefined") {
       logger = {};
       logger.log = function (text) {
@@ -408,7 +408,7 @@
       };
     }
   }
-  
+
   Prefs.prototype = {
     /**
      * Backup the prefs file.
@@ -417,9 +417,9 @@
     backup: function () {
       var f = this.file;
       var backupFile = new File(f + ".bak");
-  
+
       logger.log("backing up prefs file:", backupFile);
-  
+
       f.copy(backupFile);
       return backupFile;
     },
@@ -432,9 +432,9 @@
       defaultData = typeof defaultData !== "undefined" ? defaultData : {};
       var f = this.file;
       var json;
-  
+
       logger.log("loading prefs file:", f);
-  
+
       if (f.exists) {
         try {
           json = readJSONData(f);
@@ -448,7 +448,7 @@
         json = {};
         json.data = defaultData;
       }
-  
+
       this.data = json.data;
       return true;
     },
@@ -470,9 +470,9 @@
      */
     save: function () {
       var f = this.file;
-  
+
       logger.log("writing prefs file:", f);
-  
+
       // ensure parent folder exists
       if (!f.parent.exists) {
         if (!f.parent.parent.exists) {
@@ -481,7 +481,7 @@
         }
         f.parent.create();
       }
-  
+
       // setup the data object
       var d = {
         data: this.data,
@@ -520,34 +520,34 @@
     win.orientation = "column";
     win.alignChildren = ["fill", "top"];
     win.margins = 18;
-  
+
     win.add("statictext", undefined, "Save current settings as:");
     var name = win.add("edittext");
     name.preferredSize.width = 250;
     name.active = true;
-  
+
     var cbReplace = win.add("checkbox", undefined, "Replace settings:");
     var replace = win.add("dropdownlist", undefined, currentOptions);
     replace.enabled = false;
     replace.preferredSize.width = 250;
-  
+
     // remove [last used] since it shouldn't be overwritten
     replace.remove(replace.find("[Last Used]"));
-  
+
     cbReplace.onClick = function () {
       replace.enabled = cbReplace.value ? true : false;
       name.enabled = cbReplace.value ? false : true;
     };
-  
+
     // window buttons
     var gWindowButtons = win.add("group", undefined);
     gWindowButtons.orientation = "row";
     gWindowButtons.alignChildren = ["left", "center"];
     gWindowButtons.alignment = ["center", "top"];
-  
+
     var btOK = gWindowButtons.add("button", undefined, "OK");
     var btCancel = gWindowButtons.add("button", undefined, "Cancel");
-  
+
     // if "ok" button clicked then return savename
     if (win.show() == 1) {
       var saveName;

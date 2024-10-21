@@ -8,7 +8,7 @@ if (app.documents.length > 0) {
   if (sel.length > 0) {
     for (var i = 0; i < sel.length; i++) {
       // check to see if current item in selection is a group
-      // if so grab each path item from withing that group
+      // if so grab each path item from within that group
       if (sel[i].typename == "GroupItem") {
         for (var j = 0; j < sel[i].pathItems.length; j++) {
           paths.push(sel[i].pathItems[j]);
