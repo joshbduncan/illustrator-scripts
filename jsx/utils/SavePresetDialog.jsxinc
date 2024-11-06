@@ -37,6 +37,36 @@ function savePresetDialog(currentOptions) {
   var btOK = gWindowButtons.add("button", undefined, "OK");
   var btCancel = gWindowButtons.add("button", undefined, "Cancel");
 
+  btOK.onClick = function () {
+    var saveName = name.text;
+
+    if (!cbReplace.value) {
+      // check to ensure a name was provided
+      if (saveName.length == 0) {
+        alert(
+          "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
+        );
+        return;
+      }
+
+      // check to see if preset already exist
+      for (var i = 0; i < currentOptions.length; i++) {
+        if (saveName == currentOptions[i]) {
+          alert(
+            "Preset Already Exist\nPreset '" +
+              saveName +
+              "' has already been saved. To overwrite your currently saved settings, use the 'Replace Settings' method.",
+          );
+          cbReplace.notify("onClick");
+          replace.selection = replace.find(saveName);
+          return;
+        }
+      }
+    }
+
+    win.close(1);
+  };
+
   // if "ok" button clicked then return savename
   if (win.show() == 1) {
     var saveName;
@@ -44,11 +74,6 @@ function savePresetDialog(currentOptions) {
       saveName = replace.selection.text;
     } else if (!cbReplace.value && name.text) {
       saveName = name.text;
-    } else {
-      alert(
-        "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
-      );
-      return false;
     }
     return saveName;
   } else {

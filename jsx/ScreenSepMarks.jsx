@@ -38,13 +38,14 @@
   1.1.4 cleaned up a bug when no spot colors were found or no info was requested
   1.1.5 all new save settings function that uses a separate instead of clogging up app.preferences
   1.2.0 works with any spot color names, updated file info, updated saved settings/preferences
+  1.2.1 fixed preset overwrite protection
 */
 
 (function () {
   //@target illustrator
 
   var _title = "Screen Print Separation Marks";
-  var _version = "1.2.0";
+  var _version = "1.2.1";
   var _copyright = "Copyright 2024 Josh Duncan";
   var _website = "joshbduncan.com";
 
@@ -367,6 +368,36 @@
     var btOK = gWindowButtons.add("button", undefined, "OK");
     var btCancel = gWindowButtons.add("button", undefined, "Cancel");
 
+    btOK.onClick = function () {
+      var saveName = name.text;
+
+      if (!cbReplace.value) {
+        // check to ensure a name was provided
+        if (saveName.length == 0) {
+          alert(
+            "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
+          );
+          return;
+        }
+
+        // check to see if preset already exist
+        for (var i = 0; i < currentOptions.length; i++) {
+          if (saveName == currentOptions[i]) {
+            alert(
+              "Preset Already Exist\nPreset '" +
+                saveName +
+                "' has already been saved. To overwrite your currently saved settings, use the 'Replace Settings' method.",
+            );
+            cbReplace.notify("onClick");
+            replace.selection = replace.find(saveName);
+            return;
+          }
+        }
+      }
+
+      win.close(1);
+    };
+
     // if "ok" button clicked then return savename
     if (win.show() == 1) {
       var saveName;
@@ -374,11 +405,6 @@
         saveName = replace.selection.text;
       } else if (!cbReplace.value && name.text) {
         saveName = name.text;
-      } else {
-        alert(
-          "No name provided!\nMake sure to provide a save name or pick a current present to replace.",
-        );
-        return false;
       }
       return saveName;
     } else {
