@@ -11,11 +11,12 @@ JSX Scripts for Adobe Products
 **Script Categories**
 
 - [Alignment Scripts](#alignment-scripts)
+- [Production Scripts](#production-scripts)
 - [Utility Scripts](#utility-scripts)
 
 ## Alignment Scripts
 
-- [Offset Objects](#offsetobjects)
+- [OffsetObjects](#offsetobjects)
 
 ### OffsetObjects
 
@@ -24,6 +25,26 @@ JSX Scripts for Adobe Products
 Offset selected objects vertically or horizontally by stacking order or artboard placement.
 
 ![OffsetObjects](https://github.com/user-attachments/assets/69961345-e261-4f04-b592-800a6c762c74)
+
+## Production Scripts
+
+- [ScreenSepMarks](#screensepmarks)
+
+### ScreenSepMarks
+
+[![Download](https://img.shields.io/badge/Download-ScreenSepMarks.jsx-blue.svg)](/jsx/ScreenSepMarks.jsx)
+
+Easily add screen printing registration marks and spot color info to a document for printing separations.
+
+Includes:
+
+- Customize registration mark size, placement(s), color, and inset
+- Label film separations with spot color name
+- Output can also include file name and timestamp
+- Can be re-run at any time to update data
+- Ability to save custom presets
+
+![ScreenSepMarks](https://github.com/user-attachments/assets/2c4af2a6-ec81-4202-bfe2-60063359a3f8)
 
 ## Utility Scripts
 
