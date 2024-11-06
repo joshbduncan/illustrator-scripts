@@ -391,20 +391,23 @@
    * Module for easily storing script preferences.
    * @param {String} fp File path for the for the saved preferences "JSON-like" file. Defaults to `Folder.userData/{base_script_file_name}.json`.
    * @param {String} version Optional script version number to include in the preferences file. Helps with debugging.
-   * @param {Object} mode Optional logger for debugging. Defaults to `$.writeln()`.
+   * @param {Object} logger Optional logger for debugging. Defaults to `$.writeln()`.
    */
-  function Prefs(fp, version) {
+  function Prefs(fp, version, logger) {
     if (typeof fp == "undefined")
       fp = Folder.userData + "/" + resolveBaseScriptFromStack() + ".json";
 
     this.version = typeof version !== "undefined" ? version : null;
     this.file = new File(fp);
     this.data = {};
+    this.logger = logger;
 
-    if (typeof logger == "undefined") {
-      logger = {};
-      logger.log = function (text) {
-        $.writeln(text);
+    if (typeof this.logger == "undefined") {
+      this.logger = {};
+      this.logger.log = function (text) {
+        args = [];
+        for (var i = 0; i < arguments.length; ++i) args.push(arguments[i]);
+        $.writeln(args.join(" "));
       };
     }
   }
@@ -418,7 +421,7 @@
       var f = this.file;
       var backupFile = new File(f + ".bak");
 
-      logger.log("backing up prefs file:", backupFile);
+      this.logger.log("backing up prefs file:", backupFile);
 
       f.copy(backupFile);
       return backupFile;
@@ -433,7 +436,7 @@
       var f = this.file;
       var json;
 
-      logger.log("loading prefs file:", f);
+      this.logger.log("loading prefs file:", f);
 
       if (f.exists) {
         try {
@@ -471,7 +474,7 @@
     save: function () {
       var f = this.file;
 
-      logger.log("writing prefs file:", f);
+      this.logger.log("writing prefs file:", f);
 
       // ensure parent folder exists
       if (!f.parent.exists) {
@@ -677,7 +680,7 @@
     var positions;
     var top, left;
 
-    // helpers to prevent multiple event from firing when loading presets
+    // helpers to prevent multiple events from firing when loading presets
     var loading = false;
     var savingPreset = false;
 
@@ -701,7 +704,6 @@
     gRows.orientation = "row";
     gRows.alignChildren = ["left", "center"];
     gRows.spacing = 10;
-    gRows.margins = 0;
     gRows.alignment = ["fill", "center"];
 
     var stRows = gRows.add("statictext", undefined, "Rows:", { name: "stRows" });
@@ -717,7 +719,6 @@
     gRowGutter.orientation = "row";
     gRowGutter.alignChildren = ["left", "center"];
     gRowGutter.spacing = 10;
-    gRowGutter.margins = 0;
     gRowGutter.alignment = ["fill", "center"];
 
     var stRowGutter = gRowGutter.add("statictext", undefined, "Gutter:", {
@@ -737,7 +738,6 @@
     gCols.orientation = "row";
     gCols.alignChildren = ["left", "center"];
     gCols.spacing = 10;
-    gCols.margins = 0;
     gCols.alignment = ["fill", "center"];
 
     var stCols = gCols.add("statictext", undefined, "Columns:", { name: "stCols" });
@@ -753,7 +753,6 @@
     gColGutter.orientation = "row";
     gColGutter.alignChildren = ["left", "center"];
     gColGutter.spacing = 10;
-    gColGutter.margins = 0;
     gColGutter.alignment = ["fill", "center"];
 
     var stColGutter = gColGutter.add("statictext", undefined, "Gutter:", {
@@ -773,7 +772,6 @@
     gPattern.orientation = "row";
     gPattern.alignChildren = ["left", "center"];
     gPattern.spacing = 10;
-    gPattern.margins = 0;
     gPattern.alignment = ["left", "center"];
 
     var stType = gPattern.add("statictext", undefined, "Pattern:", {
@@ -797,7 +795,6 @@
     gArtboard.orientation = "column";
     gArtboard.alignChildren = ["left", "bottom"];
     gArtboard.spacing = 10;
-    gArtboard.margins = 0;
     gArtboard.alignment = ["fill", "center"];
 
     // Group - Fill Artboard
@@ -805,7 +802,6 @@
     gFill.orientation = "row";
     gFill.alignChildren = ["left", "bottom"];
     gFill.spacing = 10;
-    gFill.margins = 0;
     gFill.alignment = ["fill", "center"];
 
     var fill = gFill.add("checkbox", undefined, "Fill Current Artboard", {
@@ -817,7 +813,6 @@
     gPadding.orientation = "row";
     gPadding.alignChildren = ["left", "center"];
     gPadding.spacing = 10;
-    gPadding.margins = 0;
     gPadding.alignment = ["right", "center"];
 
     var stPadding = gPadding.add("statictext", undefined, "Padding:", {
@@ -843,7 +838,6 @@
     gBoundsInfo.orientation = "row";
     gBoundsInfo.alignChildren = ["fill", "center"];
     gBoundsInfo.spacing = 10;
-    gBoundsInfo.margins = 0;
     gBoundsInfo.alignment = ["fill", "fill"];
 
     // Panel - Bounds
@@ -859,7 +853,6 @@
     gBounds.orientation = "column";
     gBounds.alignChildren = ["left", "center"];
     gBounds.spacing = 10;
-    gBounds.margins = 0;
 
     var geometric = gBounds.add("radiobutton", undefined, "Geometric", {
       name: "geometric",
@@ -882,14 +875,12 @@
     gInfo.orientation = "column";
     gInfo.alignChildren = ["left", "center"];
     gInfo.spacing = 10;
-    gInfo.margins = 0;
 
     // Group - Copies
     var gCopies = gInfo.add("group", undefined, { name: "gCopies" });
     gCopies.orientation = "row";
     gCopies.alignChildren = ["left", "center"];
     gCopies.spacing = 10;
-    gCopies.margins = 0;
 
     var stCopies = gCopies.add("statictext", undefined, "Total Copies:", {
       name: "stCopies",
@@ -902,7 +893,6 @@
     gWidth.orientation = "row";
     gWidth.alignChildren = ["left", "center"];
     gWidth.spacing = 10;
-    gWidth.margins = 0;
     gWidth.alignment = ["fill", "center"];
 
     var stWidth = gWidth.add("statictext", undefined, "Width:", { name: "stWidth" });
@@ -915,7 +905,6 @@
     gHeight.orientation = "row";
     gHeight.alignChildren = ["left", "center"];
     gHeight.spacing = 10;
-    gHeight.margins = 0;
     gHeight.alignment = ["fill", "center"];
 
     var stHeight = gHeight.add("statictext", undefined, "Height:", {
@@ -938,7 +927,6 @@
     gPreset.orientation = "row";
     gPreset.alignChildren = ["left", "center"];
     gPreset.spacing = 10;
-    gPreset.margins = 0;
     gPreset.alignment = ["fill", "center"];
 
     var stLoad = gPreset.add("statictext", undefined, "Load:", { name: "stLoad" });
@@ -956,7 +944,6 @@
     gPresetButtons.orientation = "row";
     gPresetButtons.alignChildren = ["left", "center"];
     gPresetButtons.spacing = 10;
-    gPresetButtons.margins = 0;
     gPresetButtons.alignment = ["right", "center"];
 
     var btDelete = gPresetButtons.add("button", undefined, "Delete", {
@@ -983,7 +970,7 @@
     // Group - Buttons
     var gButtons = win.add("group", undefined, { name: "gButtons" });
     gButtons.orientation = "row";
-    gButtons.alignChildren = ["right", "center"];
+    gButtons.alignChildren = ["center", "center"];
     gButtons.spacing = 10;
     gButtons.margins = 10;
 
@@ -1527,29 +1514,23 @@
 
     // save new preset
     btSave.onClick = function () {
-      var boundsType;
-      for (var i = 0; i < boundsRadioButtons.length; i++) {
-        if (boundsRadioButtons[i].value) {
-          boundsType = boundsRadioButtons[i].properties.name;
-          break;
-        }
-      }
-
       var saveName = savePresetDialog(presets);
 
-      if (saveName) {
-        // since `dropdownlist.find()` send an onChange event, halt reloading the same preset
-        savingPreset = true;
-
-        prefs.data[saveName] = getCurrentDialogSettings();
-        prefs.save();
-        // reload preset dropdown
-        presets = loadPresetsDropdown();
-        // reset selection setting to new preset
-        preset.selection = preset.find(saveName);
-
-        savingPreset = false;
+      if (!saveName) {
+        return;
       }
+
+      // since `dropdownlist.find()` sends an onChange event, halt reloading the same preset
+      savingPreset = true;
+
+      prefs.data[saveName] = getCurrentDialogSettings();
+      prefs.save();
+      // reload preset dropdown
+      presets = loadPresetsDropdown();
+      // reset selection setting to new preset
+      preset.selection = preset.find(saveName);
+
+      savingPreset = false;
     };
 
     preview.onClick = function () {
@@ -1607,7 +1588,7 @@
    * @param {UIEvent} e ScriptUI keyboard event.
    */
   function editTextArrowAdjustmentsRowCol(e) {
-    // Attempt mimic the behavior of the built-in Ai text input boxes
+    // Attempt to mimic the behavior of the built-in Ai text input boxes
     // allowing users to change the value using the "Up" and "Down" arrow
     // key, and adding the "Shift" key modifier to change the value by +/- 10.
     //
@@ -1648,7 +1629,7 @@
    * @param {UIEvent} e ScriptUI keyboard event.
    */
   function editTextArrowAdjustmentsGutter(e) {
-    // Attempt mimic the behavior of the built-in Ai text input boxes
+    // Attempt to mimic the behavior of the built-in Ai text input boxes
     // allowing users to change the value using the "Up" and "Down" arrow
     // key, and adding the "Shift" key modifier to change the value by +/- 10
     //

@@ -21,20 +21,23 @@ function resolveBaseScriptFromStack() {
  * Module for easily storing script preferences.
  * @param {String} fp File path for the for the saved preferences "JSON-like" file. Defaults to `Folder.userData/{base_script_file_name}.json`.
  * @param {String} version Optional script version number to include in the preferences file. Helps with debugging.
- * @param {Object} mode Optional logger for debugging. Defaults to `$.writeln()`.
+ * @param {Object} logger Optional logger for debugging. Defaults to `$.writeln()`.
  */
-function Prefs(fp, version) {
+function Prefs(fp, version, logger) {
   if (typeof fp == "undefined")
     fp = Folder.userData + "/" + resolveBaseScriptFromStack() + ".json";
 
   this.version = typeof version !== "undefined" ? version : null;
   this.file = new File(fp);
   this.data = {};
+  this.logger = logger;
 
-  if (typeof logger == "undefined") {
-    logger = {};
-    logger.log = function (text) {
-      $.writeln(text);
+  if (typeof this.logger == "undefined") {
+    this.logger = {};
+    this.logger.log = function (text) {
+      args = [];
+      for (var i = 0; i < arguments.length; ++i) args.push(arguments[i]);
+      $.writeln(args.join(" "));
     };
   }
 }
@@ -48,7 +51,7 @@ Prefs.prototype = {
     var f = this.file;
     var backupFile = new File(f + ".bak");
 
-    logger.log("backing up prefs file:", backupFile);
+    this.logger.log("backing up prefs file:", backupFile);
 
     f.copy(backupFile);
     return backupFile;
@@ -63,7 +66,7 @@ Prefs.prototype = {
     var f = this.file;
     var json;
 
-    logger.log("loading prefs file:", f);
+    this.logger.log("loading prefs file:", f);
 
     if (f.exists) {
       try {
@@ -101,7 +104,7 @@ Prefs.prototype = {
   save: function () {
     var f = this.file;
 
-    logger.log("writing prefs file:", f);
+    this.logger.log("writing prefs file:", f);
 
     // ensure parent folder exists
     if (!f.parent.exists) {

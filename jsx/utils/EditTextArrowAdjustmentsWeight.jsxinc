@@ -67,7 +67,7 @@ function editTextArrowAdjustmentsWeight(e) {
       }
     } else {
       if (shift) {
-        val = UnitValue(Math.max(1, parseInt((val.value - 1) / 10) * 10), val.type);
+        val = UnitValue(Math.max(0, parseInt((val.value - 1) / 10) * 10), val.type);
       } else {
         if (
           val.value === 0.25 ||
@@ -75,9 +75,9 @@ function editTextArrowAdjustmentsWeight(e) {
           val.value === 0.75 ||
           val.value === 1
         ) {
-          val = UnitValue(Math.max(1, val.value - 0.25), val.type);
+          val = UnitValue(Math.max(0, val.value - 0.25), val.type);
         } else {
-          val = UnitValue(Math.max(1, val.value - 1), val.type);
+          val = UnitValue(Math.max(0, val.value - 1), val.type);
         }
       }
     }
