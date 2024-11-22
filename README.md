@@ -12,6 +12,7 @@ JSX Scripts for Adobe Products
 
 - [Alignment Scripts](#alignment-scripts)
 - [Production Scripts](#production-scripts)
+- [Text Scripts](#text-scripts)
 - [Utility Scripts](#utility-scripts)
 
 ## Alignment Scripts
@@ -45,6 +46,21 @@ Includes:
 - Ability to save custom presets
 
 ![ScreenSepMarks](https://github.com/user-attachments/assets/efffb8cd-b303-4abe-bc7b-805c32415f3b)
+
+## Text Scripts
+
+- [FontVisualizer](#fontvisualizer)
+
+### FontVisualizer
+
+[![Download](https://img.shields.io/badge/Download-FontVisualizer.jsx-blue.svg)](/jsx/FontVisualizer.jsx)
+
+Visualize every font on your system with customizable text.
+
+> [!NOTE]
+> Depending on the number of fonts on your system, this script can take a while to complete. If you want to speed things up, you can change the setting `updateScreen = false`. For example, to process all 2500 fonts on my system, it takes 2 minutes with the default settings. With `updateScreen` set to `false`, the processing time reduces to 20 seconds (83% time decrease).
+
+![FontVisualizer](https://github.com/user-attachments/assets/b73046e9-9270-4331-a461-6d48ed3643c5)
 
 ## Utility Scripts
 
