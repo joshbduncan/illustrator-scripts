@@ -35,7 +35,7 @@
 
   // Depending on the amount of fonts you have loaded into your system, this script can take a little while to finish.
   // To process all 2500 fonts on my system, it takes 2 minutes with `updateScreen` set to `true`.
-  // If you don't need to see the script writing each font to the screen, set `updateDate = false`.
+  // If you don't need to see the script writing each font to the screen, set `updateScreen = false`.
   // This reduces the processing time on my system to 20 seconds (83% time decrease).
   var updateScreen = true; // update the screen when drawing each font
   var confirmNewLayer = true; // ask before continuing to a new layer
