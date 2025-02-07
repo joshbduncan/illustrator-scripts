@@ -20,7 +20,7 @@ https://community.adobe.com/t5/illustrator-discussions/creating-a-scannable-data
 // so I just split the string into an array
 
 var ascii =
-  "00000000000000\
+    "00000000000000\
 01010101010100\
 01101001110110\
 01001010100000\
@@ -39,53 +39,55 @@ var ascii =
 drawDataMatrix(ascii);
 
 function drawDataMatrix(str) {
-  // setup defaults
-  var defaultLayerName = "Layer 1";
-  var defaultGroupName = "Matrix";
-  var defaultRectangleScale = 10;
-  var defaultPadding = 36;
+    // setup defaults
+    var defaultLayerName = "Layer 1";
+    var defaultGroupName = "Matrix";
+    var defaultRectangleScale = 10;
+    var defaultPadding = 36;
 
-  // convert the datamatrix string into an array
-  var matrix = str.split("\n");
+    // convert the datamatrix string into an array
+    var matrix = str.split("\n");
 
-  // setup colors
-  var zeroColor = new GrayColor();
-  zeroColor.gray = 100; // black
-  var oneColor = new GrayColor();
-  oneColor.gray = 0; // white
+    // setup colors
+    var zeroColor = new GrayColor();
+    zeroColor.gray = 100; // black
+    var oneColor = new GrayColor();
+    oneColor.gray = 0; // white
 
-  // setup a layer and a group to hold the art
-  var layer, group;
-  try {
-    layer = app.activeDocument.layers.getByName(defaultLayerName);
-  } catch (e) {
-    layer = app.activeDocument.layers.add();
-    layer.name = defaultLayerName;
-  }
-  group = layer.groupItems.add();
-  group.name = defaultGroupName;
-
-  // calculate start x,y position for bottom-right placement with padding
-  var startX =
-    app.activeDocument.width -
-    matrix[0].length * defaultRectangleScale -
-    defaultPadding;
-  var startY =
-    -app.activeDocument.height + matrix.length * defaultRectangleScale + defaultPadding;
-
-  // iterate over the matrix and draw the rectangles
-  var rec;
-  for (var y = 0; y < matrix.length; y++) {
-    for (var x = 0; x < matrix[y].length; x++) {
-      rec = group.pathItems.rectangle(
-        startY - y * defaultRectangleScale, // top
-        startX + x * defaultRectangleScale, // left
-        defaultRectangleScale, // width
-        defaultRectangleScale, // height
-      );
-      rec.filled = true;
-      rec.stroked = false;
-      rec.fillColor = matrix[y][x] === "0" ? zeroColor : oneColor;
+    // setup a layer and a group to hold the art
+    var layer, group;
+    try {
+        layer = app.activeDocument.layers.getByName(defaultLayerName);
+    } catch (e) {
+        layer = app.activeDocument.layers.add();
+        layer.name = defaultLayerName;
     }
-  }
+    group = layer.groupItems.add();
+    group.name = defaultGroupName;
+
+    // calculate start x,y position for bottom-right placement with padding
+    var startX =
+        app.activeDocument.width -
+        matrix[0].length * defaultRectangleScale -
+        defaultPadding;
+    var startY =
+        -app.activeDocument.height +
+        matrix.length * defaultRectangleScale +
+        defaultPadding;
+
+    // iterate over the matrix and draw the rectangles
+    var rec;
+    for (var y = 0; y < matrix.length; y++) {
+        for (var x = 0; x < matrix[y].length; x++) {
+            rec = group.pathItems.rectangle(
+                startY - y * defaultRectangleScale, // top
+                startX + x * defaultRectangleScale, // left
+                defaultRectangleScale, // width
+                defaultRectangleScale // height
+            );
+            rec.filled = true;
+            rec.stroked = false;
+            rec.fillColor = matrix[y][x] === "0" ? zeroColor : oneColor;
+        }
+    }
 }

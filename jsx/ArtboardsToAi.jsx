@@ -17,74 +17,74 @@ Changelog:
 */
 
 (function () {
-  //@target illustrator
+    //@target illustrator
 
 
-  /**
-   * If a file already exists, prompt for permission to overwrite it.
-   * @param {File} file ExtendScript file constructor.
-   * @returns {Boolean} Is it okay to overwrite the file.
-   */
-  function OverwriteFileProtection(file) {
-    if (
-      file.exists &&
-      !Window.confirm(
-        "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
-        "noAsDflt",
-        "File Already Exists",
-      )
-    )
-      return false;
-    return true;
-  }
+    /**
+     * If a file already exists, prompt for permission to overwrite it.
+     * @param {File} file ExtendScript file constructor.
+     * @returns {Boolean} Is it okay to overwrite the file.
+     */
+    function OverwriteFileProtection(file) {
+        if (
+            file.exists &&
+            !Window.confirm(
+                "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
+                "noAsDflt",
+                "File Already Exists"
+            )
+        )
+            return false;
+        return true;
+    }
 
-  // define script variables
-  var ab;
-  var doc;
-  var docFolder;
-  var exportFolder;
-  var exportPath;
-  var fileName;
-  var saveOptions;
+    // define script variables
+    var ab;
+    var doc;
+    var docFolder;
+    var exportFolder;
+    var exportPath;
+    var fileName;
+    var saveOptions;
 
-  // pick a folder to save the file
-  if (app.documents.length > 0) {
-    // get the current document and it's path (if saved)
-    doc = app.activeDocument;
-    docFolder = new Folder(doc.path == "" ? "~/" : doc.path);
-    // prompt for the file export location (defaults to document location)
-    exportFolder = Folder.selectDialog("Save Location", docFolder);
-  }
+    // pick a folder to save the file
+    if (app.documents.length > 0) {
+        // get the current document and it's path (if saved)
+        doc = app.activeDocument;
+        docFolder = new Folder(doc.path == "" ? "~/" : doc.path);
+        // prompt for the file export location (defaults to document location)
+        exportFolder = Folder.selectDialog("Save Location", docFolder);
+    }
 
-  if (exportFolder === null) return;
+    if (exportFolder === null) return;
 
-  // get the current file name
-  fileName = doc.name.split(".")[0];
+    // get the current file name
+    fileName = doc.name.split(".")[0];
 
-  // set up save options
-  saveOptions = new IllustratorSaveOptions();
-  saveOptions.saveMultipleArtboards = true;
+    // set up save options
+    saveOptions = new IllustratorSaveOptions();
+    saveOptions.saveMultipleArtboards = true;
 
-  for (var i = 0; i < doc.artboards.length; i++) {
-    // set the current artboard
-    doc.artboards.setActiveArtboardIndex(i);
-    ab = doc.artboards[i];
-    saveOptions.artboardRange = i + 1;
+    for (var i = 0; i < doc.artboards.length; i++) {
+        // set the current artboard
+        doc.artboards.setActiveArtboardIndex(i);
+        ab = doc.artboards[i];
+        saveOptions.artboardRange = i + 1;
 
-    // set the final exportPath
-    exportPath = new File(exportFolder + "/" + ab.name + ".ai");
+        // set the final exportPath
+        exportPath = new File(exportFolder + "/" + ab.name + ".ai");
 
-    // overwrite protection
-    if (!OverwriteFileProtection(exportPath)) continue;
+        // overwrite protection
+        if (!OverwriteFileProtection(exportPath)) continue;
 
-    // export the file
-    doc.saveAs(exportPath, saveOptions);
+        // export the file
+        doc.saveAs(exportPath, saveOptions);
 
-    // remove the old file
-    exportPath.remove();
+        // remove the old file
+        exportPath.remove();
 
-    // rename the file to remove the appended artboard name
-    exportPath = new File(exportFolder + "/" + ab.name + "_" + ab.name + ".ai");
-    exportPath.rename(ab.name + ".ai");
-  }
+        // rename the file to remove the appended artboard name
+        exportPath = new File(exportFolder + "/" + ab.name + "_" + ab.name + ".ai");
+        exportPath.rename(ab.name + ".ai");
+    }
 })();

@@ -25,16 +25,16 @@
 var s = /arguments/gi;
 
 var replacer = "other string",
-  result;
+    result;
 
 var atf = activeDocument.textFrames[0];
 
 while ((result = s.exec(atf.contents))) {
-  try {
-    aCon = atf.characters[result.index];
+    try {
+        aCon = atf.characters[result.index];
 
-    aCon.length = result[0].length;
+        aCon.length = result[0].length;
 
-    aCon.contents = replacer;
-  } catch (e) {}
+        aCon.contents = replacer;
+    } catch (e) {}
 }

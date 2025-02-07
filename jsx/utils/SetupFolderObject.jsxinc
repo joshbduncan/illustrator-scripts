@@ -4,7 +4,7 @@
  * @returns {FolderObject} Folder object.
  */
 function setupFolderObject(path) {
-  var folder = new Folder(path);
-  if (!folder.exists) folder.create();
-  return folder;
+    var folder = new Folder(path);
+    if (!folder.exists) folder.create();
+    return folder;
 }

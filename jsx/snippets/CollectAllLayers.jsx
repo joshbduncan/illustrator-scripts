@@ -7,15 +7,15 @@ var doc = app.activeDocument;
 doc.layers.add().name = "COLLECTED";
 var layerToMove, visible, locked;
 for (var i = doc.layers.length - 1; i > 0; i--) {
-  // get current layer and it's locked/hidden status
-  layerToMove = doc.layers[i];
-  visible = layerToMove.visible;
-  locked = layerToMove.locked;
-  // make visible and unhide layer for moving
-  layerToMove.visible = true;
-  layerToMove.locked = false;
-  layerToMove.moveToBeginning(doc.layers[0]);
-  // reapply the locked/hidden status after moving
-  if (!visible) layerToMove.visible = false;
-  if (locked) layerToMove.locked = true;
+    // get current layer and it's locked/hidden status
+    layerToMove = doc.layers[i];
+    visible = layerToMove.visible;
+    locked = layerToMove.locked;
+    // make visible and unhide layer for moving
+    layerToMove.visible = true;
+    layerToMove.locked = false;
+    layerToMove.moveToBeginning(doc.layers[0]);
+    // reapply the locked/hidden status after moving
+    if (!visible) layerToMove.visible = false;
+    if (locked) layerToMove.locked = true;
 }

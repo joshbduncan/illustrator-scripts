@@ -9,32 +9,33 @@ var printPreset = app.startupPresetsList[0];
 // iterate over the lines in the csv file and make the docs
 var docPreset, doc, parts, name, size;
 for (var n in fileData) {
-  // split out data for specific line in csv file
-  parts = fileData[n].split(",");
-  name = parts[0];
-  width = parts[1].split("x")[0];
-  height = parts[1].split("x")[1];
-  // set up a doc preset so we can change name
-  var customPreset = new DocumentPreset();
-  customPreset.colorMode = DocumentColorSpace.CMYK;
-  customPreset.title = name;
-  customPreset.width = width * 72;
-  customPreset.height = height * 72;
-  // create the document
-  app.documents.addDocument(printPreset, customPreset);
+    // split out data for specific line in csv file
+    parts = fileData[n].split(",");
+    name = parts[0];
+    width = parts[1].split("x")[0];
+    height = parts[1].split("x")[1];
+    // set up a doc preset so we can change name
+    var customPreset = new DocumentPreset();
+    customPreset.colorMode = DocumentColorSpace.CMYK;
+    customPreset.title = name;
+    customPreset.width = width * 72;
+    customPreset.height = height * 72;
+    // create the document
+    app.documents.addDocument(printPreset, customPreset);
 }
 
 // load file data if available
 function loadFileData(file) {
-  if (file.exists) {
-    try {
-      file.encoding = "UTF-8";
-      file.open("r");
-      var data = file.read();
-      file.close();
-      return data;
-    } catch (e) {
-      alert("Sorry, error loading file " + file + "!");
+    if (file.exists) {
+        try {
+            file.encoding = "UTF-8";
+            file.open("r");
+            var data = file.read();
+            return data;
+        } catch (e) {
+            alert("Sorry, error loading file " + file + "!");
+        } finally {
+            f.close();
+        }
     }
-  }
 }

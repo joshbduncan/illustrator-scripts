@@ -1,16 +1,38 @@
-/*
-  Changelog
-  ---------
-  2021-09-13
-    - updated getVisibleBounds() to catch lots of weird edge cases
-  2021-10-13
-    - updated getVisibleBounds() again for more edge cases (William Dowling @ github.com/wdjsdev)
-  2021-10-15
-    - fix for clipping masks not at top of clipping group stack (issue #7 Sergey Osokin @ https://github.com/creold)
-    - error catch for selected guides (William Dowling @ github.com/wdjsdev)
-    - error catch for empty objects or item with no bounds
-    - error catch for clipping masks inside of an empty group
-*/
+// scale_apply.jsx
+
+// get source bounds from first script
+var sourceBounds = eval($.getenv("scaleTargetBounds"));
+
+// iterate over each selected object and scale to match source object width
+var target, targetBounds, scaleFactor, strokeScaleFactor, scaleMatrix;
+for (var i = 0; i < app.activeDocument.selection.length; i++) {
+    target = app.activeDocument.selection[i];
+
+    // get the true visible bounds of the target object (accounting for clipping masks)
+    targetBounds = getVisibleBounds(target);
+
+    // calculate the scale factor between the source and current target widths
+    scaleFactor =
+        ((sourceBounds[2] - sourceBounds[0]) / (targetBounds[2] - targetBounds[0])) *
+        100;
+    strokeScaleFactor =
+        (sourceBounds[2] - sourceBounds[0]) / (targetBounds[2] - targetBounds[0]);
+
+    // generate a scale matrix
+    scaleMatrix = app.getScaleMatrix(scaleFactor, scaleFactor);
+
+    // apply the matrix using the transform method
+    // https://ai-scripting.docsforadobe.dev/jsobjref/PageItem.html#pageitem-transform
+    target.transform(
+        scaleMatrix,
+        true, // change positions
+        true, // change fill patterns
+        true, // change fill gradients
+        true, // change stroke patterns
+        strokeScaleFactor, // change stroke width
+        Transformation.CENTER // anchor point https://ai-scripting.docsforadobe.dev/jsobjref/scripting-constants.html#transformation
+    );
+}
 
 /**
  * Determine the actual "visible" bounds for an object if clipping mask or compound path items are found.
@@ -90,43 +112,4 @@ function getVisibleBounds(o) {
         bounds = o.geometricBounds;
     }
     return bounds;
-}
-
-/**
- * Determine the overall bounds of an Adobe Illustrator selection.
- * @param {Array} sel Adobe Illustrator selection. Defaults to the selection of the active document.
- * @param {string} type Type of bounds to return (control, geometric, visible, clipped). Defaults to geometric.
- * @returns {Array} Selection bounds [left, top, right, bottom].
- */
-function getSelectionBounds(sel, type) {
-    sel = typeof sel !== "undefined" ? sel : app.activeDocument.selection;
-    type = typeof type !== "undefined" ? type.toLowerCase() : "geometric";
-
-    var bounds = [[], [], [], []];
-    var cur;
-    for (var i = 0; i < sel.length; i++) {
-        switch (type) {
-            case "control":
-                cur = sel[i].geometricBounds;
-                break;
-            case "visible":
-                cur = sel[i].visibleBounds;
-                break;
-            case "clipped":
-                cur = getVisibleBounds(sel[i]);
-                break;
-            default:
-                cur = sel[i].geometricBounds;
-                break;
-        }
-        for (var j = 0; j < cur.length; j++) {
-            bounds[j].push(cur[j]);
-        }
-    }
-    return [
-        Math.min.apply(Math, bounds[0]),
-        Math.max.apply(Math, bounds[1]),
-        Math.max.apply(Math, bounds[2]),
-        Math.min.apply(Math, bounds[3]),
-    ];
 }

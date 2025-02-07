@@ -10,20 +10,20 @@ var doc = app.activeDocument;
 // first get rid of pesky groups hidden inside of compound paths
 var peskyGroups = [];
 for (var i = 0; i < doc.groupItems.length; i++) {
-  if (
-    doc.groupItems[i].selected &&
-    doc.groupItems[i].parent.typename == "CompoundPathItem"
-  ) {
-    peskyGroups.push(doc.groupItems[i]);
-  }
+    if (
+        doc.groupItems[i].selected &&
+        doc.groupItems[i].parent.typename == "CompoundPathItem"
+    ) {
+        peskyGroups.push(doc.groupItems[i]);
+    }
 }
 for (var i = 0; i < peskyGroups.length; i++) {
-  peskyGroups[i].move(peskyGroups[i].layer, ElementPlacement.PLACEATEND);
+    peskyGroups[i].move(peskyGroups[i].layer, ElementPlacement.PLACEATEND);
 }
 
 // clean-up all the junk and only get the path items
 for (var i = 0; i < doc.selection.length; i++) {
-  onlyPathItems(doc.selection[i]);
+    onlyPathItems(doc.selection[i]);
 }
 
 /**
@@ -31,28 +31,28 @@ for (var i = 0; i < doc.selection.length; i++) {
  * @param {PageItem} obj A single Adobe Illustrator pageItem
  */
 function onlyPathItems(obj) {
-  // if pathItem found carry on
-  if (obj.typename == "PathItem") {
-    obj.move(obj.layer, ElementPlacement.PLACEATEND);
-    return;
-  }
-  // remove clipping masks first
-  if (obj.typename == "GroupItem" && obj.clipped && obj.pathItems.length > 0) {
-    obj.pathItems[0].remove();
-  }
-  // remove all items of their container
-  var subObject;
-  if (obj.typename == "GroupItem") {
-    while (obj.pageItems.length > 0) {
-      subObject = obj.pageItems[0];
-      subObject.move(obj.layer, ElementPlacement.PLACEATEND);
-      onlyPathItems(subObject);
+    // if pathItem found carry on
+    if (obj.typename == "PathItem") {
+        obj.move(obj.layer, ElementPlacement.PLACEATEND);
+        return;
     }
-  } else if (obj.typename == "CompoundPathItem") {
-    while (obj.pathItems.length > 0) {
-      subObject = obj.pathItems[0];
-      subObject.move(obj.layer, ElementPlacement.PLACEATEND);
-      onlyPathItems(subObject);
+    // remove clipping masks first
+    if (obj.typename == "GroupItem" && obj.clipped && obj.pathItems.length > 0) {
+        obj.pathItems[0].remove();
     }
-  }
+    // remove all items of their container
+    var subObject;
+    if (obj.typename == "GroupItem") {
+        while (obj.pageItems.length > 0) {
+            subObject = obj.pageItems[0];
+            subObject.move(obj.layer, ElementPlacement.PLACEATEND);
+            onlyPathItems(subObject);
+        }
+    } else if (obj.typename == "CompoundPathItem") {
+        while (obj.pathItems.length > 0) {
+            subObject = obj.pathItems[0];
+            subObject.move(obj.layer, ElementPlacement.PLACEATEND);
+            onlyPathItems(subObject);
+        }
+    }
 }

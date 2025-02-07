@@ -27,40 +27,40 @@
 */
 
 (function () {
-  //@target illustrator
+    //@target illustrator
 
-  var f = File.openDialog("Select a file.");
+    var f = File.openDialog("Select a file.");
 
-  if (f === null) return;
+    if (f === null) return;
 
-  var props = [
-    "absoluteURI",
-    "alias",
-    "created",
-    "creator",
-    "displayName",
-    "encoding",
-    "eof",
-    "error",
-    "exists",
-    "fsName",
-    "fullName",
-    "hidden",
-    "length",
-    "lineFeed",
-    "localizedName",
-    "modified",
-    "name",
-    "parent",
-    "path",
-    "readonly",
-    "relativeURI",
-    "type",
-  ];
+    var props = [
+        "absoluteURI",
+        "alias",
+        "created",
+        "creator",
+        "displayName",
+        "encoding",
+        "eof",
+        "error",
+        "exists",
+        "fsName",
+        "fullName",
+        "hidden",
+        "length",
+        "lineFeed",
+        "localizedName",
+        "modified",
+        "name",
+        "parent",
+        "path",
+        "readonly",
+        "relativeURI",
+        "type",
+    ];
 
-  var arr = ["File Properties"];
-  for (var i = 0; i < props.length; i++) {
-    arr.push(props[i] + ": " + f[props[i]]);
-  }
-  alert(arr.join("\n"));
+    var arr = ["File Properties"];
+    for (var i = 0; i < props.length; i++) {
+        arr.push(props[i] + ": " + f[props[i]]);
+    }
+    alert(arr.join("\n"));
 })();

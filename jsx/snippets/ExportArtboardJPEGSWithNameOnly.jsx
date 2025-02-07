@@ -9,11 +9,11 @@ var whatToExport = new ExportForScreensItemToExport();
 whatToExport.artboards = artboard_idx + 1 + "";
 
 doc.exportForScreens(
-  doc.path,
-  ExportForScreensType.SE_JPEG100,
-  jpegParam,
-  whatToExport,
-  prefix,
+    doc.path,
+    ExportForScreensType.SE_JPEG100,
+    jpegParam,
+    whatToExport,
+    prefix
 );
 
 // When exporting artboard using the exportForScreens method, the api adds

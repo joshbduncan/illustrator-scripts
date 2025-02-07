@@ -21,29 +21,29 @@ var _website = "joshbduncan.com";
 
 // run script
 if (app.documents.length > 0) {
-  var doc = app.activeDocument;
-  var boards = doc.artboards;
-  // check current document save location
-  if (doc.path == "") {
-    var startPath = "~/";
-  } else {
-    var startPath = doc.path;
-  }
-  // prompt for a save location
-  var saveLoc = Folder.selectDialog("Artboard(s) Save Location", startPath);
-  if (saveLoc) {
-    // iterate over all artboards and save them
-    for (var i = 0; i < boards.length; i++) {
-      doc.artboards.setActiveArtboardIndex(i);
-      ab = doc.artboards[i];
-      abDoc = new File(saveLoc + "/" + ab.name);
-      saveOpts = new IllustratorSaveOptions();
-      saveOpts.saveMultipleArtboards = true;
-      saveOpts.artboardRange = (i + 1).toString();
-      doc.saveAs(abDoc, saveOpts);
+    var doc = app.activeDocument;
+    var boards = doc.artboards;
+    // check current document save location
+    if (doc.path == "") {
+        var startPath = "~/";
+    } else {
+        var startPath = doc.path;
     }
-    alert("Artboards saved to:\n" + decodeURI(saveLoc));
-  }
+    // prompt for a save location
+    var saveLoc = Folder.selectDialog("Artboard(s) Save Location", startPath);
+    if (saveLoc) {
+        // iterate over all artboards and save them
+        for (var i = 0; i < boards.length; i++) {
+            doc.artboards.setActiveArtboardIndex(i);
+            ab = doc.artboards[i];
+            abDoc = new File(saveLoc + "/" + ab.name);
+            saveOpts = new IllustratorSaveOptions();
+            saveOpts.saveMultipleArtboards = true;
+            saveOpts.artboardRange = (i + 1).toString();
+            doc.saveAs(abDoc, saveOpts);
+        }
+        alert("Artboards saved to:\n" + decodeURI(saveLoc));
+    }
 } else {
-  alert("No documents open!\nCreate or open a document first.");
+    alert("No documents open!\nCreate or open a document first.");
 }

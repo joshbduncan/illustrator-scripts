@@ -28,9 +28,9 @@ var doc = app.activeDocument;
 var layers = doc.layers;
 
 for (var i = 0; i < layers.length; i++) {
-  for (var n = i + 1; n < layers.length; n++) {
-    alert("Comparing Layer " + i + " to Layer " + n);
-  }
+    for (var n = i + 1; n < layers.length; n++) {
+        alert("Comparing Layer " + i + " to Layer " + n);
+    }
 }
 
 // comparsions

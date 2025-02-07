@@ -38,8 +38,8 @@ sepOptions.colorSeparationMode = PrintColorSeparationMode.HOSTBASEDSEPARATION;
 // disable all inks except last
 var newInkList = doc.inkList;
 for (var i = 0; i < newInkList.length - 1; i++) {
-  alert(i);
-  newInkList[i].inkInfo.printingStatus = InkPrintStatus.DISABLEINK;
+    alert(i);
+    newInkList[i].inkInfo.printingStatus = InkPrintStatus.DISABLEINK;
 }
 sepOptions.inkList = newInkList;
 

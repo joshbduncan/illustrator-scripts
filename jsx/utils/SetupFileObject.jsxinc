@@ -5,5 +5,5 @@
  * @returns {FileObject} File object.
  */
 function setupFileObject(path, name) {
-  return new File(path + "/" + name);
+    return new File(path + "/" + name);
 }

@@ -6,18 +6,21 @@
  * @returns {UnitValue}
  */
 function parseNumberInput(n, defaultValue, defaultUnit) {
-  defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
+    defaultValue = typeof defaultValue !== "undefined" ? defaultValue : 0;
 
-  var rulerUnits = app.activeDocument.rulerUnits.toString().split(".")[1].toLowerCase();
-  defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
+    var rulerUnits = app.activeDocument.rulerUnits
+        .toString()
+        .split(".")[1]
+        .toLowerCase();
+    defaultUnit = typeof defaultUnit !== "undefined" ? defaultUnit : rulerUnits;
 
-  var val = UnitValue(n);
-  if (val.type === "?") {
-    val = UnitValue(n, defaultUnit);
-    if (isNaN(val.value)) {
-      app.beep();
-      val = UnitValue(defaultValue, defaultUnit);
+    var val = UnitValue(n);
+    if (val.type === "?") {
+        val = UnitValue(n, defaultUnit);
+        if (isNaN(val.value)) {
+            app.beep();
+            val = UnitValue(defaultValue, defaultUnit);
+        }
     }
-  }
-  return val;
+    return val;
 }

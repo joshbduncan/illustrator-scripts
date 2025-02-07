@@ -15,25 +15,28 @@ Versions:
 */
 
 (function () {
-  var doc = app.activeDocument;
+    var doc = app.activeDocument;
 
-  while (findContainerObjects(doc.selection).length > 0) {
-    app.executeMenuCommand("ungroup");
-    app.executeMenuCommand("releaseMask");
-    app.executeMenuCommand("noCompoundPath");
-  }
-
-  /**
-   * Find all container objects (groups (including clipping masks), and compound paths) within the array.
-   * @param {Array} arr Adobe Illustrator pageItems.
-   * @returns {Array} Array of container objects.
-   */
-  function findContainerObjects(arr) {
-    var matches = [];
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i].typename === "GroupItem" || arr[i].typename === "CompoundPathItem")
-        matches.push(arr[i]);
+    while (findContainerObjects(doc.selection).length > 0) {
+        app.executeMenuCommand("ungroup");
+        app.executeMenuCommand("releaseMask");
+        app.executeMenuCommand("noCompoundPath");
     }
-    return matches;
-  }
+
+    /**
+     * Find all container objects (groups (including clipping masks), and compound paths) within the array.
+     * @param {Array} arr Adobe Illustrator pageItems.
+     * @returns {Array} Array of container objects.
+     */
+    function findContainerObjects(arr) {
+        var matches = [];
+        for (var i = 0; i < arr.length; i++) {
+            if (
+                arr[i].typename === "GroupItem" ||
+                arr[i].typename === "CompoundPathItem"
+            )
+                matches.push(arr[i]);
+        }
+        return matches;
+    }
 })();

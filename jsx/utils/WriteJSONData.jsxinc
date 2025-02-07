@@ -5,14 +5,15 @@
  * @returns {Boolean} Write success.
  */
 function writeJSONData(data, f) {
-  try {
-    f.encoding = "UTF-8";
-    f.open("w");
-    f.write(data.toSource());
-    f.close();
-  } catch (e) {
-    alert("Error writing file:\n" + f);
-    return false;
-  }
-  return true;
+    try {
+        f.encoding = "UTF-8";
+        f.open("w");
+        f.write(data.toSource());
+    } catch (e) {
+        alert("Error writing file:\n" + f);
+        return false;
+    } finally {
+        f.close();
+    }
+    return true;
 }
