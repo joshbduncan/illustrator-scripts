@@ -75,7 +75,7 @@ Changelog
 
     var _title = "RepeatAfterMe";
     var _version = "0.7.1";
-    var _copyright = "Copyright 2024 Josh Duncan";
+    var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
     //////////////

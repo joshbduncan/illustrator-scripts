@@ -46,7 +46,7 @@ Changelog
 
     var _title = "Screen Print Separation Marks";
     var _version = "1.2.1";
-    var _copyright = "Copyright 2024 Josh Duncan";
+    var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
     //////////////

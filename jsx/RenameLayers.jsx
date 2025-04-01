@@ -1,19 +1,34 @@
 /*
 RenameLayers.jsx for Adobe Illustrator
 --------------------------------------
-
 Rename layers in Adobe Illustrator using find and replace (regex enabled).
 
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
+https://joshbduncan.com
+https://github.com/joshbduncan/
+
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
+
+License
+-------
 This script is distributed under the MIT License.
 See the LICENSE file for details.
 
-Versions:
+Changelog
+---------
 1.0.0 initial release
 */
 
 var _title = "Rename Layers";
 var _version = "1.0.0";
-var _copyright = "Copyright 2024 Josh Duncan";
+var _copyright = "Copyright 2025 Josh Duncan";
 var _website = "joshbduncan.com";
 
 // -----------

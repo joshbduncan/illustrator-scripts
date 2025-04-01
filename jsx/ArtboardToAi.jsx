@@ -1,18 +1,28 @@
 /*
 ArtboardToAi.jsx for Adobe Illustrator
 --------------------------------------
-
 Export the current artboard to a Ai file.
 
-Copyright 2024 Josh Duncan
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
 https://joshbduncan.com
+https://github.com/joshbduncan/
 
-See README.md for more info
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
 
+License
+-------
 This script is distributed under the MIT License.
 See the LICENSE file for details.
 
-Changelog:
+Changelog
+---------
 0.1.0 initial release
 0.1.1 fix where ai appends the artboard name to the end of saved files
 */

@@ -1,13 +1,28 @@
 /*
 MatchObjects.jsx for Adobe Illustrator
 --------------------------------------
-
 Match one or more objects to another by size and/or position.
 
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
+https://joshbduncan.com
+https://github.com/joshbduncan/
+
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
+
+License
+-------
 This script is distributed under the MIT License.
 See the LICENSE file for details.
 
-Versions:
+Changelog
+---------
 1.0.0 initial release
 1.0.1 added move to anchor point of source (not just center)
 1.0.2 changed ui dialog
@@ -28,7 +43,7 @@ Versions:
 (function () {
     var _title = "Match Objects";
     var _version = "1.1.1";
-    var _copyright = "Copyright 2024 Josh Duncan";
+    var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
     // run script

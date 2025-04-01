@@ -1,10 +1,28 @@
 /*
 ExportPrintCutPDFs.jsx for Adobe Illustrator
 --------------------------------------------
-
 Export proper print and cut PDFs for decal and signage production.
 
-Changelog:
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
+https://joshbduncan.com
+https://github.com/joshbduncan/
+
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
+
+License
+-------
+This script is distributed under the MIT License.
+See the LICENSE file for details.
+
+Changelog
+---------
 0.1.0 initial release
 0.1.1 fixed reg mark placement when ruler origin isn't at normal position
 0.1.2 moved ruler origin fix into `createRegMarks()` function
@@ -17,7 +35,7 @@ Changelog:
 (function () {
     var _title = "Export Print and Cut PDFs";
     var _version = "0.1.4";
-    var _copyright = "Copyright 2024 Josh Duncan";
+    var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
     if (app.documents.length > 0) {

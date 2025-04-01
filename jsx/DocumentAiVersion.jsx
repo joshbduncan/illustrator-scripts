@@ -1,13 +1,28 @@
 /*
 DocumentAiVersion.jsx for Adobe Illustrator
 -------------------------------------------
-
 Get the version of Adobe Illustrator that created the document.
 
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
+https://joshbduncan.com
+https://github.com/joshbduncan/
+
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
+
+License
+-------
 This script is distributed under the MIT License.
 See the LICENSE file for details.
 
-Versions:
+Changelog
+---------
 0.1.0 initial release
 */
 

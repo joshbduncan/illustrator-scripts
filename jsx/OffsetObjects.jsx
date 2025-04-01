@@ -1,13 +1,28 @@
 /*
 OffsetObjects.jsx for Adobe Illustrator
 --------------------------------------
-
 Offset selected objects vertically or horizontally by stacking order or artboard placement.
 
+Author
+------
+Josh Duncan
+joshbduncan@gmail.com
+https://joshbduncan.com
+https://github.com/joshbduncan/
+
+Wanna Support Me?
+-----------------
+Most of the things I make are free to download but if you would like
+to support me that would be awesome and greatly appreciated!
+https://joshbduncan.com/software.html
+
+License
+-------
 This script is distributed under the MIT License.
 See the LICENSE file for details.
 
-Versions:
+Changelog
+---------
 1.0.0 initial release
 1.0.1 fixed bug where if no translation was needed the stroke would scale for some reason
 1.2.0 added ordering by artboard placement
@@ -19,7 +34,7 @@ Versions:
 
     var _title = "Offset Objects";
     var _version = "1.3.0";
-    var _copyright = "Copyright 2024 Josh Duncan";
+    var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
     //////////////
