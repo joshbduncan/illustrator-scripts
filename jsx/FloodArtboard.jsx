@@ -24,6 +24,7 @@ See the LICENSE file for details.
 Changelog
 ---------
 2025-04-01 initial release
+2025-05-19 fix for non-standard ruler location
 */
 
 (function () {
@@ -47,6 +48,10 @@ Changelog
     // grab document and selection info
     var doc = app.activeDocument;
 
+    // reset ruler for correct math
+    var oldRulerOrigin = doc.rulerOrigin;
+    doc.rulerOrigin = [0, doc.height];
+
     // get the active artboard
     var ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
     var t = ab.artboardRect[0];
@@ -63,4 +68,7 @@ Changelog
     rect.filled = true;
     rect.stroked = false;
     rect.fillColor = doc.defaultFillColor;
+
+    // reset ruler to original user setting
+    doc.rulerOrigin = oldRulerOrigin;
 })();
