@@ -68,13 +68,16 @@ Changelog
 0.7.1 2025-02-06
     fixed:
         - row/col incorrect NaN check fixed ("." caused validation to return NaN)
+0.7.2 2025-06-11
+    fixed:
+        - script was incorrectly expanding the appearance of the selected object(s) instead of temporary object
 */
 
 (function () {
     //@target illustrator
 
     var _title = "RepeatAfterMe";
-    var _version = "0.7.1";
+    var _version = "0.7.2";
     var _copyright = "Copyright 2025 Josh Duncan";
     var _website = "joshbduncan.com";
 
@@ -178,11 +181,15 @@ Changelog
         },
     };
     /**
-     * Provide easy access page item placement information.
-     * @param {Array} bounds Illustrator object bounds (e.g. [left, top, right, bottom]).
-     * @returns {Object} Object information (left, top, right, bottom, width, height, centerX, centerY)
+     * Get geometric info from Illustrator object bounds.
+     * @param {Array} bounds - Illustrator object bounds (e.g. [left, top, right, bottom]).
+     * @returns {Object} Geometry info with left, top, right, bottom, width, height, centerX, centerY.
      */
     function getObjectPlacementInfo(bounds) {
+        if (!bounds || bounds.length !== 4) {
+            throw new Error("Invalid bounds: Expected [left, top, right, bottom]");
+        }
+
         var left = bounds[0];
         var top = bounds[1];
         var right = bounds[2];
@@ -191,6 +198,7 @@ Changelog
         var height = top - bottom;
         var centerX = left + width / 2;
         var centerY = top - height / 2;
+
         return {
             left: left,
             top: top,
@@ -673,7 +681,7 @@ Changelog
     // setup development logging
     var logger;
     if (dev) {
-        var logFilePath = Folder.userData + "/JBD/" + _title + ".log";
+        var logFilePath = Folder.desktop + "/RepeatAfterMe.log";
         logger = new Logger(logFilePath, "a", undefined, true);
         logger.log("**DEV MODE**", $.fileName);
     } else {
@@ -1156,9 +1164,12 @@ Changelog
                 templateLayer.name = layerName;
 
                 // create a temporary item to fix any issues with the appearance panel
+                var oldSelection = app.activeDocument.selection;
                 var t = templateLayer.pathItems.rectangle(0, 0, 1, 1);
+                app.activeDocument.selection = t;
                 app.executeMenuCommand("expandStyle");
                 t.remove();
+                app.activeDocument.selection = oldSelection;
 
                 // draw initial preview rectangle.
                 var rect = templateLayer.pathItems.rectangle(
