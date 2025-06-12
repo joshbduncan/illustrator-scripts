@@ -27,6 +27,7 @@ Changelog
 1.0.1 fixed bug where if no translation was needed the stroke would scale for some reason
 1.2.0 added ordering by artboard placement
 1.3.0 added limits for vertical and horizontal
+1.3.1 removed limit option, bug fixes
 */
 
 (function () {
@@ -43,11 +44,15 @@ Changelog
 
 
     /**
-     * Provide easy access page item placement information.
-     * @param {Array} bounds Illustrator object bounds (e.g. [left, top, right, bottom]).
-     * @returns {Object} Object information (left, top, right, bottom, width, height, centerX, centerY)
+     * Get geometric info from Illustrator object bounds.
+     * @param {Array} bounds - Illustrator object bounds (e.g. [left, top, right, bottom]).
+     * @returns {Object} Geometry info with left, top, right, bottom, width, height, centerX, centerY.
      */
     function getObjectPlacementInfo(bounds) {
+        if (!bounds || bounds.length !== 4) {
+            throw new Error("Invalid bounds: Expected [left, top, right, bottom]");
+        }
+
         var left = bounds[0];
         var top = bounds[1];
         var right = bounds[2];
@@ -56,6 +61,7 @@ Changelog
         var height = top - bottom;
         var centerX = left + width / 2;
         var centerY = top - height / 2;
+
         return {
             left: left,
             top: top,
@@ -325,19 +331,6 @@ Changelog
         rbHorizontal.value = true;
         var rbVertical = gDirection.add("radiobutton", undefined, "Vertical Offset");
 
-        // group - limit objects
-        var gLimit = pDirection.add("group", undefined);
-        gLimit.alignChildren = "fill";
-        gLimit.orientation = "row";
-        var stLimit = gLimit.add(
-            "statictext",
-            undefined,
-            "Max objects before new row/col:"
-        );
-        var size = gLimit.add('edittext {justify: "center"}');
-        size.preferredSize.width = 60;
-        size.text = 0;
-
         // panel - order by
         var pOrderBy = win.add("panel", undefined, "Order");
         pOrderBy.alignChildren = "fill";
@@ -375,9 +368,11 @@ Changelog
         var pGutter = win.add("panel", undefined, "Gutter Setup");
         pGutter.orientation = "row";
         var stSize = pGutter.add("statictext", undefined, "Size:");
-        var size = pGutter.add('edittext {justify: "center"}');
-        size.preferredSize.width = 60;
-        size.text = 0;
+        var gutter = pGutter.add('edittext {justify: "center"}');
+        gutter.preferredSize.width = 60;
+        gutter.text = "0";
+        gutter.preferredSize.width = 60;
+        gutter.text = 0;
         var ddSizeUnit = pGutter.add("dropdownlist", undefined, ["in", "pt", "mm"]);
         ddSizeUnit.preferredSize.width = 70;
         ddSizeUnit.selection = 0;
@@ -411,13 +406,16 @@ Changelog
 
         // if "ok" button clicked then return inputs
         if (win.show() == 1) {
-            var gutter = parseNumberInput(size.text, 0, ddSizeUnit.selection.text);
+            var gutterSize = parseNumberInput(
+                gutter.text,
+                0,
+                ddSizeUnit.selection.text
+            );
             currentSettings = {
                 direction: rbVertical.value ? "Vertical" : "Horizontal",
-                limit: Number(stLimit.text),
                 ordering: getSelectedRbFromGroup(gOrderBy),
                 reverse: cbReverseStackingOrder.value,
-                gutter: gutter.as("pt"),
+                gutter: gutterSize.as("pt"),
             };
             return currentSettings;
         } else {
