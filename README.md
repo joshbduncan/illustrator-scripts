@@ -25,7 +25,7 @@ JSX Scripts for Adobe Products
 
 Offset selected objects vertically or horizontally by stacking order or artboard placement.
 
-![OffsetObjects](./images/OffsetObjects.gif)
+![OffsetObjects](https://github.com/user-attachments/assets/69961345-e261-4f04-b592-800a6c762c74)
 
 ## Production Scripts
 
@@ -45,7 +45,7 @@ Includes:
 - Can be re-run at any time to update data
 - Ability to save custom presets
 
-![ScreenSepMarks](./images/ScreenSepMarks.gif)
+![ScreenSepMarks](https://github.com/user-attachments/assets/efffb8cd-b303-4abe-bc7b-805c32415f3b)
 
 ## Text Scripts
 
@@ -60,7 +60,7 @@ Visualize every font on your system with customizable text.
 > [!NOTE]
 > Depending on the number of fonts on your system, this script can take a while to complete. If you want to speed things up, you can change the setting `updateScreen = false`. For example, to process all 2500 fonts on my system, it takes 2 minutes with the default settings. With `updateScreen` set to `false`, the processing time reduces to 20 seconds (83% time decrease).
 
-![FontVisualizer](./images/FontVisualizer.gif)
+![FontVisualizer](https://github.com/user-attachments/assets/b73046e9-9270-4331-a461-6d48ed3643c5)
 
 ## Utility Scripts
 
