@@ -1,0 +1,9 @@
+/**
+ * Setup file object.
+ * @param {FolderObject} path Folder object where file should exist,
+ * @param {String} name File name.
+ * @returns {FileObject} File object.
+ */
+function setupFileObject(path, name) {
+  return new File(path + "/" + name);
+}

@@ -21,7 +21,7 @@ JSX Scripts for Adobe Products
 
 ### OffsetObjects
 
-[![Download](https://img.shields.io/badge/Download-OffsetObjects.jsxinc-blue.svg)](/jsx/utils/OffsetObjects.jsxinc)
+[![Download](https://img.shields.io/badge/Download-OffsetObjects.jsxinc-blue.svg)](/utils/OffsetObjects.jsxinc)
 
 Offset selected objects vertically or horizontally by stacking order or artboard placement.
 
@@ -70,7 +70,7 @@ Visualize every font on your system with customizable text.
 
 ### GetObjectPlacementInfo
 
-[![Download](https://img.shields.io/badge/Download-GetObjectPlacementInfo.jsxinc-blue.svg)](/jsx/utils/GetObjectPlacementInfo.jsxinc)
+[![Download](https://img.shields.io/badge/Download-GetObjectPlacementInfo.jsxinc-blue.svg)](/utils/GetObjectPlacementInfo.jsxinc)
 
 Provide the bounds of a `PageItem` and get all of its placement information. Includes `left`, `top`, `right`, `bottom`, `width`, `height`, `centerX`, and `centerY`.
 
@@ -81,7 +81,7 @@ var myObjectPlacementInfo = getObjectPlacementInfo(myObject.visibleBounds)
 
 ### GetVisibleBounds
 
-[![Download](https://img.shields.io/badge/Download-GetVisibleBounds.jsxinc-blue.svg)](/jsx/utils/GetVisibleBounds.jsxinc)
+[![Download](https://img.shields.io/badge/Download-GetVisibleBounds.jsxinc-blue.svg)](/utils/GetVisibleBounds.jsxinc)
 
 Determine the actual "visible" bounds for an object accounting for clipping mask and compound paths.
 
@@ -92,7 +92,7 @@ var bounds = getVisibleBounds(clippedObject)
 
 ### Logger
 
-[![Download](https://img.shields.io/badge/Download-Logger.jsxinc-blue.svg)](/jsx/utils/Logger.jsxinc)
+[![Download](https://img.shields.io/badge/Download-Logger.jsxinc-blue.svg)](/utils/Logger.jsxinc)
 
 Module for easy file logging from within Adobe ExtendScript.
 
