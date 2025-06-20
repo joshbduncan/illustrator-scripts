@@ -1,4 +1,43 @@
 /**
+ * Read ExtendScript "json-like" data from file.
+ * @param {File} f File object to read.
+ * @returns {Object} Evaluated JSON data.
+ */
+function readJSONData(f) {
+  var json, obj;
+  try {
+    f.encoding = "UTF-8";
+    f.open("r");
+    json = f.read();
+  } catch (e) {
+    alert("Error loading file:\n" + f);
+  } finally {
+    f.close();
+  }
+  obj = eval(json);
+  return obj;
+}
+/**
+ * Write ExtendScript "json-like" data to disk.
+ * @param {Object} data Data to be written.
+ * @param {File} f File object to write to.
+ * @returns {Boolean} Write success.
+ */
+function writeJSONData(data, f) {
+  try {
+    f.encoding = "UTF-8";
+    f.open("w");
+    f.write(data.toSource());
+  } catch (e) {
+    alert("Error writing file:\n" + f);
+    return false;
+  } finally {
+    f.close();
+  }
+  return true;
+}
+
+/**
  * Determine the base calling script from the current stack.
  * @returns {String} Initial script name.
  */

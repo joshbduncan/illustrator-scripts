@@ -3,7 +3,7 @@
  * @param {File} file ExtendScript file constructor.
  * @returns {Boolean} Is it okay to overwrite the file.
  */
-function OverwriteFileProtection(file) {
+function overwriteFileProtection(file) {
   if (
     file.exists &&
     !Window.confirm(

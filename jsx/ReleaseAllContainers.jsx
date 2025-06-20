@@ -26,32 +26,36 @@ See the LICENSE file for details.
 
 Changelog
 ---------
-0.1.0 initial release
+0.1.0 2023-11-08 initial release
+0.1.1 2025-06-19 refactor
 */
 
 (function () {
-    var doc = app.activeDocument;
+  //@target illustrator
 
-    while (findContainerObjects(doc.selection).length > 0) {
-        app.executeMenuCommand("ungroup");
-        app.executeMenuCommand("releaseMask");
-        app.executeMenuCommand("noCompoundPath");
-    }
+  ////////////////////////////
+  // MAIN SCRIPT OPERATIONS //
+  ////////////////////////////
 
-    /**
-     * Find all container objects (groups (including clipping masks), and compound paths) within the array.
-     * @param {Array} arr Adobe Illustrator pageItems.
-     * @returns {Array} Array of container objects.
-     */
-    function findContainerObjects(arr) {
-        var matches = [];
-        for (var i = 0; i < arr.length; i++) {
-            if (
-                arr[i].typename === "GroupItem" ||
-                arr[i].typename === "CompoundPathItem"
-            )
-                matches.push(arr[i]);
-        }
-        return matches;
-    }
+  // no need to continue if there is no active document
+  if (!app.documents.length) {
+    alert("No active document.");
+    return;
+  }
+
+  // grab document
+  var doc = app.activeDocument;
+
+  var n = 0;
+
+  while (doc.groupItems.length + doc.compoundPathItems.length > 0) {
+    n++;
+    $.writeln(n);
+    app.executeMenuCommand("selectall");
+    app.executeMenuCommand("ungroup");
+    app.executeMenuCommand("selectall");
+    app.executeMenuCommand("releaseMask");
+    app.executeMenuCommand("selectall");
+    app.executeMenuCommand("noCompoundPath");
+  }
 })();

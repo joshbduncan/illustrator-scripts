@@ -26,70 +26,70 @@ Changelog
 0.1.0 2025-04-01 initial release
 0.1.1 2025-05-19 fix for non-standard ruler location
 0.1.2 2025-06-18 refactor
+0.1.3 2025-06-19 bug fix re-lock flood layer
 */
 
 (function () {
-    //@target illustrator
+  //@target illustrator
 
-    var _title = "FloodArtboard";
-    var _version = "0.1.0";
-    var _copyright = "Copyright 2025 Josh Duncan";
-    var _website = "joshbduncan.com";
+  ////////////////////////////
+  // MAIN SCRIPT OPERATIONS //
+  ////////////////////////////
 
-    ////////////////////////////
-    // MAIN SCRIPT OPERATIONS //
-    ////////////////////////////
+  // no need to continue if there is no active document
+  if (!app.documents.length) {
+    alert("No active document.");
+    return;
+  }
 
-    // no need to continue if there is no active document
-    if (!app.documents.length) {
-        alert("No active document.");
-        return;
-    }
+  // grab document and selection info
+  var doc = app.activeDocument;
 
-    // grab document and selection info
-    var doc = app.activeDocument;
+  // create a layer to hold fill
+  var floodLayer;
+  var floodLayerName = "Flood Fill";
+  var floodLayerWasLocked = false;
+  try {
+    floodLayer = doc.layers.getByName(floodLayerName);
+    floodLayerWasLocked = floodLayer.locked;
+    floodLayer.locked = false;
+  } catch (e) {
+    $.writeln(e.message);
+    floodLayer = doc.layers.add();
+    floodLayer.name = floodLayerName;
+  }
 
-    // create a layer to hold fill
-    var floodLayer;
-    var floodLayerName = "Flood Fill";
-    var floodLayerWasLocked = false;
-    try {
-        floodLayer = doc.layers.getByName(floodLayerName);
-        floodLayerWasLocked = floodLayer.locked;
-        floodLayer.locked = false;
-    } catch (e) {
-        floodLayer = doc.layers.add();
-        floodLayer.name = floodLayerName;
-    }
+  // get the active artboard
+  var ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
 
-    // get the active artboard
-    var ab = doc.artboards[doc.artboards.getActiveArtboardIndex()];
+  // do all operations inside of try block to ensure ruler origin is reset
+  var oldRulerOrigin;
+  try {
+    // reset ruler for correct math
+    oldRulerOrigin = doc.rulerOrigin;
+    doc.rulerOrigin = [0, doc.height];
 
-    // do all operations inside of try block to ensure ruler origin is reset
-    var oldRulerOrigin;
-    try {
-        // reset ruler for correct math
-        oldRulerOrigin = doc.rulerOrigin;
-        doc.rulerOrigin = [0, doc.height];
+    // calculate guide size and placement
+    var left = ab.artboardRect[0];
+    var top = ab.artboardRect[1];
+    var right = ab.artboardRect[2];
+    var bottom = ab.artboardRect[3];
 
-        // calculate guide size and placement
-        var left = ab.artboardRect[0];
-        var top = ab.artboardRect[1];
-        var right = ab.artboardRect[2];
-        var bottom = ab.artboardRect[3];
+    var width = right - left;
+    var height = top - bottom;
 
-        var width = right - left;
-        var height = top - bottom;
+    // create a flood fill rectangle
+    var rect = floodLayer.pathItems.rectangle(top, left, width, height); // top, left, width, height
+    rect.filled = true;
+    rect.stroked = false;
+    rect.fillColor = doc.defaultFillColor;
+  } catch (e) {
+    alert("Unexpected error:\n" + e.message);
+  } finally {
+    // reset guides layer locked status
+    if (floodLayerWasLocked) floodLayer.locked = true;
 
-        // create a flood fill rectangle
-        var rect = floodLayer.pathItems.rectangle(top, left, width, height); // top, left, width, height
-        rect.filled = true;
-        rect.stroked = false;
-        rect.fillColor = doc.defaultFillColor;
-    } catch (e) {
-        alert("Unexpected error:\n" + e.message);
-    } finally {
-        // reset ruler to original user setting
-        doc.rulerOrigin = oldRulerOrigin;
-    }
+    // reset ruler to original user setting
+    doc.rulerOrigin = oldRulerOrigin;
+  }
 })();

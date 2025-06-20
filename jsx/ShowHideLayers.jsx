@@ -1,7 +1,7 @@
 /*
 ShowHideLayers.jsx for Adobe Illustrator
---------------------------------------
-Show/Hide layers in Adobe Illustrator using find (regex enabled).
+----------------------------------------
+Show or Hide layers in Adobe Illustrator using find (regex enabled).
 
 Author
 ------
@@ -24,54 +24,79 @@ See the LICENSE file for details.
 Changelog
 ---------
 1.0.0 initial release
+1.0.1 2025-06-20 refactor, bug fixes
 */
 
-//@target illustrator
+(function () {
+  //@target illustrator
 
-var _title = "Show/Hide Layers";
-var _version = "1.0.0";
-var _copyright = "Copyright 2025 Josh Duncan";
-var _website = "joshbduncan.com";
+  var scriptTitle = "Show/Hide Layers";
+  var scriptVersion = "1.0.1";
+  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var website = "joshbduncan.com";
 
-// -----------
-// main script
-// -----------
+  //////////////
+  // INCLUDES //
+  //////////////
 
-// run script
-if (app.documents.length > 0) {
-    var doc = app.activeDocument;
-    var layers = doc.layers;
-    var settings = settingsWin();
-    if (settings) {
-        var changedLayers = [];
-        for (var i = 0; i < layers.length; i++) {
-            var layer = layers[i];
-            var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
-            if (
-                (settings.regex && find.test(layer.name)) ||
-                layer.name.indexOf(settings.find) > -1
-            ) {
-                if (
-                    (settings.selected && layer.hasSelectedArtwork) ||
-                    !settings.selected
-                ) {
-                    if (layer.visible != settings.visibility) {
-                        layer.visible = settings.visibility;
-                        changedLayers.push(i);
-                    }
-                }
-            }
+  /**
+   * Open a url in the system browser.
+   * @param {String} url URL to open.
+   */
+  function openURL(url) {
+    var html = new File(Folder.temp.absoluteURI + "/aisLink.html");
+    html.open("w");
+    var htmlBody =
+      '<html><head><META HTTP-EQUIV=Refresh CONTENT="0; URL=' +
+      url +
+      '"></head><body><p></p></body></html>';
+    html.write(htmlBody);
+    html.close();
+    html.execute();
+  }
+
+  ////////////////////////////
+  // MAIN SCRIPT OPERATIONS //
+  ////////////////////////////
+
+  // no need to continue if there is no active document
+  if (!app.documents.length) {
+    alert("No active document.");
+    return;
+  }
+
+  // grab document and layers
+  var doc = app.activeDocument;
+  var layers = doc.layers;
+
+  var settings = settingsWin();
+  if (!settings) return;
+
+  var changedLayers = [];
+  for (var i = 0; i < layers.length; i++) {
+    var layer = layers[i];
+    var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
+    if (
+      (settings.regex && find.test(layer.name)) ||
+      layer.name.indexOf(settings.find) > -1
+    ) {
+      if (
+        (settings.selected && layer.hasSelectedArtwork) ||
+        !settings.selected
+      ) {
+        if (layer.visible != settings.visibility) {
+          layer.visible = settings.visibility;
+          changedLayers.push(i);
         }
-        alert("Visibility changed on " + changedLayers.length + " layer(s).");
+      }
     }
-} else {
-    alert("No documents open!\nCreate or open a document first.");
-}
+  }
+  alert("Visibility changed on " + changedLayers.length + " layer(s).");
 
-function settingsWin() {
+  function settingsWin() {
     // settings window
     var win = new Window("dialog");
-    win.text = _title + " " + _version;
+    win.text = scriptTitle + " " + scriptVersion;
     win.orientation = "column";
     win.alignChildren = "fill";
 
@@ -98,9 +123,9 @@ function settingsWin() {
 
     //checkbox - limit to layers with selected artwork
     var cbSelected = pFind.add(
-        "checkbox",
-        undefined,
-        "Limit to layer(s) with selected artwork"
+      "checkbox",
+      undefined,
+      "Limit to layer(s) with selected artwork",
     );
     cbSelected.value = false;
 
@@ -109,9 +134,13 @@ function settingsWin() {
     pVisibility.alignChildren = "fill";
     pVisibility.orientation = "column";
     pVisibility.margins = 18;
-    var rbShow = pVisibility.add("radiobutton", undefined, "Show Matching Layer(s)");
+    var rbShow = pVisibility.add(
+      "radiobutton",
+      undefined,
+      "Show Matching Layer(s)",
+    );
     rbShow.value = true;
-    var rbHide = pVisibility.add("radiobutton", undefined, "Hide Matching Layer(s)");
+    pVisibility.add("radiobutton", undefined, "Hide Matching Layer(s)");
 
     // group - window buttons
     var gWindowButtons = win.add("group", undefined);
@@ -120,31 +149,40 @@ function settingsWin() {
     gWindowButtons.alignment = ["center", "top"];
     var btOK = gWindowButtons.add("button", undefined, "OK");
     btOK.enabled = false;
-    var btCancel = gWindowButtons.add("button", undefined, "Cancel");
+    gWindowButtons.add("button", undefined, "Cancel");
 
-    // copyright info
-    var pCopyright = win.add("panel", undefined);
-    pCopyright.orientation = "column";
-    pCopyright.add("statictext", undefined, "Version " + _version + " " + _copyright);
-    pCopyright.add("statictext", undefined, _website);
+    // Copyright
+    var stCopyright = win.add(
+      "statictext",
+      undefined,
+      scriptCopyright + " @ " + website,
+      {
+        name: "stCopyright",
+      },
+    );
+
+    stCopyright.addEventListener("click", function () {
+      openURL("https://joshbduncan.com");
+    });
 
     find.onChanging = function () {
-        if (find.text.length > 0) {
-            btOK.enabled = true;
-        } else {
-            btOK.enabled = false;
-        }
+      if (find.text.length > 0) {
+        btOK.enabled = true;
+      } else {
+        btOK.enabled = false;
+      }
     };
 
     // if "ok" button clicked then return inputs
     if (win.show() == 1) {
-        return {
-            visibility: rbShow.value,
-            regex: rbRegex.value,
-            find: find.text,
-            selected: cbSelected.value,
-        };
+      return {
+        visibility: rbShow.value,
+        regex: rbRegex.value,
+        find: find.text,
+        selected: cbSelected.value,
+      };
     } else {
-        return;
+      return;
     }
-}
+  }
+})();

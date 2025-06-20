@@ -20,21 +20,21 @@ var tool = winButtons.add("button", undefined, "Tool");
 tool.preferredSize.width = 75;
 
 menu.onClick = function () {
-    win.close();
-    try {
-        app.executeMenuCommand(cmd.text);
-    } catch (e) {
-        alert(e);
-    }
+  win.close();
+  try {
+    app.executeMenuCommand(cmd.text);
+  } catch (e) {
+    alert(e);
+  }
 };
 
 tool.onClick = function () {
-    win.close();
-    try {
-        app.selectTool(cmd.text);
-    } catch (e) {
-        alert(e);
-    }
+  win.close();
+  try {
+    app.selectTool(cmd.text);
+  } catch (e) {
+    alert(e);
+  }
 };
 
 win.show();

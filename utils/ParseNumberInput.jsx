@@ -1,8 +1,8 @@
 /**
  * Parse a ScriptUI `edittext` value into a valid `UnitType` number.
- * @param {Number|String} n Value to parse.
- * @param {Number} defaultValue Default value to return if `n` is invalid.
- * @param {String} defaultUnit Default unit type to return the input as if not included in `n`.
+ * @param {Number|String} n - Value to parse.
+ * @param {Number} defaultValue - Default value to return if `n` is invalid.
+ * @param {String} defaultUnit - Default unit type to return the input as if not included in `n`.
  * @returns {UnitValue}
  */
 function parseNumberInput(n, defaultValue, defaultUnit) {

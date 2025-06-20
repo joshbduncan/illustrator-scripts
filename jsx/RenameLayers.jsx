@@ -23,51 +23,80 @@ See the LICENSE file for details.
 
 Changelog
 ---------
-1.0.0 initial release
+0.1.0 2023-11-08 initial release
+0.1.1 2025-06-19 refactor, bug fixes
 */
 
-var _title = "Rename Layers";
-var _version = "1.0.0";
-var _copyright = "Copyright 2025 Josh Duncan";
-var _website = "joshbduncan.com";
+(function () {
+  //@target illustrator
 
-// -----------
-// main script
-// -----------
+  var scriptTitle = "Rename Layers";
+  var scriptVersion = "0.1.1";
+  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var website = "joshbduncan.com";
 
-// run script
-if (app.documents.length > 0) {
-    var doc = app.activeDocument;
-    var layers = doc.layers;
-    var settings = settingsWin();
-    if (settings) {
-        var changedLayers = [];
-        for (var i = 0; i < layers.length; i++) {
-            var layer = layers[i];
-            var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
-            if (
-                (settings.regex && find.test(layer.name)) ||
-                layer.name.indexOf(settings.find) > -1
-            ) {
-                if (
-                    (settings.selected && layer.hasSelectedArtwork) ||
-                    !settings.selected
-                ) {
-                    layer.name = layer.name.replace(find, settings.replace);
-                    changedLayers.push(i);
-                }
-            }
-        }
-        alert("Renamed " + changedLayers.length + " layer(s).");
+  //////////////
+  // INCLUDES //
+  //////////////
+
+  /**
+   * Open a url in the system browser.
+   * @param {String} url URL to open.
+   */
+  function openURL(url) {
+    var html = new File(Folder.temp.absoluteURI + "/aisLink.html");
+    html.open("w");
+    var htmlBody =
+      '<html><head><META HTTP-EQUIV=Refresh CONTENT="0; URL=' +
+      url +
+      '"></head><body><p></p></body></html>';
+    html.write(htmlBody);
+    html.close();
+    html.execute();
+  }
+
+  ////////////////////////////
+  // MAIN SCRIPT OPERATIONS //
+  ////////////////////////////
+
+  // no need to continue if there is no active document
+  if (!app.documents.length) {
+    alert("No active document.");
+    return;
+  }
+
+  // grab document
+  var doc = app.activeDocument;
+
+  // grab document layers
+  var layers = doc.layers;
+
+  var settings = settingsWin();
+  if (!settings) return;
+
+  var changedLayers = [];
+  for (var i = 0; i < layers.length; i++) {
+    var layer = layers[i];
+    var find = settings.regex ? new RegExp(settings.find, "g") : settings.find;
+    if (
+      (settings.regex && find.test(layer.name)) ||
+      layer.name.indexOf(settings.find) > -1
+    ) {
+      if (
+        (settings.selected && layer.hasSelectedArtwork) ||
+        !settings.selected
+      ) {
+        layer.name = layer.name.replace(find, settings.replace);
+        changedLayers.push(i);
+      }
     }
-} else {
-    alert("No documents open!\nCreate or open a document first.");
-}
+  }
+  alert("Renamed " + changedLayers.length + " layer(s).");
 
-function settingsWin() {
+  function settingsWin() {
     // settings window
     var win = new Window("dialog");
-    win.text = _title + " " + _version;
+    win.text = scriptTitle + " " + scriptVersion;
     win.orientation = "column";
     win.alignChildren = "fill";
 
@@ -102,9 +131,9 @@ function settingsWin() {
 
     //checkbox - limit to layers with selected artwork
     var cbSelected = pFind.add(
-        "checkbox",
-        undefined,
-        "Limit to layer(s) with selected artwork"
+      "checkbox",
+      undefined,
+      "Limit to layer(s) with selected artwork",
     );
     cbSelected.value = false;
 
@@ -115,31 +144,41 @@ function settingsWin() {
     gWindowButtons.alignment = ["center", "top"];
     var btOK = gWindowButtons.add("button", undefined, "OK");
     btOK.enabled = false;
-    var btCancel = gWindowButtons.add("button", undefined, "Cancel");
+    gWindowButtons.add("button", undefined, "Cancel");
 
     // copyright info
-    var pCopyright = win.add("panel", undefined);
-    pCopyright.orientation = "column";
-    pCopyright.add("statictext", undefined, "Version " + _version + " " + _copyright);
-    pCopyright.add("statictext", undefined, _website);
+    var stCopyright = win.add(
+      "statictext",
+      undefined,
+      scriptCopyright + " @ " + website,
+      {
+        name: "stCopyright",
+      },
+    );
+    stCopyright.alignment = "center";
+
+    stCopyright.addEventListener("click", function () {
+      openURL("https://joshbduncan.com");
+    });
 
     find.onChanging = function () {
-        if (find.text.length > 0) {
-            btOK.enabled = true;
-        } else {
-            btOK.enabled = false;
-        }
+      if (find.text.length > 0) {
+        btOK.enabled = true;
+      } else {
+        btOK.enabled = false;
+      }
     };
 
     // if "ok" button clicked then return inputs
     if (win.show() == 1) {
-        return {
-            regex: rbRegex.value,
-            find: find.text,
-            replace: replace.text,
-            selected: cbSelected.value,
-        };
+      return {
+        regex: rbRegex.value,
+        find: find.text,
+        replace: replace.text,
+        selected: cbSelected.value,
+      };
     } else {
-        return;
+      return;
     }
-}
+  }
+})();

@@ -1,7 +1,7 @@
 /*
 ArtboardToAi.jsx for Adobe Illustrator
 --------------------------------------
-Export the current artboard to a Ai file.
+Export the current artboard to an Ai file.
 
 Author
 ------
@@ -23,83 +23,86 @@ See the LICENSE file for details.
 
 Changelog
 ---------
-0.1.0 initial release
-0.1.1 fix where ai appends the artboard name to the end of saved files
+0.1.0 2023-11-08 initial release
+0.1.1 2023-11-09 fix where ai appends the artboard name to the end of saved files
 */
 
 (function () {
-    //@target illustrator
+  //@target illustrator
 
+  //////////////
+  // INCLUDES //
+  //////////////
 
-    /**
-     * If a file already exists, prompt for permission to overwrite it.
-     * @param {File} file ExtendScript file constructor.
-     * @returns {Boolean} Is it okay to overwrite the file.
-     */
-    function OverwriteFileProtection(file) {
-        if (
-            file.exists &&
-            !Window.confirm(
-                "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
-                "noAsDflt",
-                "File Already Exists"
-            )
-        )
-            return false;
-        return true;
-    }
+  /**
+   * If a file already exists, prompt for permission to overwrite it.
+   * @param {File} file ExtendScript file constructor.
+   * @returns {Boolean} Is it okay to overwrite the file.
+   */
+  function overwriteFileProtection(file) {
+    if (
+      file.exists &&
+      !Window.confirm(
+        "File already exists!\nOverwrite " + decodeURI(file.name) + "?",
+        "noAsDflt",
+        "File Already Exists",
+      )
+    )
+      return false;
+    return true;
+  }
 
-    // define script variables
-    var ab;
-    var abIdx;
-    var doc;
-    var docFolder;
-    var exportFolder;
-    var exportName;
-    var exportPath;
-    var saveOptions;
+  ////////////////////////////
+  // MAIN SCRIPT OPERATIONS //
+  ////////////////////////////
 
-    // pick a folder to save the file
-    if (app.documents.length > 0) {
-        // get the current document and it's path (if saved)
-        doc = app.activeDocument;
-        docFolder = new Folder(doc.path == "" ? "~/" : doc.path);
-        // prompt for the file export location (defaults to document location)
-        exportFolder = Folder.selectDialog("Save Location", docFolder);
-    }
+  // no need to continue if there is no active document
+  if (!app.documents.length) {
+    alert("No active document.");
+    return;
+  }
 
-    if (exportFolder === null) return;
+  // get the current document and it's path (if saved)
+  var doc = app.activeDocument;
+  var docFolder = new Folder(doc.path == "" ? "~/" : doc.path);
 
-    // get the current artboard
-    abIdx = doc.artboards.getActiveArtboardIndex();
-    ab = doc.artboards[abIdx];
+  // prompt for the file export location (defaults to document location)
+  var exportFolder = Folder.selectDialog("Save Location", docFolder);
 
-    // prompt for a filename
-    exportName = prompt("Save File As", ab.name + ".ai");
+  if (exportFolder === null) return;
 
-    if (exportName === null) return;
+  // get the current artboard
+  var abIdx = doc.artboards.getActiveArtboardIndex();
+  var ab = doc.artboards[abIdx];
 
-    // strip off any extensions from the provided name
-    exportName = exportName.replace(/\.pdf|\.ai|\.eps$/i, "");
+  // prompt for a filename
+  var exportName = prompt("Save File As", ab.name + ".ai");
 
-    // set the final exportPath
-    exportPath = new File(exportFolder + "/" + exportName + ".ai");
+  if (exportName === null) return;
 
-    // overwrite protection
-    if (!OverwriteFileProtection(exportPath)) return;
+  // strip off any extensions from the provided name
+  exportName = exportName.replace(/\.pdf|\.ai|\.eps$/i, "");
 
-    // set up save options
-    saveOptions = new IllustratorSaveOptions();
-    saveOptions.saveMultipleArtboards = true;
-    saveOptions.artboardRange = abIdx + 1;
+  // set the final exportPath
+  var exportPath = new File(exportFolder + "/" + exportName + ".ai");
 
-    // export the file
-    doc.saveAs(exportPath, saveOptions);
+  // overwrite protection
+  if (!overwriteFileProtection(exportPath)) return;
 
-    // remove the old file
-    exportPath.remove();
+  // set up save options
+  var saveOptions = new IllustratorSaveOptions();
+  saveOptions.saveMultipleArtboards = true;
+  saveOptions.artboardRange = abIdx + 1;
 
-    // rename the file to remove the appended artboard name
-    exportPath = new File(exportFolder + "/" + exportName + "_" + ab.name + ".ai");
-    exportPath.rename(exportName + ".ai");
+  // export the file
+  doc.saveAs(exportPath, saveOptions);
+
+  // remove the old file
+  exportPath.remove();
+
+  // rename the file to remove the appended artboard name
+  exportPath = new File(
+    exportFolder + "/" + exportName + "_" + ab.name + ".ai",
+  );
+  exportPath.rename(exportName + ".ai");
 })();
