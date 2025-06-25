@@ -37,13 +37,14 @@ Changelog
 1.1.1            added rotation matching suggested by Sergey Osokin @ github.com/creold
 1.1.2 2023-11-08 fixed center/center position matching
 1.1.3 2025-06-19 refactor, bug fixes
+1.2.0 2025-06-25 refactor, safety checks, bug fixes
 */
 
 (function () {
   //@target illustrator
 
   var scriptTitle = "Match Objects";
-  var scriptVersion = "1.1.3";
+  var scriptVersion = "1.2.0";
   var scriptCopyright = "Copyright 2025 Josh Duncan";
   var website = "joshbduncan.com";
 
@@ -53,18 +54,21 @@ Changelog
 
   /**
    * Get geometric info from Illustrator object bounds.
-   * @param {Array} bounds - Illustrator object bounds (e.g. [left, top, right, bottom]).
-   * @returns {Object} Geometry info with left, top, right, bottom, width, height, centerX, centerY.
+   * @param {Array} bounds - Illustrator object bounds: [left, top, right, bottom].
+   * @returns {Object} - Geometry info with left, top, right, bottom, width, height, centerX, centerY.
    */
   function getObjectPlacementInfo(bounds) {
-    if (!bounds || bounds.length !== 4) {
+    if (!bounds || typeof bounds !== "object" || bounds.length !== 4) {
       throw new Error("Invalid bounds: Expected [left, top, right, bottom]");
     }
 
-    var left = bounds[0];
-    var top = bounds[1];
-    var right = bounds[2];
-    var bottom = bounds[3];
+    // Normalize for safety since occasionally Illustrator can return
+    // inverted bounds (e.g., top < bottom due to transformations).
+    var left = Math.min(bounds[0], bounds[2]);
+    var right = Math.max(bounds[0], bounds[2]);
+    var top = Math.max(bounds[1], bounds[3]);
+    var bottom = Math.min(bounds[1], bounds[3]);
+
     var width = right - left;
     var height = top - bottom;
     var centerX = left + width / 2;
@@ -206,15 +210,9 @@ Changelog
   // get the current selection
   var sel = doc.selection;
 
-  // no need to continue if there is no active selection
-  if (!sel.length) {
-    alert("No active selection. Select at least two objects.");
-    return;
-  }
-
   // at least two objects must be selected
-  if (sel.length < 2) {
-    alert("Not enough objects to compare. Select at least two objects.");
+  if (!sel.length || sel.length < 2) {
+    alert("Invalid selection. Select at least two objects.");
     return;
   }
 
@@ -247,16 +245,13 @@ Changelog
   }
 
   function getRotationRadians(object) {
+    if (!object || !object.tags) return 0;
+
     for (var i = 0; i < object.tags.length; i++) {
-      var tag = object.tags[i];
-      if (tag.name == "BBAccumRotation") {
-        var rads = parseFloat(object.tags.BBAccumRotation.value);
-        return rads;
+      if (object.tags[i].name === "BBAccumRotation") {
+        return parseFloat(object.tags[i].value);
       }
     }
-    var newTag = object.tags.add();
-    newTag.name = "BBAccumRotation";
-    newTag.value = 0;
     return 0;
   }
 
@@ -264,91 +259,131 @@ Changelog
     return r * (180 / Math.PI);
   }
 
-  function matchObjects() {
-    // set user selected object as source
-    var source, sourceBounds;
-    if (settings["source"] == "top") {
-      source = sel.shift();
-    } else {
-      source = sel.pop();
-    }
-    sourceBounds = getVisibleBounds(source);
+  function matchRotation(source, target) {
+    // Get rotation from source
+    var sourceRotationRadians = getRotationRadians(source);
+    var sourceRotationDegrees = radians2Degrees(sourceRotationRadians);
+    var targetRotationRadians = getRotationRadians(target);
+    var targetRotationDegrees = radians2Degrees(targetRotationRadians);
 
-    // iterate over the target objects
-    var target, targetBounds;
+    // "Unrotate" target if already rotated
+    if (targetRotationRadians !== 0) {
+      target.rotate(-targetRotationDegrees);
+    }
+
+    // Rotate to match source
+    target.rotate(sourceRotationDegrees);
+
+    // Set or update BBAccumRotation tag
+    var tagFound = false;
+    for (var i = 0; i < target.tags.length; i++) {
+      if (target.tags[i].name === "BBAccumRotation") {
+        target.tags[i].value = sourceRotationRadians;
+        tagFound = true;
+        break;
+      }
+    }
+    if (!tagFound) {
+      var newTag = target.tags.add();
+      newTag.name = "BBAccumRotation";
+      newTag.value = sourceRotationRadians;
+    }
+  }
+
+  function matchSize(sourceBounds, target) {
+    if (!sourceBounds || !target) return;
+
+    // found it worked best to first scale the target object and
+    // then move the target object since scaling clipped objects can shift
+    // the object making previous move calculations incorrect
+
+    // make sure to get updated bounds after rotation so updated size is correct
+    var targetBounds = getVisibleBounds(target);
+
+    var scaleMatrix = getTrueScaleMatrix(
+      sourceBounds,
+      targetBounds,
+      settings.scale,
+    );
+
+    // work out any adjustment on art with strokes
+    var strokeScale = getStrokeScale(
+      sourceBounds,
+      targetBounds,
+      settings.scale,
+    );
+
+    // scale the target object
+    target.transform(
+      scaleMatrix,
+      true,
+      settings.patterns,
+      settings.gradients,
+      settings.strokePatterns,
+      settings.strokeWidth ? strokeScale : false,
+      Transformation.CENTER,
+    );
+  }
+
+  function matchPosition(sourceBounds, target) {
+    if (!sourceBounds || !target) return;
+
+    // get updated target bounds and info since scaling
+    // clipped objects can shift the object on the artboard
+    var targetBounds = getVisibleBounds(target);
+
+    var moveMatrix = getMoveMatrix(sourceBounds, targetBounds, settings.anchor);
+    target.transform(
+      moveMatrix,
+      true, // objects
+      true, // patterns
+      true, // gradients
+      true, // stroke patterns
+    );
+  }
+
+  function alignTarget(sourceBounds, target) {
+    if (!sourceBounds || !target) return;
+
+    // get updated target bounds and info since scaling
+    // clipped objects can shift the object on the artboard
+    var targetBounds = getVisibleBounds(target);
+
+    var moveMatrix = getMoveMatrix(
+      sourceBounds,
+      targetBounds,
+      settings.alignTo,
+    );
+    target.transform(moveMatrix, true, true, true);
+  }
+
+  function matchLayer(source, target, placement) {
+    if (!source || !target || !placement) return;
+
+    target.move(source, placement);
+  }
+
+  function matchObjects() {
+    // choose source based on settings
+    var sourceSetting = (settings["source"] || "top").toLowerCase();
+    var source = sourceSetting === "top" ? sel.shift() : sel.pop();
+    var sourceBounds = getVisibleBounds(source);
+
+    // transform all targets
     for (var i = 0; i < sel.length; i++) {
-      target = sel[i];
-      // if target should be rotated
-      if (settings.rotation) {
-        // after the addition of the match rotation function I found
-        // it now best to rotate the target first then gets it's updated
-        // bounds and then resize or reposition
-        var sourceRotationRadians = getRotationRadians(source);
-        var sourceRotationDegrees = radians2Degrees(sourceRotationRadians);
-        var targetRotationRadians = getRotationRadians(target);
-        var targetRotationDegrees = radians2Degrees(targetRotationRadians);
-        // "unrotate" target if already rotated
-        if (targetRotationRadians != 0) {
-          target.rotate(-targetRotationDegrees);
-        }
-        target.rotate(sourceRotationDegrees);
-        target.tags["BBAccumRotation"].value = sourceRotationRadians;
-      }
-      // get bounds after rotation so updated size is correct
-      targetBounds = getVisibleBounds(target);
-      // if target should be resized
-      if (settings.size) {
-        // (see above) found it worked best to first scale the target object and
-        // then move the target object since scaling clipped objects can shift
-        // the object making previous move calculations incorrect
-        var scaleMatrix = getTrueScaleMatrix(
-          sourceBounds,
-          targetBounds,
-          settings.scale,
-        );
-        // work out any adjustment on art with strokes
-        var strokeScale = getStrokeScale(
-          sourceBounds,
-          targetBounds,
-          settings.scale,
-        );
-        // scale the target object
-        target.transform(
-          scaleMatrix,
-          true,
-          settings.patterns,
-          settings.gradients,
-          settings.strokePatterns,
-          settings.strokeWidth ? strokeScale : false,
-          Transformation.CENTER,
-        );
-      }
-      // if target should be repositioned
-      var moveMatrix;
+      var target = sel[i];
+
+      if (settings.rotation) matchRotation(source, target);
+      if (settings.size) matchSize(sourceBounds, target);
+
       if (settings.position) {
-        // get updated target bounds and info since scaling
-        // clipped objects can shift the object on the artboard
-        targetBounds = getVisibleBounds(target);
-        moveMatrix = getMoveMatrix(sourceBounds, targetBounds, settings.anchor);
-        // move the target object
-        target.transform(moveMatrix, true, true, true);
+        matchPosition(sourceBounds, target);
+      } else if (settings.alignment) {
+        alignTarget(sourceBounds, target);
       }
-      // if target should be aligned
-      if (settings.alignment) {
-        // get updated target bounds and info since scaling
-        // clipped objects can shift the object on the artboard
-        targetBounds = getVisibleBounds(target);
-        moveMatrix = getMoveMatrix(
-          sourceBounds,
-          targetBounds,
-          settings.alignTo,
-        );
-        // move the target object
-        target.transform(moveMatrix, true, true, true);
-      }
-      // if target should be moved to same layer
+
       if (settings.layer) {
-        target.move(source, ElementPlacement.PLACEBEFORE);
+        matchLayer(source, target, ElementPlacement.PLACEBEFORE);
       }
     }
   }
@@ -356,105 +391,121 @@ Changelog
   function getTrueScaleMatrix(sourceBounds, targetBounds, scale) {
     var sourceInfo = getObjectPlacementInfo(sourceBounds);
     var targetInfo = getObjectPlacementInfo(targetBounds);
-    var widthProp, heightProp;
-    if (scale == "both") {
-      widthProp = (sourceInfo.width / targetInfo.width) * 100;
-      heightProp = (sourceInfo.height / targetInfo.height) * 100;
-    } else if (scale == "height") {
-      widthProp = (sourceInfo.height / targetInfo.height) * 100;
-      heightProp = (sourceInfo.height / targetInfo.height) * 100;
+
+    var widthProp = 100;
+    var heightProp = 100;
+    var ratio = 100;
+
+    // Prevent divide-by-zero errors
+    var safeTargetWidth = targetInfo.width || 1;
+    var safeTargetHeight = targetInfo.height || 1;
+
+    if (scale === "both") {
+      widthProp = (sourceInfo.width / safeTargetWidth) * 100;
+      heightProp = (sourceInfo.height / safeTargetHeight) * 100;
+    } else if (scale === "height") {
+      ratio = (sourceInfo.height / safeTargetHeight) * 100;
+      widthProp = heightProp = ratio;
     } else {
-      widthProp = (sourceInfo.width / targetInfo.width) * 100;
-      heightProp = (sourceInfo.width / targetInfo.width) * 100;
+      ratio = (sourceInfo.width / safeTargetWidth) * 100;
+      widthProp = heightProp = ratio;
     }
+
     return app.getScaleMatrix(widthProp, heightProp);
   }
 
   function getMoveMatrix(sourceBounds, targetBounds, anchor) {
     var sourceInfo = getObjectPlacementInfo(sourceBounds);
     var targetInfo = getObjectPlacementInfo(targetBounds);
-    if (anchor == "tl") {
-      return app.getTranslationMatrix(
-        sourceInfo.left - targetInfo.left,
-        sourceInfo.top - targetInfo.top,
-      );
-    } else if (anchor == "tc") {
-      return app.getTranslationMatrix(
-        sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.top - targetInfo.top,
-      );
-    } else if (anchor == "tr") {
-      return app.getTranslationMatrix(
-        sourceInfo.right - targetInfo.right,
-        sourceInfo.top - targetInfo.top,
-      );
-    } else if (anchor == "cl") {
-      return app.getTranslationMatrix(
-        sourceInfo.left - targetInfo.left,
-        sourceInfo.centerY - targetInfo.centerY,
-      );
-    } else if (anchor == "cc") {
-      return app.getTranslationMatrix(
-        sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.centerY - targetInfo.centerY,
-      );
-    } else if (anchor == "cr") {
-      return app.getTranslationMatrix(
-        sourceInfo.right - targetInfo.right,
-        sourceInfo.centerY - targetInfo.centerY,
-      );
-    } else if (anchor == "bl") {
-      return app.getTranslationMatrix(
-        sourceInfo.left - targetInfo.left,
-        sourceInfo.bottom - targetInfo.bottom,
-      );
-    } else if (anchor == "bc") {
-      return app.getTranslationMatrix(
-        sourceInfo.centerX - targetInfo.centerX,
-        sourceInfo.bottom - targetInfo.bottom,
-      );
-    } else if (anchor == "br") {
-      return app.getTranslationMatrix(
-        sourceInfo.right - targetInfo.right,
-        sourceInfo.bottom - targetInfo.bottom,
-      );
-    } else if (anchor == "Top Edge") {
-      return app.getTranslationMatrix(0, sourceInfo.top - targetInfo.top);
-    } else if (anchor == "Left Edge") {
-      return app.getTranslationMatrix(sourceInfo.left - targetInfo.left, 0);
-    } else if (anchor == "Horizontal Center") {
-      return app.getTranslationMatrix(
-        sourceInfo.centerX - targetInfo.centerX,
-        0,
-      );
-    } else if (anchor == "Vertical Center") {
-      return app.getTranslationMatrix(
-        0,
-        sourceInfo.centerY - targetInfo.centerY,
-      );
-    } else if (anchor == "Right Edge") {
-      return app.getTranslationMatrix(sourceInfo.right - targetInfo.right, 0);
-    } else if (anchor == "Bottom Edge") {
-      return app.getTranslationMatrix(0, sourceInfo.bottom - targetInfo.bottom);
+
+    switch (anchor.toLowerCase()) {
+      case "tl":
+        return app.getTranslationMatrix(
+          sourceInfo.left - targetInfo.left,
+          sourceInfo.top - targetInfo.top,
+        );
+      case "tc":
+        return app.getTranslationMatrix(
+          sourceInfo.centerX - targetInfo.centerX,
+          sourceInfo.top - targetInfo.top,
+        );
+      case "tr":
+        return app.getTranslationMatrix(
+          sourceInfo.right - targetInfo.right,
+          sourceInfo.top - targetInfo.top,
+        );
+      case "cl":
+        return app.getTranslationMatrix(
+          sourceInfo.left - targetInfo.left,
+          sourceInfo.centerY - targetInfo.centerY,
+        );
+      case "cr":
+        return app.getTranslationMatrix(
+          sourceInfo.right - targetInfo.right,
+          sourceInfo.centerY - targetInfo.centerY,
+        );
+      case "bl":
+        return app.getTranslationMatrix(
+          sourceInfo.left - targetInfo.left,
+          sourceInfo.bottom - targetInfo.bottom,
+        );
+      case "bc":
+        return app.getTranslationMatrix(
+          sourceInfo.centerX - targetInfo.centerX,
+          sourceInfo.bottom - targetInfo.bottom,
+        );
+      case "br":
+        return app.getTranslationMatrix(
+          sourceInfo.right - targetInfo.right,
+          sourceInfo.bottom - targetInfo.bottom,
+        );
+      case "top edge":
+        return app.getTranslationMatrix(0, sourceInfo.top - targetInfo.top);
+      case "bottom edge":
+        return app.getTranslationMatrix(
+          0,
+          sourceInfo.bottom - targetInfo.bottom,
+        );
+      case "left edge":
+        return app.getTranslationMatrix(sourceInfo.left - targetInfo.left, 0);
+      case "right edge":
+        return app.getTranslationMatrix(sourceInfo.right - targetInfo.right, 0);
+      case "horizontal center":
+        return app.getTranslationMatrix(
+          sourceInfo.centerX - targetInfo.centerX,
+          0,
+        );
+      case "vertical center":
+        return app.getTranslationMatrix(
+          0,
+          sourceInfo.centerY - targetInfo.centerY,
+        );
+      default:
+        // fallback to center alignment
+        return app.getTranslationMatrix(
+          sourceInfo.centerX - targetInfo.centerX,
+          sourceInfo.centerY - targetInfo.centerY,
+        );
     }
   }
 
   function getStrokeScale(sourceBounds, targetBounds, scale) {
     var sourceInfo = getObjectPlacementInfo(sourceBounds);
     var targetInfo = getObjectPlacementInfo(targetBounds);
-    var strokeScale;
-    if (scale == "width") {
-      strokeScale = sourceInfo.width / targetInfo.width;
-    } else if (scale == "height") {
-      strokeScale = sourceInfo.height / targetInfo.height;
+
+    // prevent divide-by-zero
+    var tw = targetInfo.width || 1;
+    var th = targetInfo.height || 1;
+
+    if (scale === "width") {
+      return sourceInfo.width / tw;
+    } else if (scale === "height") {
+      return sourceInfo.height / th;
     } else {
-      strokeScale =
-        ((sourceInfo.width / targetInfo.width) * 100 +
-          (sourceInfo.height / targetInfo.height) * 100) /
-        2 /
-        100;
+      var wScale = sourceInfo.width / tw;
+      var hScale = sourceInfo.height / th;
+      return (wScale + hScale) / 2;
     }
-    return strokeScale;
   }
 
   // ------------
@@ -520,7 +571,8 @@ Changelog
     ];
     var ddAlignment = group2.add("dropdownlist", undefined, arrAlignment);
     ddAlignment.selection = 0;
-    ddAlignment.enabled = false;
+    // ddAlignment.enabled = false;
+    ddAlignment.enabled = cbAlignment.value;
 
     // group - 3
     var group3 = win.add("group", undefined);
@@ -570,10 +622,12 @@ Changelog
     pSize.orientation = "column";
     pSize.margins = 18;
     pSize.enabled = false;
-    var rbScaleWidth = pSize.add("radiobutton", undefined, "Width");
-    rbScaleWidth.value = true;
-    var rbScaleHeight = pSize.add("radiobutton", undefined, "Height");
-    pSize.add("radiobutton", undefined, "Both");
+    var scaleRadios = [
+      pSize.add("radiobutton", undefined, "Width"),
+      pSize.add("radiobutton", undefined, "Height"),
+      pSize.add("radiobutton", undefined, "Both"),
+    ];
+    scaleRadios[0].value = true;
 
     // panel - also scale
     var pAlsoScale = group3.add("panel", undefined, "Also Scale");
@@ -685,29 +739,34 @@ Changelog
       // reset selection back to original user selection
       app.activeDocument.selection = sel;
 
-      // figure out which dimensions to scale
-      var scale;
-      if (rbScaleWidth.value) {
-        scale = "width";
-      } else if (rbScaleHeight.value) {
-        scale = "height";
-      } else {
-        scale = "both";
+      function getSelectedAnchor() {
+        var anchorNames = [
+          "tl",
+          "tc",
+          "tr",
+          "cl",
+          "cc",
+          "cr",
+          "bl",
+          "bc",
+          "br",
+        ];
+        for (var j = 0; j < anchors.length; j++) {
+          if (anchors[j].value) return anchorNames[j];
+        }
+        return "cc";
       }
 
-      // figure out which dimensions to scale
-      var anchorNames = ["tl", "tc", "tr", "cl", "cc", "cr", "bl", "bc", "br"];
-      var anchorTo = "cc";
-      for (var j = 0; j < anchors.length; j++) {
-        if (anchors[j].value == true) {
-          anchorTo = anchorNames[j];
-        }
+      function getSelectedScale() {
+        if (scaleRadios[0].value) return "width";
+        if (scaleRadios[1].value) return "height";
+        return "both";
       }
 
       return {
         source: rbTop.value ? "top" : "bottom",
         size: cbSize.value,
-        scale: scale,
+        scale: getSelectedScale(),
         rotation: cbRotation.value,
         layer: cbLayer.value,
         patterns: cbPatterns.value,
@@ -715,7 +774,7 @@ Changelog
         strokePatterns: cbStrokePatterns.value,
         strokeWidth: cbStrokeWidth.value,
         position: cbPosition.value,
-        anchor: anchorTo,
+        anchor: getSelectedAnchor(),
         alignment: cbAlignment.value,
         alignTo: cbAlignment.value ? ddAlignment.selection.text : false,
       };
