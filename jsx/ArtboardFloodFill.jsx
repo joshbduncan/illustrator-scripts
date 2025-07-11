@@ -27,6 +27,7 @@ Changelog
 0.1.1 2025-05-19 fix for non-standard ruler location
 0.1.2 2025-06-18 refactor
 0.1.3 2025-06-19 bug fix re-lock flood layer
+0.1.4 2025-07-11 fix for weird no document.defaultFillColor big
 */
 
 (function () {
@@ -78,11 +79,22 @@ Changelog
     var width = right - left;
     var height = top - bottom;
 
+    // setup a fill color
+    var fillColor = new GrayColor();
+    fillColor.gray = 50;
+    if (doc.documentColorSpace == DocumentColorSpace.CMYK) {
+      fillColor = new CMYKColor();
+      fillColor.yellow = 100;
+    } else if (doc.documentColorSpace == DocumentColorSpace.RGB) {
+      fillColor = new RGBColor();
+      fillColor.red = fillColor.green = 255;
+    }
+
     // create a flood fill rectangle
     var rect = floodLayer.pathItems.rectangle(top, left, width, height); // top, left, width, height
     rect.filled = true;
     rect.stroked = false;
-    rect.fillColor = doc.defaultFillColor;
+    rect.fillColor = fillColor;
   } catch (e) {
     alert("Unexpected error:\n" + e.message);
   } finally {

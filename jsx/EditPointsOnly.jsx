@@ -24,6 +24,7 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2023-11-08 initial release
+0.1.1 2025-07-10 fix subroutines
 */
 
 (function () {
@@ -52,17 +53,14 @@ Changelog
   }
 
   if (sel instanceof Array) {
-    // setup vars
-    var paths = [];
-    var calculatedPoints = [];
-
     // grab all path objects in the selection
-    getPaths();
+    var paths = getPaths(sel);
     // grab all selected points of paths
-    getPoints();
+    var calculatedPoints = getPoints(paths);
 
     // deselect everything
     app.activeDocument.selection = null;
+
     // iterate over all points and reselect them for editing
     for (var i = 0; i < calculatedPoints.length; i++) {
       calculatedPoints[i].selected = PathPointSelection.ANCHORPOINT;
@@ -72,34 +70,39 @@ Changelog
   /**
    * iterate over all selected objects and
    * figure out if the object is a PathItem
-   * if compound path or group then do deeper
+   * if compound path or group then go deeper
    */
-  function getPaths() {
-    for (var i = 0; i < sel.length; i++) {
-      if (sel[i].typename == "GroupItem") {
-        getPaths(sel[i].pageItems);
-      } else if (sel[i].typename == "CompoundPathItem") {
-        getPaths(sel[i].pathItems);
-      } else if (sel[i].typename == "PathItem") {
-        paths.push(sel[i]);
+  function getPaths(arr) {
+    var paths = [];
+    for (var i = 0; i < arr.length; i++) {
+      var item = arr[i];
+      if (item.typename == "GroupItem") {
+        paths = paths.concat(getPaths(item.pageItems));
+      } else if (item.typename == "CompoundPathItem") {
+        paths = paths.concat(getPaths(item.pathItems));
+      } else if (item.typename == "PathItem") {
+        paths.push(item);
       }
     }
+    return paths;
   }
 
   /**
    * iterate over all provided paths and figure out
    * if they have any currently selected points
    */
-  function getPoints() {
-    for (var i = 0; i < paths.length; i++) {
-      if (paths[i].pathPoints.length > 1) {
-        var objPoints = paths[i].pathPoints;
+  function getPoints(arr) {
+    var points = [];
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].pathPoints.length > 1) {
+        var objPoints = arr[i].pathPoints;
         for (var j = 0; j < objPoints.length; j++) {
           if (objPoints[j].selected == PathPointSelection.ANCHORPOINT) {
-            calculatedPoints.push(objPoints[j]);
+            points.push(objPoints[j]);
           }
         }
       }
     }
+    return points;
   }
 })();
