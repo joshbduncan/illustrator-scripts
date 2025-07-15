@@ -16,6 +16,7 @@ Welcome to my playground for Adobe Illustrator scripting. Along with the scripts
 - [Layer Scripts](#layer-scripts)
 - [Path Scripts](#path-scripts)
 - [Production Scripts](#production-scripts)
+- [Selection Scripts](#selection-scripts)
 - [Text Scripts](#text-scripts)
 - [Utility Scripts](#utility-scripts)
 
@@ -194,6 +195,16 @@ Includes:
 
 ![ScreenSepMarks](https://github.com/user-attachments/assets/e1eaaa23-b1e3-4723-84ac-b2362b7201e1)
 
+## Selection Scripts
+
+- [SelectObjectsByName.jsx](#selectobjectsbyname)
+
+### SelectObjectsByName
+
+[![Download](https://img.shields.io/badge/Download-SelectObjectsByName.jsx-blue.svg)](/jsx/SelectObjectsByName.jsx)
+
+Easily find and select objects in your Adobe Illustrator document by name. Supports both simple string searches and powerful regular expression matching. Ideal for quickly filtering and managing complex artwork layers and groups.
+
 ## Text Scripts
 
 - [FontVisualizer](#fontvisualizer)
@@ -211,7 +222,7 @@ Visualize every font on your system with customizable text.
 
 ## Utility Scripts
 
-- [DrawVisibleBounds.jsx](#drawvisiblebounds)
+- [DrawVisibleBounds](#drawvisiblebounds)
 - [GetObjectPlacementInfo](#getobjectplacementinfo)
 - [GetVisibleBounds](#getvisiblebounds)
 - [GroupObjectByRow](#groupobjectsbyrow)
