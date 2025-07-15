@@ -205,6 +205,8 @@ Includes:
 
 Easily find and select objects in your Adobe Illustrator document by name. Supports both simple string searches and powerful regular expression matching. Ideal for quickly filtering and managing complex artwork layers and groups.
 
+![SelectObjectsByName](https://github.com/user-attachments/assets/0f8b2e37-30da-41cc-ba4a-95543defabe6)
+
 ## Text Scripts
 
 - [FontVisualizer](#fontvisualizer)
