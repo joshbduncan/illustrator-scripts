@@ -72,6 +72,7 @@ Changelog
     fixed:
         - script was incorrectly expanding the appearance of the selected object(s) instead of temporary object
 0.7.3 2025-06-19 refactor, bug fixes for input validation
+0.7.4 2025-07-15 code cleanup
 */
 
 (function () {
@@ -182,18 +183,21 @@ Changelog
   };
   /**
    * Get geometric info from Illustrator object bounds.
-   * @param {Array} bounds - Illustrator object bounds (e.g. [left, top, right, bottom]).
-   * @returns {Object} Geometry info with left, top, right, bottom, width, height, centerX, centerY.
+   * @param {Array} bounds - Illustrator object bounds: [left, top, right, bottom].
+   * @returns {Object} - Geometry info with left, top, right, bottom, width, height, centerX, centerY.
    */
   function getObjectPlacementInfo(bounds) {
-    if (!bounds || bounds.length !== 4) {
+    if (!bounds || typeof bounds !== "object" || bounds.length !== 4) {
       throw new Error("Invalid bounds: Expected [left, top, right, bottom]");
     }
 
-    var left = bounds[0];
-    var top = bounds[1];
-    var right = bounds[2];
-    var bottom = bounds[3];
+    // Normalize for safety since occasionally Illustrator can return
+    // inverted bounds (e.g., top < bottom due to transformations).
+    var left = Math.min(bounds[0], bounds[2]);
+    var right = Math.max(bounds[0], bounds[2]);
+    var top = Math.max(bounds[1], bounds[3]);
+    var bottom = Math.min(bounds[1], bounds[3]);
+
     var width = right - left;
     var height = top - bottom;
     var centerX = left + width / 2;
@@ -637,9 +641,9 @@ Changelog
     }
   }
 
-  ////////////////////////////
-  // MAIN SCRIPT OPERATIONS //
-  ////////////////////////////
+  /////////////////
+  // MAIN SCRIPT //
+  /////////////////
 
   // no need to continue if there is no active document
   if (!app.documents.length) {
@@ -649,8 +653,6 @@ Changelog
 
   // grab document and selection info
   var doc = app.activeDocument;
-
-  // get the current selection
   var sel = doc.selection;
 
   // no need to continue if there is no active selection
@@ -685,7 +687,8 @@ Changelog
   // setup development logging
   var logger;
   if (dev) {
-    var logFilePath = Folder.desktop + "/RepeatAfterMe.log";
+    var logFilePath =
+      Folder.desktop + "/" + scriptTitle.replace(" ", "_") + ".log";
     logger = new Logger(logFilePath, "a", undefined, true);
     logger.log("**DEV MODE**", $.fileName);
   } else {
@@ -1644,34 +1647,8 @@ Changelog
       processChanges();
     };
 
-    stCopyright.addEventListener("click", function (e) {
-      if (dev && e.ctrlKey) {
-        var actions = {
-          "Open Log": function () {
-            logger.open();
-          },
-          "Reveal Prefs": function () {
-            prefs.reveal();
-          },
-        };
-
-        var win = new Window("dialog");
-        win.text = "Dev Menu";
-        win.orientation = "column";
-        win.alignChildren = ["center", "center"];
-        win.spacing = 10;
-        win.margins = 16;
-
-        var b;
-        for (var prop in actions) {
-          b = win.add("button", undefined, prop, { name: "prop" });
-          b.onClick = actions[prop];
-        }
-
-        win.show();
-      } else {
-        openURL("https://joshbduncan.com");
-      }
+    stCopyright.addEventListener("click", function () {
+      openURL("https://joshbduncan.com");
     });
 
     // if "ok" button clicked then return inputs
