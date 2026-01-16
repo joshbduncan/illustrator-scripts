@@ -45,7 +45,7 @@ Changelog
 
   var scriptTitle = "Match Objects";
   var scriptVersion = "1.2.0";
-  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 
   //////////////

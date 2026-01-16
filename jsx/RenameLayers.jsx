@@ -32,7 +32,7 @@ Changelog
 
   var scriptTitle = "Rename Layers";
   var scriptVersion = "0.1.1";
-  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 
   //////////////
@@ -55,9 +55,9 @@ Changelog
     html.execute();
   }
 
-  ////////////////////////////
-  // MAIN SCRIPT OPERATIONS //
-  ////////////////////////////
+  /////////////////
+  // MAIN SCRIPT //
+  /////////////////
 
   // no need to continue if there is no active document
   if (!app.documents.length) {

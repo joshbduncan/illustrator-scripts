@@ -31,8 +31,6 @@ Changelog
 0.1.5 2025-06-20 refactor
 */
 
-//@target illustrator
-
 (function () {
   //@target illustrator
 

@@ -31,7 +31,7 @@ Changelog
 
   var scriptTitle = "Select Objects by Name";
   var scriptVersion = "0.1.0";
-  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 
   //////////////

@@ -32,7 +32,7 @@ Changelog
 
   var scriptTitle = "Show/Hide Layers";
   var scriptVersion = "1.0.1";
-  var scriptCopyright = "Copyright 2025 Josh Duncan";
+  var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 
   //////////////
