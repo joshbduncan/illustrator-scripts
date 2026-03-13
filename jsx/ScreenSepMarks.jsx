@@ -40,13 +40,14 @@ Changelog
 1.2.0            works with any spot color names, updated file info, updated saved settings/preferences
 1.2.1 2025-02-06 fixed preset overwrite protection
 1.2.2 2025-06-20 fixed input validation
+1.2.3 2026-03-12 fixed registration marks to use actual spot color
 */
 
 (function () {
   //@target illustrator
 
   var scriptTitle = "Screen Print Separation Marks";
-  var scriptVersion = "1.2.2";
+  var scriptVersion = "1.2.3";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 
@@ -571,7 +572,8 @@ Changelog
     var inset = UnitValue(settings.inset).as("pt");
 
     // make sure spot color is available
-    var color = getSpotColor(settings.color);
+    var color = new SpotColor();
+    color.spot = getSpotColor(settings.color);
 
     // calculate artboard edges
     var top = inset + size / 2;
@@ -612,7 +614,7 @@ Changelog
       size / 2,
       size / 2,
     );
-    circle.strokeColor = color.color;
+    circle.strokeColor = color;
     circle.stroked = true;
     circle.strokeWidth = strokeWeight;
     circle.filled = false;
@@ -622,7 +624,7 @@ Changelog
       [x - size / 2, -y],
       [x + size / 2, -y],
     ]);
-    xLine.strokeColor = color.color;
+    xLine.strokeColor = color;
     xLine.stroked = true;
     xLine.strokeWidth = strokeWeight;
     xLine.filled = false;
@@ -632,7 +634,7 @@ Changelog
       [x, -y + size / 2],
       [x, -y - size / 2],
     ]);
-    yLine.strokeColor = color.color;
+    yLine.strokeColor = color;
     yLine.stroked = true;
     yLine.strokeWidth = strokeWeight;
     yLine.filled = false;
