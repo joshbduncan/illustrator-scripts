@@ -130,6 +130,7 @@ Show or Hide layers in Adobe Illustrator using find (regex enabled).
 ## Path Scripts
 
 - [EditPointsOnly](#editpointsonly)
+- [EllipseStepsBetween](#ellipsestepsbetween)
 - [RemoveBezierHandles](#removebezierhandles)
 
 ### EditPointsOnly
@@ -137,6 +138,15 @@ Show or Hide layers in Adobe Illustrator using find (regex enabled).
 [![Download](https://img.shields.io/badge/Download-EditPointsOnly.jsx-blue.svg)](/jsx/EditPointsOnly.jsx)
 
 Sometimes when selecting path points using the Direct Selection Tool or Lasso Tool, path segments also get selected making anchor point manipulation difficult. This script selects only the path points (not path segments) from your current selection.
+
+### EllipseStepsBetween
+
+[![Download](https://img.shields.io/badge/Download-EllipseStepsBetween.jsx-blue.svg)](/jsx/EllipseStepsBetween.jsx)
+
+Create evenly spaced ellipses between two selected ellipses by interpolating their geometric bounds.
+
+> [!TIP]
+> Think Object > Blend but with ellipses... I mainly use this when creating text on path circle layouts.
 
 ### RemoveBezierHandles
 
