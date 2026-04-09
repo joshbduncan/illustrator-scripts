@@ -24,11 +24,12 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2025-09-22 initial release
+0.1.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   ////////////////////////////
   // MAIN SCRIPT OPERATIONS //
   ////////////////////////////
@@ -56,7 +57,7 @@ Changelog
       doc.placedItems[i].embed();
       embedded++;
     } catch (e) {
-      alert("Error embedding '" + doc.placedItems[i].name + "'.");
+      alert("Error embedding '" + doc.placedItems[i].name + "'." + "/n/n" + e);
     }
   }
 

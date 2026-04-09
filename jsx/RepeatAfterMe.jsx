@@ -73,13 +73,14 @@ Changelog
         - script was incorrectly expanding the appearance of the selected object(s) instead of temporary object
 0.7.3 2025-06-19 refactor, bug fixes for input validation
 0.7.4 2025-07-15 code cleanup
+0.7.5 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "RepeatAfterMe";
-  var scriptVersion = "0.7.3";
+  var scriptVersion = "0.7.5";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

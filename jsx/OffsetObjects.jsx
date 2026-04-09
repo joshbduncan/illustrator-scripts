@@ -29,13 +29,14 @@ Changelog
 1.3.0 2025-02-06 added limits for vertical and horizontal
 1.3.1 2025-06-12 removed limit option, bug fixes
 1.4.0 2025-06-19 refactor, unit value for gutter, bug fixes
+1.4.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Offset Objects";
-  var scriptVersion = "1.4.0";
+  var scriptVersion = "1.4.1";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

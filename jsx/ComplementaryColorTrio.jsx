@@ -24,11 +24,12 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2025-12-19 initial release
+0.1.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   // no need to continue if there is no active document
   if (!app.documents.length) {
     alert("No active document.");

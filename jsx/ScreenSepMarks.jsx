@@ -41,13 +41,14 @@ Changelog
 1.2.1 2025-02-06 fixed preset overwrite protection
 1.2.2 2025-06-20 fixed input validation
 1.2.3 2026-03-12 fixed registration marks to use actual spot color
+1.2.4 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Screen Print Separation Marks";
-  var scriptVersion = "1.2.3";
+  var scriptVersion = "1.2.4";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

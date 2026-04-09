@@ -24,13 +24,14 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2025-07-14 initial release
+0.1.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Select Objects by Name";
-  var scriptVersion = "0.1.0";
+  var scriptVersion = "0.1.1";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

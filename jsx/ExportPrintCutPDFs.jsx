@@ -29,13 +29,14 @@ Changelog
 0.1.3 2024-04-12 better file name output in export notification, parent folder opens after export, dialog closes after export
 0.1.4 2024-05-21 reg mark size calculation now factors in `app.activeDocument.scaleFactor`
 0.1.5 2025-06-20 refactor
+0.1.6 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Export Print and Cut PDFs";
-  var scriptVersion = "0.1.5";
+  var scriptVersion = "0.1.6";
 
   ////////////////////////////
   // MAIN SCRIPT OPERATIONS //

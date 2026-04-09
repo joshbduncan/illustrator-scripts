@@ -24,11 +24,12 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2023-11-08 initial release
+0.1.1 2026-04-09 2026-04-09
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   //////////////
   // INCLUDES //
   //////////////

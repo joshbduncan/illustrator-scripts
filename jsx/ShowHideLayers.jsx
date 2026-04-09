@@ -25,13 +25,14 @@ Changelog
 ---------
 1.0.0 initial release
 1.0.1 2025-06-20 refactor, bug fixes
+1.0.2 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Show/Hide Layers";
-  var scriptVersion = "1.0.1";
+  var scriptVersion = "1.0.2";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

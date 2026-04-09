@@ -23,13 +23,14 @@
 
   Changelog
   ---------
-  v0.1.0 2024-11-22 initial release
-  v0.1.2 2025-06-19 refactor, bug fixes
+  0.1.0 2024-11-22 initial release
+  0.1.2 2025-06-19 refactor, bug fixes
+  0.1.3 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   //////////////////////////
   // SCRIPT CONFIGURATION //
   //////////////////////////

@@ -24,13 +24,14 @@ See the LICENSE file for details.
 Changelog
 ---------
 0.1.0 2025-06-18 initial release
+0.1.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "ArtboardRectGuides";
-  var scriptVersion = "0.1.0";
+  var scriptVersion = "0.1.1";
 
   //////////////
   // INCLUDES //

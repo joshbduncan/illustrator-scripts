@@ -38,13 +38,14 @@ Changelog
 1.1.2 2023-11-08 fixed center/center position matching
 1.1.3 2025-06-19 refactor, bug fixes
 1.2.0 2025-06-25 refactor, safety checks, bug fixes
+1.2.1 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Match Objects";
-  var scriptVersion = "1.2.0";
+  var scriptVersion = "1.2.1";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

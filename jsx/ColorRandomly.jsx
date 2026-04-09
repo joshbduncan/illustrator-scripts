@@ -25,15 +25,16 @@ Changelog
 ---------
 0.1.0 2023-11-08 initial release
 0.1.1 2025-06-19 fixed recoloring of text objects
+0.1.2 2026-04-09 fix nested target directive
 */
 
 // FIXME: not coloring compound paths
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   var scriptTitle = "Color Randomly";
-  var scriptVersion = "1.0.0";
+  var scriptVersion = "0.1.2";
   var scriptCopyright = "Copyright 2026 Josh Duncan";
   var website = "joshbduncan.com";
 

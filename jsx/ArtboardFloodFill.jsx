@@ -28,11 +28,12 @@ Changelog
 0.1.2 2025-06-18 refactor
 0.1.3 2025-06-19 bug fix re-lock flood layer
 0.1.4 2025-07-11 fix for weird no document.defaultFillColor big
+0.1.5 2026-04-09 fix nested target directive
 */
 
-(function () {
-  //@target illustrator
+//@target illustrator
 
+(function () {
   ////////////////////////////
   // MAIN SCRIPT OPERATIONS //
   ////////////////////////////
