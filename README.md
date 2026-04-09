@@ -148,6 +148,10 @@ Create evenly spaced ellipses between two selected ellipses by interpolating the
 > [!TIP]
 > Think Object > Blend but with ellipses... I mainly use this when creating text on path circle layouts.
 
+![EllipseStepsBetween](https://github.com/user-attachments/assets/40a74c18-a33b-4f16-92a5-47fce0b265ea)
+
+<img width="500" height="500" alt="EllipseStepsBetween" src="https://github.com/user-attachments/assets/182c0698-cac5-4582-868a-510734cea058" />
+
 ### RemoveBezierHandles
 
 [![Download](https://img.shields.io/badge/Download-RemoveBezierHandles.jsx-blue.svg)](/jsx/RemoveBezierHandles.jsx)
